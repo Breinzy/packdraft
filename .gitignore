@@ -1,0 +1,28 @@
+# dependencies
+app/node_modules/
+app/.next/
+
+# env files
+app/.env.local
+app/.env*.local
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# typescript
+*.tsbuildinfo
+app/next-env.d.ts
+
+# vercel
+.vercel
+
+# misc
+.DS_Store
+*.pem
+Thumbs.db
+
+# supabase
+app/.supabase/
