@@ -146,9 +146,12 @@ function getGradedPrice(card: Card, productName: string): number | null {
   const isPsa10 = productName.toLowerCase().includes('psa 10');
   const isPsa9 = productName.toLowerCase().includes('psa 9');
 
-  if (isPsa10 && card.ebay?.psa10?.avg) return card.ebay.psa10.avg;
-  if (isPsa9 && card.ebay?.psa9?.avg) return card.ebay.psa9.avg;
+  // API returns data in ebay.salesByGrade.psa10/psa9
+  const psa10 = card.ebay?.salesByGrade?.psa10 ?? card.ebay?.psa10;
+  const psa9 = card.ebay?.salesByGrade?.psa9 ?? card.ebay?.psa9;
 
-  // Fall back to TCGPlayer market price for the ungraded card
+  if (isPsa10 && psa10) return psa10.smartMarketPrice?.price ?? psa10.averagePrice ?? psa10.avg ?? null;
+  if (isPsa9 && psa9) return psa9.smartMarketPrice?.price ?? psa9.averagePrice ?? psa9.avg ?? null;
+
   return card.prices?.market ?? null;
 }

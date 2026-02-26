@@ -11,6 +11,10 @@
     {
       "path": "/api/cron/create-contest",
       "schedule": "0 * * * 6"
+    },
+    {
+      "path": "/api/admin/import-products",
+      "schedule": "0 0 * * 0"
     }
   ]
 }
