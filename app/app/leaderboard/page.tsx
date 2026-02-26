@@ -84,7 +84,7 @@ export default async function LeaderboardPage() {
   const { data: contest } = await supabase
     .from('contests')
     .select('*')
-    .in('status', ['active', 'pending'])
+    .in('status', ['registration', 'active', 'pending'])
     .order('starts_at', { ascending: true })
     .limit(1)
     .single();
@@ -125,7 +125,7 @@ export default async function LeaderboardPage() {
     <>
       <Header />
       <Ticker />
-      <main className="flex-1 overflow-y-auto px-6 py-6 max-w-5xl mx-auto w-full space-y-6">
+      <main className="flex-1 overflow-y-auto px-4 md:px-6 py-4 md:py-6 max-w-5xl mx-auto w-full space-y-4 md:space-y-6">
         {!contest ? (
           <div className="text-center py-16">
             <div className="text-3xl mb-4">🏆</div>

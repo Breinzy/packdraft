@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import ProductList from './ProductList';
 import PortfolioPanel from './PortfolioPanel';
 import { createClient } from '@/lib/supabase/client';
@@ -17,19 +17,22 @@ interface PortfolioBuilderProps {
   initialProducts: ProductWithPrice[];
   initialPortfolio: Portfolio | null;
   initialItems: PortfolioItemWithProduct[];
+  readOnly?: boolean;
 }
 
 export default function PortfolioBuilder({
   initialProducts,
   initialPortfolio,
   initialItems,
+  readOnly = false,
 }: PortfolioBuilderProps) {
   const [products] = useState(initialProducts);
   const [items, setItems] = useState<PortfolioItemWithProduct[]>(initialItems);
   const [portfolio, setPortfolio] = useState<Portfolio | null>(initialPortfolio);
   const [animatingId, setAnimatingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const supabase = createClient();
+  const [mobileTab, setMobileTab] = useState<'market' | 'portfolio'>('market');
+  const supabase = useRef(createClient()).current;
 
   const portfolioValue = items.reduce(
     (sum, item) => sum + item.product.price * item.quantity,
@@ -37,41 +40,11 @@ export default function PortfolioBuilder({
   );
   const cashRemaining = BUDGET - portfolioValue;
   const totalSlots = items.reduce((sum, item) => sum + item.quantity, 0);
-  const isLocked = portfolio?.is_locked ?? false;
-
-  const persistItems = useCallback(
-    async (newItems: PortfolioItemWithProduct[]) => {
-      if (!portfolio) return;
-      const value = newItems.reduce(
-        (sum, item) => sum + item.product.price * item.quantity,
-        0
-      );
-
-      await supabase
-        .from('portfolios')
-        .update({ cash_remaining: BUDGET - value })
-        .eq('id', portfolio.id);
-
-      // Upsert items
-      const upsertData = newItems.map((item) => ({
-        portfolio_id: portfolio.id,
-        product_id: item.product_id,
-        quantity: item.quantity,
-        price_at_lock: item.product.price,
-      }));
-
-      if (upsertData.length > 0) {
-        await supabase
-          .from('portfolio_items')
-          .upsert(upsertData, { onConflict: 'portfolio_id,product_id' });
-      }
-    },
-    [portfolio, supabase]
-  );
+  const isLocked = readOnly || (portfolio?.is_locked ?? false);
 
   const addProduct = useCallback(
-    (product: ProductWithPrice) => {
-      if (isLocked) return;
+    async (product: ProductWithPrice) => {
+      if (isLocked || !portfolio) return;
       if (totalSlots >= MAX_SLOTS) return;
       if (cashRemaining < product.price) return;
 
@@ -81,6 +54,8 @@ export default function PortfolioBuilder({
       setAnimatingId(product.id);
       setTimeout(() => setAnimatingId(null), 600);
 
+      // Optimistic update
+      const prevItems = items;
       const newItems = existing
         ? items.map((i) =>
             i.product_id === product.id ? { ...i, quantity: i.quantity + 1 } : i
@@ -89,78 +64,75 @@ export default function PortfolioBuilder({
             ...items,
             {
               id: crypto.randomUUID(),
-              portfolio_id: portfolio?.id ?? '',
+              portfolio_id: portfolio.id,
               product_id: product.id,
               quantity: 1,
               price_at_lock: product.price,
               product,
             },
           ];
-
       setItems(newItems);
-      persistItems(newItems);
+
+      const res = await fetch('/api/portfolio/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ portfolioId: portfolio.id, productId: product.id }),
+      });
+
+      if (!res.ok) {
+        setItems(prevItems);
+      }
     },
-    [items, isLocked, totalSlots, cashRemaining, portfolio, persistItems]
+    [items, isLocked, totalSlots, cashRemaining, portfolio]
   );
 
   const removeProduct = useCallback(
     async (productId: string) => {
-      if (isLocked) return;
+      if (isLocked || !portfolio) return;
       const existing = items.find((i) => i.product_id === productId);
       if (!existing) return;
 
-      let newItems: PortfolioItemWithProduct[];
-      if (existing.quantity === 1) {
-        newItems = items.filter((i) => i.product_id !== productId);
-        // Delete from DB
-        if (portfolio) {
-          await supabase
-            .from('portfolio_items')
-            .delete()
-            .eq('portfolio_id', portfolio.id)
-            .eq('product_id', productId);
-        }
-      } else {
-        newItems = items.map((i) =>
-          i.product_id === productId ? { ...i, quantity: i.quantity - 1 } : i
-        );
-      }
-
+      // Optimistic update
+      const prevItems = items;
+      const newItems =
+        existing.quantity === 1
+          ? items.filter((i) => i.product_id !== productId)
+          : items.map((i) =>
+              i.product_id === productId ? { ...i, quantity: i.quantity - 1 } : i
+            );
       setItems(newItems);
-      persistItems(newItems);
+
+      const res = await fetch('/api/portfolio/remove', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ portfolioId: portfolio.id, productId }),
+      });
+
+      if (!res.ok) {
+        setItems(prevItems);
+      }
     },
-    [items, isLocked, portfolio, supabase, persistItems]
+    [items, isLocked, portfolio]
   );
 
   const lockPortfolio = useCallback(async () => {
     if (!portfolio || isLocked || items.length === 0) return;
     setSaving(true);
 
-    const itemUpdates = items.map((item) => ({
-      portfolio_id: portfolio.id,
-      product_id: item.product_id,
-      quantity: item.quantity,
-      price_at_lock: item.product.price,
-    }));
+    const res = await fetch('/api/portfolio/lock', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ portfolioId: portfolio.id }),
+    });
 
-    await supabase
-      .from('portfolio_items')
-      .upsert(itemUpdates, { onConflict: 'portfolio_id,product_id' });
+    if (res.ok) {
+      const data = await res.json();
+      setPortfolio({ ...portfolio, is_locked: true, submitted_at: data.lockedAt });
+    }
 
-    await supabase
-      .from('portfolios')
-      .update({
-        is_locked: true,
-        submitted_at: new Date().toISOString(),
-        cash_remaining: cashRemaining,
-      })
-      .eq('id', portfolio.id);
-
-    setPortfolio({ ...portfolio, is_locked: true, submitted_at: new Date().toISOString() });
     setSaving(false);
-  }, [portfolio, isLocked, items, cashRemaining, supabase]);
+  }, [portfolio, isLocked, items]);
 
-  // Subscribe to realtime portfolio changes (for lock status updates)
   useEffect(() => {
     if (!portfolio) return;
     const channel = supabase
@@ -180,26 +152,62 @@ export default function PortfolioBuilder({
   }, [portfolio, supabase]);
 
   return (
-    <div className="flex flex-1 h-[calc(100vh-96px)]">
-      <ProductList
-        products={products}
-        portfolioItems={items}
-        cashRemaining={cashRemaining}
-        totalSlots={totalSlots}
-        maxSlots={MAX_SLOTS}
-        animatingId={animatingId}
-        onAdd={addProduct}
-      />
-      <PortfolioPanel
-        items={items}
-        products={products}
-        portfolioValue={portfolioValue}
-        cashRemaining={cashRemaining}
-        totalSlots={totalSlots}
-        isLocked={isLocked || saving}
-        onRemove={removeProduct}
-        onLock={lockPortfolio}
-      />
+    <div className="flex flex-col md:flex-row flex-1 h-[calc(100vh-96px)]">
+      {/* Mobile tab bar */}
+      <div className="md:hidden flex border-b border-white/[0.06]">
+        <button
+          onClick={() => setMobileTab('market')}
+          className="flex-1 py-3 text-sm font-bold tracking-widest text-center border-b-2 transition-colors"
+          style={{
+            borderColor: mobileTab === 'market' ? '#6e9bcf' : 'transparent',
+            color: mobileTab === 'market' ? '#9fc0e6' : '#475569',
+          }}
+        >
+          MARKET
+        </button>
+        <button
+          onClick={() => setMobileTab('portfolio')}
+          className="flex-1 py-3 text-sm font-bold tracking-widest text-center border-b-2 transition-colors relative"
+          style={{
+            borderColor: mobileTab === 'portfolio' ? '#6e9bcf' : 'transparent',
+            color: mobileTab === 'portfolio' ? '#9fc0e6' : '#475569',
+          }}
+        >
+          PORTFOLIO
+          {items.length > 0 && (
+            <span className="ml-1.5 text-xs bg-accent/20 text-accent-light px-1.5 py-0.5 rounded">
+              {totalSlots}
+            </span>
+          )}
+        </button>
+      </div>
+
+      {/* Product list - hidden on mobile when portfolio tab active */}
+      <div className={`flex-1 ${mobileTab === 'portfolio' ? 'hidden md:flex' : 'flex'} flex-col min-h-0`}>
+        <ProductList
+          products={products}
+          portfolioItems={items}
+          cashRemaining={cashRemaining}
+          totalSlots={totalSlots}
+          maxSlots={MAX_SLOTS}
+          animatingId={animatingId}
+          onAdd={addProduct}
+        />
+      </div>
+
+      {/* Portfolio panel - hidden on mobile when market tab active */}
+      <div className={`${mobileTab === 'market' ? 'hidden md:flex' : 'flex'} flex-col w-full md:w-80 min-h-0`}>
+        <PortfolioPanel
+          items={items}
+          products={products}
+          portfolioValue={portfolioValue}
+          cashRemaining={cashRemaining}
+          totalSlots={totalSlots}
+          isLocked={isLocked || saving}
+          onRemove={removeProduct}
+          onLock={lockPortfolio}
+        />
+      </div>
     </div>
   );
 }

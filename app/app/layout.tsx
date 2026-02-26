@@ -15,12 +15,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-screen relative overflow-hidden">
-        {/* Ambient gradients */}
         <div
           className="fixed inset-0 pointer-events-none z-0"
           style={{
             background:
-              'radial-gradient(ellipse 80% 50% at 20% 0%, rgba(139,92,246,0.08) 0%, transparent 60%), radial-gradient(ellipse 60% 40% at 80% 100%, rgba(251,191,36,0.06) 0%, transparent 60%)',
+              'radial-gradient(ellipse 80% 50% at 20% 0%, rgba(110,155,207,0.06) 0%, transparent 60%), radial-gradient(ellipse 60% 40% at 80% 100%, rgba(110,155,207,0.03) 0%, transparent 60%)',
           }}
         />
         <div className="relative z-10 min-h-screen flex flex-col">{children}</div>

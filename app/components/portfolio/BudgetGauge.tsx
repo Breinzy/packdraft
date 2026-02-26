@@ -21,32 +21,30 @@ export default function BudgetGauge({
   return (
     <div className="p-4 border-b border-white/[0.06]">
       <div className="flex justify-between mb-2">
-        <span className="text-[10px] text-slate-600 tracking-widest">BUDGET ALLOCATED</span>
-        <span className="text-[10px] text-slate-400">{budgetPct.toFixed(1)}%</span>
+        <span className="text-xs text-slate-600 tracking-widest">BUDGET ALLOCATED</span>
+        <span className="text-xs text-slate-400">{budgetPct.toFixed(1)}%</span>
       </div>
 
-      {/* Progress bar */}
-      <div className="h-1 bg-white/[0.06] rounded-full overflow-hidden">
+      <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
         <div
           className="h-full rounded-full transition-all duration-400"
           style={{
             width: `${Math.min(budgetPct, 100)}%`,
             background:
               budgetPct > 85
-                ? 'linear-gradient(90deg, #7c3aed, #f87171)'
+                ? 'linear-gradient(90deg, #6e9bcf, #f87171)'
                 : budgetPct > 50
-                ? 'linear-gradient(90deg, #7c3aed, #fbbf24)'
-                : 'linear-gradient(90deg, #7c3aed, #60a5fa)',
+                ? 'linear-gradient(90deg, #6e9bcf, #fbbf24)'
+                : 'linear-gradient(90deg, #6e9bcf, #9fc0e6)',
           }}
         />
       </div>
 
-      {/* Stat cards */}
       <div className="grid grid-cols-3 gap-2 mt-3">
         <StatCard
           label="INVESTED"
           value={formatCurrency(portfolioValue)}
-          color="#a78bfa"
+          color="#9fc0e6"
         />
         <StatCard
           label="CASH"
@@ -60,10 +58,9 @@ export default function BudgetGauge({
         />
       </div>
 
-      {/* Decay warning */}
       {cashRemaining > 0 && (
-        <div className="mt-2 px-2.5 py-1.5 rounded bg-yellow-400/[0.06] border border-yellow-400/[0.15] text-[10px] text-yellow-800">
-          ⚠ {formatCurrency(projectedDecay)} cash decay projected over 7 days
+        <div className="mt-2 px-3 py-2 rounded bg-yellow-400/[0.06] border border-yellow-400/[0.15] text-xs text-yellow-800">
+          ⚠ {formatCurrency(projectedDecay)} cash decay at contest end
         </div>
       )}
     </div>

@@ -1,15 +1,40 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { LEAGUE_SIZE } from '@/types';
 
 /**
  * Find or create an open league for a given contest.
- * Called during signup — the DB trigger handles this,
- * but this is available as a utility for manual operations.
+ * Only allows assignment during the registration window.
  */
 export async function assignToLeague(
   supabase: SupabaseClient,
-  contestId: string
+  contestId: string,
+  enforceRegistration = true
 ): Promise<string> {
+  if (enforceRegistration) {
+    const { data: contest } = await supabase
+      .from('contests')
+      .select('status, registration_opens_at, starts_at')
+      .eq('id', contestId)
+      .single();
+
+    if (!contest) {
+      throw new Error('Contest not found');
+    }
+
+    const now = new Date();
+    const regOpens = contest.registration_opens_at
+      ? new Date(contest.registration_opens_at)
+      : null;
+    const startsAt = new Date(contest.starts_at);
+
+    const isRegistrationOpen =
+      contest.status === 'registration' ||
+      (regOpens && now >= regOpens && now < startsAt);
+
+    if (!isRegistrationOpen) {
+      throw new Error('Registration is not currently open for this contest');
+    }
+  }
+
   // Try to find an open league
   const { data: openLeague } = await supabase
     .from('leagues')
@@ -37,18 +62,15 @@ export async function assignToLeague(
   return newLeague.id;
 }
 
-/**
- * Check if league is full and should be closed.
- */
 export async function checkLeagueFull(
   supabase: SupabaseClient,
   leagueId: string
 ): Promise<boolean> {
   const { data: league } = await supabase
     .from('leagues')
-    .select('player_count')
+    .select('player_count, max_players')
     .eq('id', leagueId)
     .single();
 
-  return (league?.player_count ?? 0) >= LEAGUE_SIZE;
+  return (league?.player_count ?? 0) >= (league?.max_players ?? 20);
 }

@@ -21,9 +21,9 @@ export default function BestFitSuggestion({
   const best = affordable[0];
 
   return (
-    <div className="mx-3 mb-2 px-3 py-2 rounded-md bg-purple-500/[0.06] border border-purple-500/[0.15]">
-      <div className="text-[9px] text-slate-500 tracking-widest mb-1">BEST FIT</div>
-      <div className="text-[11px] text-slate-300">
+    <div className="mx-3 mb-2 px-3 py-2.5 rounded-md" style={{ background: 'rgba(110,155,207,0.06)', border: '1px solid rgba(110,155,207,0.12)' }}>
+      <div className="text-xs text-slate-500 tracking-widest mb-1">BEST FIT</div>
+      <div className="text-sm text-slate-300">
         You have <span className="text-green font-semibold">{formatCurrency(cashRemaining)}</span>{' '}
         left — add a{' '}
         <span className="text-accent-light font-semibold">{best.name}</span>?

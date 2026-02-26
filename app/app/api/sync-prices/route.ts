@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { syncPrices } from '@/lib/tcgplayer/sync';
+import { syncPrices } from '@/lib/pricing/sync';
 
 /**
  * Manual price sync trigger.

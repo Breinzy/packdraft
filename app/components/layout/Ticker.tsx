@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import type { League, Profile } from '@/types';
+import type { League, Profile, Contest } from '@/types';
 
 interface TickerItem {
   label: string;
@@ -20,7 +20,7 @@ export default function Ticker() {
       if (!user) {
         setItems([
           { label: 'STATUS', value: 'NOT SIGNED IN', color: '#94a3b8' },
-          { label: 'ACTION', value: 'SIGN UP TO PLAY', color: '#a78bfa' },
+          { label: 'ACTION', value: 'SIGN UP TO PLAY', color: '#9fc0e6' },
         ]);
         return;
       }
@@ -44,17 +44,30 @@ export default function Ticker() {
 
       if (!league) return;
 
+      const { data: contest } = await supabase
+        .from('contests')
+        .select('*')
+        .eq('id', league.contest_id)
+        .single<Contest>();
+
       const tickerItems: TickerItem[] = [
-        { label: 'LEAGUE', value: league.name.toUpperCase(), color: '#a78bfa' },
-        { label: 'PLAYERS', value: `${league.player_count} / 20`, color: '#60a5fa' },
+        { label: 'LEAGUE', value: league.name.toUpperCase(), color: '#9fc0e6' },
+        { label: 'PLAYERS', value: `${league.player_count} / ${league.max_players}`, color: '#60a5fa' },
         {
-          label: 'LOCK STATUS',
-          value: league.all_locked_at ? 'ALL LOCKED' : 'DRAFTING',
-          color: league.all_locked_at ? '#34d399' : '#fbbf24',
+          label: 'STATUS',
+          value: contest?.status === 'registration'
+            ? 'REGISTRATION'
+            : league.all_locked_at
+            ? 'ALL LOCKED'
+            : 'DRAFTING',
+          color: contest?.status === 'registration'
+            ? '#9fc0e6'
+            : league.all_locked_at
+            ? '#34d399'
+            : '#fbbf24',
         },
       ];
 
-      // Fetch hot pick — product with best 7d change
       const { data: hotPick } = await supabase
         .from('price_snapshots')
         .select('change_7d, product_id, products(name, image_code)')
@@ -79,9 +92,9 @@ export default function Ticker() {
   if (items.length === 0) return null;
 
   return (
-    <div className="bg-accent/[0.08] border-b border-accent/[0.15] px-6 py-1.5 flex gap-8 overflow-x-auto text-[10px] tracking-wider">
+    <div className="bg-accent/[0.06] border-b border-accent/[0.12] px-4 md:px-16 py-2 md:py-2.5 flex gap-4 md:gap-10 overflow-x-auto text-xs md:text-sm tracking-wider">
       {items.map((item) => (
-        <div key={item.label} className="flex gap-2 whitespace-nowrap items-center">
+        <div key={item.label} className="flex gap-1.5 md:gap-2 whitespace-nowrap items-center">
           <span className="text-slate-600">{item.label}</span>
           <span style={{ color: item.color }} className="font-semibold">
             {item.value}

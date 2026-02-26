@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import Header from '@/components/layout/Header';
 import Ticker from '@/components/layout/Ticker';
 import PortfolioBuilder from '@/components/portfolio/PortfolioBuilder';
-import type { ProductWithPrice, PortfolioItemWithProduct } from '@/types';
+import type { ProductWithPrice, PortfolioItemWithProduct, ContestStatus } from '@/types';
 
 export default async function DraftPage() {
   const supabase = await createClient();
@@ -13,14 +13,27 @@ export default async function DraftPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect('/auth/login');
 
-  // Fetch portfolio for the user in the current contest
-  const { data: portfolio } = await supabase
-    .from('portfolios')
+  // Find the current/upcoming contest
+  const { data: contest } = await supabase
+    .from('contests')
     .select('*')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false })
+    .in('status', ['registration', 'active'])
+    .order('starts_at', { ascending: true })
     .limit(1)
     .single();
+
+  const contestStatus: ContestStatus | null = contest?.status ?? null;
+
+  // Fetch portfolio for the user in the current contest
+  const { data: portfolio } = contest
+    ? await supabase
+        .from('portfolios')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('contest_id', contest.id)
+        .limit(1)
+        .single()
+    : { data: null };
 
   // Fetch products with latest prices
   const { data: products } = await supabase
@@ -28,7 +41,6 @@ export default async function DraftPage() {
     .select('*')
     .eq('is_active', true);
 
-  // Fetch latest price for each product
   const productIds = (products ?? []).map((p) => p.id);
   const { data: snapshots } = await supabase
     .from('price_snapshots')
@@ -36,7 +48,6 @@ export default async function DraftPage() {
     .in('product_id', productIds)
     .order('recorded_at', { ascending: false });
 
-  // Dedupe: keep only the latest snapshot per product
   const latestPrices = new Map<string, { price: number; change_7d: number; volume: number }>();
   for (const snap of snapshots ?? []) {
     if (!latestPrices.has(snap.product_id)) {
@@ -60,7 +71,6 @@ export default async function DraftPage() {
     })
     .filter((p) => p.price > 0);
 
-  // Fetch existing portfolio items
   let portfolioItems: PortfolioItemWithProduct[] = [];
   if (portfolio) {
     const { data: items } = await supabase
@@ -79,8 +89,12 @@ export default async function DraftPage() {
           name: 'Unknown',
           set_name: '',
           type: 'booster_box' as const,
+          category: 'sealed' as const,
           tcgplayer_id: null,
           image_code: null,
+          card_name: null,
+          card_number: null,
+          psa_grade: null,
           is_active: true,
           created_at: '',
           price: 0,
@@ -91,15 +105,51 @@ export default async function DraftPage() {
     });
   }
 
+  const isActiveContestLocked = contestStatus === 'active';
+
   return (
     <>
       <Header />
       <Ticker />
-      <PortfolioBuilder
-        initialProducts={productsWithPrices}
-        initialPortfolio={portfolio}
-        initialItems={portfolioItems}
-      />
+      {!contest && (
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <div className="text-4xl mb-4">📅</div>
+            <div className="text-base text-slate-400 tracking-wider mb-2">NO ACTIVE CONTEST</div>
+            <div className="text-sm text-slate-600 tracking-wider">
+              Check back Sunday for the next registration window.
+            </div>
+          </div>
+        </div>
+      )}
+      {contest && contestStatus === 'registration' && !portfolio && (
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <div className="text-4xl mb-4">🔓</div>
+            <div className="text-base text-accent-light tracking-wider mb-2">REGISTRATION IS OPEN</div>
+            <div className="text-sm text-slate-600 tracking-wider max-w-xs mx-auto">
+              Leagues lock Monday at 12:00 AM EST. Your portfolio will be created when you add your first product.
+            </div>
+          </div>
+        </div>
+      )}
+      {contest && (contestStatus === 'registration' || !isActiveContestLocked || portfolio) && (
+        <>
+          {isActiveContestLocked && !portfolio?.is_locked && (
+            <div className="bg-red/10 border-b border-red/20 px-6 py-2.5 text-center text-sm text-red tracking-wider">
+              CONTEST IS ACTIVE — PORTFOLIO EDITING IS LOCKED
+            </div>
+          )}
+          {contest && (portfolio || contestStatus === 'registration') && (
+            <PortfolioBuilder
+              initialProducts={productsWithPrices}
+              initialPortfolio={portfolio}
+              initialItems={portfolioItems}
+              readOnly={isActiveContestLocked}
+            />
+          )}
+        </>
+      )}
     </>
   );
 }

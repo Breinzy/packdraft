@@ -6,9 +6,10 @@
   --color-surface: rgba(255, 255, 255, 0.03);
   --color-border: rgba(255, 255, 255, 0.06);
   --color-border-strong: rgba(255, 255, 255, 0.12);
-  --color-accent: #7c3aed;
-  --color-accent-light: #a78bfa;
-  --color-accent-dim: rgba(124, 58, 237, 0.15);
+  --color-accent: #6e9bcf;
+  --color-accent-light: #9fc0e6;
+  --color-accent-dim: rgba(110, 155, 207, 0.12);
+  --color-accent-glow: rgba(110, 155, 207, 0.18);
   --color-gold: #fbbf24;
   --color-green: #34d399;
   --color-red: #f87171;
@@ -45,6 +46,14 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+button, a {
+  transition: all 0.15s ease;
+}
+
+button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
 ::-webkit-scrollbar {
   width: 4px;
   height: 4px;
@@ -60,6 +69,18 @@ body {
 }
 
 ::selection {
-  background: rgba(124, 58, 237, 0.3);
+  background: rgba(110, 155, 207, 0.3);
   color: #f8fafc;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.03) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 0.5rem;
 }

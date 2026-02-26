@@ -6,11 +6,11 @@ interface BadgeProps {
   className?: string;
 }
 
-export default function Badge({ children, color = '#a78bfa', className }: BadgeProps) {
+export default function Badge({ children, color = '#9fc0e6', className }: BadgeProps) {
   return (
     <span
       className={cn(
-        'inline-flex items-center text-[10px] tracking-wider font-semibold px-2 py-0.5 rounded border',
+        'inline-flex items-center text-xs tracking-wider font-semibold px-2.5 py-1 rounded border',
         className
       )}
       style={{

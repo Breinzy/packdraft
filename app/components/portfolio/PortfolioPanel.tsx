@@ -41,17 +41,16 @@ export default function PortfolioPanel({
       : 0;
 
   return (
-    <div className="w-80 flex flex-col bg-white/[0.01]">
+    <div className="w-full md:w-80 flex flex-col bg-white/[0.01]">
       <BudgetGauge
         portfolioValue={portfolioValue}
         cashRemaining={cashRemaining}
         totalSlots={totalSlots}
       />
 
-      {/* Projected return */}
       {items.length > 0 && (
         <div className="px-4 py-3 border-b border-white/[0.06]">
-          <div className="text-[9px] text-slate-600 tracking-widest mb-1.5">
+          <div className="text-xs text-slate-600 tracking-widest mb-1.5">
             PROJECTED RETURN (7D AVG)
           </div>
           <div className="flex items-baseline gap-2">
@@ -61,22 +60,21 @@ export default function PortfolioPanel({
             >
               {formatPct(weightedChange)}
             </span>
-            <span className="text-[11px] text-slate-600">
+            <span className="text-sm text-slate-600">
               ≈ {formatCurrency(portfolioValue * weightedChange / 100)}
             </span>
           </div>
-          <div className="text-[9px] text-slate-700 mt-0.5">
+          <div className="text-xs text-slate-700 mt-0.5">
             Based on trailing 7d · not a guarantee
           </div>
         </div>
       )}
 
-      {/* Items */}
       <div className="flex-1 overflow-y-auto py-2">
         {items.length === 0 ? (
           <div className="px-8 py-8 text-center">
             <div className="text-3xl mb-3">📋</div>
-            <div className="text-[11px] text-slate-700 leading-relaxed tracking-wider">
+            <div className="text-sm text-slate-700 leading-relaxed tracking-wider">
               YOUR PORTFOLIO IS EMPTY
               <br />
               <span className="text-slate-500">Add products from the market</span>
@@ -87,19 +85,35 @@ export default function PortfolioPanel({
             const allocationPct = ((item.product.price * item.quantity) / BUDGET) * 100;
             const setColor = SET_COLORS[item.product.set_name] || '#94a3b8';
             const icon = TYPE_ICONS[item.product.type] || '📦';
+            const isGraded = item.product.category === 'graded';
 
             return (
               <div
                 key={item.product_id}
-                className="mx-3 mb-1 rounded-md bg-white/[0.03] border border-white/[0.06] px-3 py-2.5"
+                className="mx-3 mb-1.5 rounded-md bg-white/[0.03] border border-white/[0.06] px-3 py-3"
               >
                 <div className="flex justify-between items-start">
                   <div className="flex-1 min-w-0">
-                    <div className="text-[11px] text-slate-200 truncate">
-                      {icon} {item.product.name}
+                    <div className="text-sm text-slate-200 truncate">
+                      {isGraded ? (
+                        <>
+                          <span
+                            className="text-[10px] font-bold tracking-wider mr-1.5 px-1.5 py-0.5 rounded"
+                            style={{
+                              color: item.product.psa_grade === 10 ? '#fbbf24' : '#94a3b8',
+                              background: item.product.psa_grade === 10 ? 'rgba(251,191,36,0.15)' : 'rgba(148,163,184,0.15)',
+                            }}
+                          >
+                            PSA {item.product.psa_grade}
+                          </span>
+                          {item.product.card_name ?? item.product.name}
+                        </>
+                      ) : (
+                        <>{icon} {item.product.name}</>
+                      )}
                     </div>
                     <div
-                      className="text-[10px] mt-0.5 opacity-70"
+                      className="text-xs mt-0.5 opacity-70"
                       style={{ color: setColor }}
                     >
                       {item.product.set_name}
@@ -108,7 +122,7 @@ export default function PortfolioPanel({
                   {!isLocked && (
                     <button
                       onClick={() => onRemove(item.product_id)}
-                      className="bg-transparent border-none text-slate-600 cursor-pointer text-sm pl-2 leading-none font-mono hover:text-white transition-colors"
+                      className="bg-transparent border-none text-slate-600 cursor-pointer text-base pl-2 leading-none font-mono hover:text-white transition-colors"
                     >
                       ×
                     </button>
@@ -116,15 +130,15 @@ export default function PortfolioPanel({
                 </div>
                 <div className="flex justify-between items-center mt-2">
                   <div className="flex gap-2 items-center">
-                    <span className="text-[11px] text-slate-400">
+                    <span className="text-sm text-slate-400">
                       {formatCurrency(item.product.price)} × {item.quantity}
                     </span>
-                    <span className="text-xs font-bold text-white">
+                    <span className="text-sm font-bold text-white">
                       {formatCurrency(item.product.price * item.quantity)}
                     </span>
                   </div>
                   <span
-                    className="text-[10px]"
+                    className="text-xs"
                     style={{
                       color: item.product.change_7d >= 0 ? '#34d399' : '#f87171',
                     }}
@@ -132,7 +146,7 @@ export default function PortfolioPanel({
                     {formatPct(item.product.change_7d)}
                   </span>
                 </div>
-                <div className="mt-1.5 h-0.5 bg-white/[0.04] rounded-sm">
+                <div className="mt-2 h-0.5 bg-white/[0.04] rounded-sm">
                   <div
                     className="h-full rounded-sm transition-all duration-300"
                     style={{
@@ -141,7 +155,7 @@ export default function PortfolioPanel({
                     }}
                   />
                 </div>
-                <div className="text-[9px] text-slate-700 mt-1">
+                <div className="text-xs text-slate-700 mt-1">
                   {allocationPct.toFixed(1)}% of budget
                 </div>
               </div>
@@ -150,31 +164,29 @@ export default function PortfolioPanel({
         )}
       </div>
 
-      {/* Best fit suggestion */}
       {!isLocked && cashRemaining > 0 && items.length > 0 && (
         <BestFitSuggestion cashRemaining={cashRemaining} products={products} />
       )}
 
-      {/* Submit / Lock */}
       <div className="p-3 border-t border-white/[0.06]">
         <button
           disabled={items.length === 0 || isLocked}
           onClick={onLock}
-          className="w-full py-3 rounded-md text-xs font-bold tracking-widest font-mono transition-all"
+          className="w-full py-3.5 rounded-lg text-sm font-bold tracking-widest font-mono transition-all"
           style={{
             background:
               items.length > 0 && !isLocked
-                ? 'linear-gradient(135deg, #7c3aed, #6d28d9)'
+                ? 'linear-gradient(135deg, #5b89bf, #4a78ae)'
                 : 'rgba(255,255,255,0.04)',
             border:
               items.length > 0 && !isLocked
-                ? '1px solid rgba(124,58,237,0.5)'
+                ? '1px solid rgba(110,155,207,0.4)'
                 : '1px solid rgba(255,255,255,0.06)',
             color: items.length > 0 && !isLocked ? '#fff' : '#334155',
             cursor: items.length > 0 && !isLocked ? 'pointer' : 'not-allowed',
             boxShadow:
               items.length > 0 && !isLocked
-                ? '0 0 24px rgba(124,58,237,0.3)'
+                ? '0 0 24px rgba(110,155,207,0.18)'
                 : 'none',
           }}
         >
@@ -185,7 +197,7 @@ export default function PortfolioPanel({
             : `LOCK IN PORTFOLIO · ${totalSlots} PICK${totalSlots !== 1 ? 'S' : ''}`}
         </button>
         {!isLocked && (
-          <div className="text-[9px] text-slate-700 text-center mt-1.5 tracking-wider">
+          <div className="text-xs text-slate-700 text-center mt-2 tracking-wider">
             Locking is final — no changes after lock
           </div>
         )}
