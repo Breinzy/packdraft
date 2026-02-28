@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { importAllProducts, type ImportOptions } from '@/lib/pricing/import';
 
-export const maxDuration = 800;
+export const maxDuration = 300;
 
 /**
  * Admin import endpoint. Protected by CRON_SECRET.

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { syncPrices } from '@/lib/pricing/sync';
 
-export const maxDuration = 900;
+export const maxDuration = 300;
 
 export async function GET(request: Request) {
   const authHeader = request.headers.get('authorization');
