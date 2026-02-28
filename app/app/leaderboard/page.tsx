@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import Header from '@/components/layout/Header';
 import Ticker from '@/components/layout/Ticker';
@@ -89,6 +90,15 @@ export default async function LeaderboardPage() {
     .limit(1)
     .single();
 
+  // Get last completed contest for results link
+  const { data: lastCompleted } = await supabase
+    .from('contests')
+    .select('id, ends_at')
+    .eq('status', 'complete')
+    .order('ends_at', { ascending: false })
+    .limit(1)
+    .single();
+
   let leagueEntries: LeaderboardEntry[] = [];
   let globalEntries: LeaderboardEntry[] = [];
   let league: League | null = null;
@@ -147,6 +157,16 @@ export default async function LeaderboardPage() {
               />
             )}
             <GlobalTable entries={globalEntries} currentUserId={user?.id} />
+            {lastCompleted && (
+              <div className="text-center pt-2">
+                <Link
+                  href={`/results/${lastCompleted.id}`}
+                  className="text-xs text-slate-600 hover:text-slate-400 tracking-widest transition-colors"
+                >
+                  VIEW LAST WEEK&apos;S RESULTS →
+                </Link>
+              </div>
+            )}
           </>
         )}
       </main>

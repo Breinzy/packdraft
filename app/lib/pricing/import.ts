@@ -1,7 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import {
-  getSets,
-  getSealedProductsBySet,
+  getSealedProductsBySearch,
   getTopCards,
   type SealedProduct,
   type Card,
@@ -26,7 +25,7 @@ const DEFAULT_OPTIONS: Required<ImportOptions> = {
   maxSets: 30,
   maxGradedCards: 200,
   creditBudget: 5000,
-  throttleMs: 1100,
+  throttleMs: 31000,
 };
 
 class CreditTracker {
@@ -106,8 +105,16 @@ async function upsertAndSnapshot(
   return { ok: true };
 }
 
+const SEALED_SEARCH_TERMS = [
+  'Booster Box',
+  'Elite Trainer Box',
+  'Booster Bundle',
+  'Ultra Premium Collection',
+  'Premium Collection',
+];
+
 /**
- * Import sealed products from the most recent sets.
+ * Import sealed products by searching for each product type keyword.
  * Respects credit budget and throttles between API calls.
  */
 export async function importSealedProducts(
@@ -115,60 +122,66 @@ export async function importSealedProducts(
   credits: CreditTracker,
   opts: Required<ImportOptions>
 ): Promise<{ imported: number; errors: string[] }> {
+  if (opts.maxSets <= 0) return { imported: 0, errors: [] };
+
   const errors: string[] = [];
   let imported = 0;
+  const pageSize = 20;
+  const seen = new Set<number>();
 
-  let sets;
-  try {
-    sets = await getSets();
-    credits.add(1);
-  } catch (err) {
-    return { imported: 0, errors: [`Failed to fetch sets: ${err}`] };
-  }
-
-  const recentSets = sets.slice(0, opts.maxSets);
-  console.log(`[import] Processing ${recentSets.length} of ${sets.length} sets`);
-
-  for (const set of recentSets) {
+  for (const searchTerm of SEALED_SEARCH_TERMS) {
     if (credits.exceeded()) {
       errors.push(`Credit budget reached (${credits.used}/${opts.creditBudget}), stopped sealed import`);
       break;
     }
 
-    const slug = set.slug ?? set.id;
-    await sleep(opts.throttleMs);
+    let offset = 0;
+    let fetched = 0;
 
-    let sealedProducts: SealedProduct[];
-    try {
-      sealedProducts = await getSealedProductsBySet(slug);
-      credits.add(sealedProducts.length || 1);
-    } catch (err) {
-      errors.push(`Failed to fetch sealed for set ${set.name ?? slug}: ${err}`);
-      continue;
-    }
+    while (true) {
+      if (credits.exceeded()) break;
 
-    if (!sealedProducts.length) continue;
+      await sleep(opts.throttleMs);
 
-    console.log(`[import] Set "${set.name}": ${sealedProducts.length} sealed products`);
+      let products: SealedProduct[];
+      let total: number;
+      try {
+        const result = await getSealedProductsBySearch({ search: searchTerm, limit: pageSize, offset });
+        products = result.products;
+        total = result.total;
+        credits.add(products.length || 1);
+      } catch (err) {
+        errors.push(`Failed to fetch "${searchTerm}" at offset ${offset}: ${err}`);
+        break;
+      }
 
-    for (const product of sealedProducts) {
-      if (!product.tcgPlayerId) continue;
+      if (!products.length) break;
 
-      const result = await upsertAndSnapshot(
-        supabase,
-        {
-          tcgplayer_id: String(product.tcgPlayerId),
-          name: product.name,
-          set_name: product.setName ?? set.name,
-          type: classifySealedType(product.name),
-          category: 'sealed',
-        },
-        product.prices?.market ?? null,
-        0
-      );
 
-      if (result.error) errors.push(result.error);
-      if (result.ok) imported++;
+      for (const product of products) {
+        if (!product.tcgPlayerId || seen.has(product.tcgPlayerId)) continue;
+        seen.add(product.tcgPlayerId);
+
+        const result = await upsertAndSnapshot(
+          supabase,
+          {
+            tcgplayer_id: String(product.tcgPlayerId),
+            name: product.name,
+            set_name: product.setName ?? 'Unknown',
+            type: classifySealedType(product.name),
+            category: 'sealed',
+          },
+          product.unopenedPrice ?? product.prices?.market ?? null,
+          0
+        );
+
+        if (result.error) errors.push(result.error);
+        if (result.ok) imported++;
+      }
+
+      fetched += products.length;
+      offset += pageSize;
+      if (offset >= total || fetched >= opts.maxSets * pageSize) break;
     }
   }
 
@@ -186,7 +199,7 @@ export async function importTopGradedCards(
 ): Promise<{ imported: number; errors: string[] }> {
   const errors: string[] = [];
   let imported = 0;
-  const pageSize = 100;
+  const pageSize = 25;
   const allCards: Card[] = [];
 
   for (let offset = 0; offset < opts.maxGradedCards; offset += pageSize) {
@@ -200,7 +213,7 @@ export async function importTopGradedCards(
     try {
       const batchSize = Math.min(pageSize, opts.maxGradedCards - offset);
       const { cards } = await getTopCards({
-        sortBy: 'price',
+        sortBy: 'volume',
         sortOrder: 'desc',
         limit: batchSize,
         offset,
@@ -210,7 +223,6 @@ export async function importTopGradedCards(
       credits.add(cards.length * 2);
       if (!cards.length) break;
       allCards.push(...cards);
-      console.log(`[import] Fetched ${cards.length} cards at offset ${offset} (${credits.used} credits used)`);
     } catch (err) {
       errors.push(`Failed to fetch cards at offset ${offset}: ${err}`);
       break;
@@ -277,8 +289,6 @@ export async function importAllProducts(
   const opts = { ...DEFAULT_OPTIONS, ...options };
   const credits = new CreditTracker(opts.creditBudget);
 
-  console.log(`[import] Starting with budget=${opts.creditBudget}, maxSets=${opts.maxSets}, maxGradedCards=${opts.maxGradedCards}`);
-
   const sealed = await importSealedProducts(supabase, credits, opts);
   const graded = await importTopGradedCards(supabase, credits, opts);
 
@@ -290,6 +300,5 @@ export async function importAllProducts(
     stoppedEarly: credits.exceeded(),
   };
 
-  console.log(`[import] Done: ${result.sealedImported} sealed, ${result.gradedImported} graded, ${result.creditsUsed} credits used`);
   return result;
 }

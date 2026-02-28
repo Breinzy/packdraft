@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import ProductRow from './ProductRow';
 import {
   PRODUCT_TYPE_LABELS,
@@ -14,6 +14,8 @@ import {
 
 type SortKey = 'volume' | 'change' | 'price_asc' | 'price_desc';
 type CategoryFilter = 'all' | ProductCategory;
+
+const PAGE_SIZE = 50;
 
 interface ProductListProps {
   products: ProductWithPrice[];
@@ -59,10 +61,11 @@ export default function ProductList({
   const [category, setCategory] = useState<CategoryFilter>('all');
   const [filterType, setFilterType] = useState('All');
   const [sortBy, setSortBy] = useState<SortKey>('volume');
+  const [page, setPage] = useState(1);
 
   const typeFilters = useMemo(() => getTypeFilters(category), [category]);
 
-  const filtered = useMemo(() => {
+  const allFiltered = useMemo(() => {
     const q = search.toLowerCase();
     return products
       .filter((p) => {
@@ -88,14 +91,37 @@ export default function ProductList({
       });
   }, [products, search, category, filterType, sortBy]);
 
+  const filtered = useMemo(
+    () => allFiltered.slice(0, page * PAGE_SIZE),
+    [allFiltered, page]
+  );
+
+  const hasMore = filtered.length < allFiltered.length;
+
   function getHeldQty(productId: string): number {
     return portfolioItems.find((i) => i.product_id === productId)?.quantity ?? 0;
   }
 
-  function handleCategoryChange(cat: CategoryFilter) {
+  const handleCategoryChange = useCallback((cat: CategoryFilter) => {
     setCategory(cat);
     setFilterType('All');
-  }
+    setPage(1);
+  }, []);
+
+  const handleSearchChange = useCallback((val: string) => {
+    setSearch(val);
+    setPage(1);
+  }, []);
+
+  const handleSortChange = useCallback((val: SortKey) => {
+    setSortBy(val);
+    setPage(1);
+  }, []);
+
+  const handleFilterTypeChange = useCallback((val: string) => {
+    setFilterType(val);
+    setPage(1);
+  }, []);
 
   return (
     <div className="flex-1 flex flex-col border-r-0 md:border-r border-border min-w-0">
@@ -121,14 +147,14 @@ export default function ProductList({
         <input
           placeholder={category === 'graded' ? 'Search cards...' : 'Search products...'}
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => handleSearchChange(e.target.value)}
           className="bg-white/[0.04] border border-white/[0.08] rounded-md px-3 py-2 text-sm text-slate-200 outline-none flex-1 min-w-[120px] font-mono tracking-wider placeholder:text-slate-600 focus:border-accent/40 transition-colors"
         />
         <div className="flex gap-1 overflow-x-auto">
           {typeFilters.map((t) => (
             <button
               key={t.key}
-              onClick={() => setFilterType(t.key)}
+              onClick={() => handleFilterTypeChange(t.key)}
               className="px-2.5 md:px-3 py-1.5 rounded text-[10px] md:text-xs font-mono tracking-wider border transition-all whitespace-nowrap"
               style={{
                 borderColor:
@@ -146,7 +172,7 @@ export default function ProductList({
         </div>
         <select
           value={sortBy}
-          onChange={(e) => setSortBy(e.target.value as SortKey)}
+          onChange={(e) => handleSortChange(e.target.value as SortKey)}
           className="bg-white/[0.04] border border-white/[0.08] rounded-md px-2 md:px-3 py-2 text-xs md:text-sm text-slate-400 font-mono outline-none cursor-pointer"
         >
           <option value="volume">VOLUME</option>
@@ -170,29 +196,43 @@ export default function ProductList({
 
       {/* Rows */}
       <div className="flex-1 overflow-y-auto">
-        {filtered.length === 0 ? (
+        {allFiltered.length === 0 ? (
           <div className="px-4 py-12 text-center text-sm text-slate-600 tracking-wider">
             NO PRODUCTS FOUND
           </div>
         ) : (
-          filtered.map((product) => {
-            const heldQty = getHeldQty(product.id);
-            const canAfford = cashRemaining >= product.price;
-            const slotsAvailable = totalSlots < maxSlots;
-            const underProductCap = heldQty < 10;
-            const canAdd = canAfford && slotsAvailable && underProductCap;
+          <>
+            {filtered.map((product) => {
+              const heldQty = getHeldQty(product.id);
+              const canAfford = cashRemaining >= product.price;
+              const slotsAvailable = totalSlots < maxSlots;
+              const underProductCap = heldQty < 10;
+              const canAdd = canAfford && slotsAvailable && underProductCap;
 
-            return (
-              <ProductRow
-                key={product.id}
-                product={product}
-                heldQty={heldQty}
-                canAdd={canAdd}
-                isAnimating={animatingId === product.id}
-                onAdd={() => onAdd(product)}
-              />
-            );
-          })
+              return (
+                <ProductRow
+                  key={product.id}
+                  product={product}
+                  heldQty={heldQty}
+                  canAdd={canAdd}
+                  isAnimating={animatingId === product.id}
+                  onAdd={() => onAdd(product)}
+                />
+              );
+            })}
+            {hasMore ? (
+              <button
+                onClick={() => setPage((p) => p + 1)}
+                className="w-full py-3 text-xs font-mono tracking-widest text-slate-500 hover:text-slate-300 border-t border-white/[0.04] transition-colors"
+              >
+                LOAD MORE ({allFiltered.length - filtered.length} remaining)
+              </button>
+            ) : (
+              <div className="py-3 text-center text-[10px] text-slate-700 tracking-widest border-t border-white/[0.04]">
+                {allFiltered.length} PRODUCTS
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

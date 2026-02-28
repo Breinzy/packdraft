@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { formatCurrency, formatPct } from '@/lib/utils';
 import { SET_COLORS, TYPE_ICONS, type ProductWithPrice } from '@/types';
 
@@ -11,6 +12,67 @@ interface ProductRowProps {
   onAdd: () => void;
 }
 
+function ProductThumb({
+  product,
+  size = 28,
+}: {
+  product: ProductWithPrice;
+  size?: number;
+}) {
+  const setColor = SET_COLORS[product.set_name] || '#94a3b8';
+  const icon = TYPE_ICONS[product.type] || '📦';
+  const isGraded = product.category === 'graded';
+
+  if (product.image_code) {
+    return (
+      <div
+        className="rounded flex-shrink-0 overflow-hidden border border-white/[0.08]"
+        style={{ width: size, height: size }}
+      >
+        <Image
+          src={product.image_code}
+          alt={product.card_name ?? product.name}
+          width={size}
+          height={size}
+          className="object-cover w-full h-full"
+          unoptimized
+        />
+      </div>
+    );
+  }
+
+  if (isGraded) {
+    return (
+      <div
+        className="h-7 px-2 rounded flex-shrink-0 flex items-center justify-center text-[10px] font-bold tracking-wider border"
+        style={{
+          background: product.psa_grade === 10
+            ? 'linear-gradient(135deg, rgba(251,191,36,0.15), rgba(251,191,36,0.3))'
+            : 'linear-gradient(135deg, rgba(148,163,184,0.15), rgba(148,163,184,0.3))',
+          borderColor: product.psa_grade === 10 ? '#fbbf2444' : '#94a3b844',
+          color: product.psa_grade === 10 ? '#fbbf24' : '#94a3b8',
+        }}
+      >
+        PSA {product.psa_grade}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="rounded flex-shrink-0 flex items-center justify-center text-sm border"
+      style={{
+        width: size,
+        height: size,
+        background: `linear-gradient(135deg, ${setColor}22, ${setColor}44)`,
+        borderColor: `${setColor}33`,
+      }}
+    >
+      {icon}
+    </div>
+  );
+}
+
 export default function ProductRow({
   product,
   heldQty,
@@ -19,7 +81,6 @@ export default function ProductRow({
   onAdd,
 }: ProductRowProps) {
   const setColor = SET_COLORS[product.set_name] || '#94a3b8';
-  const icon = TYPE_ICONS[product.type] || '📦';
   const isGraded = product.category === 'graded';
 
   return (
@@ -38,30 +99,7 @@ export default function ProductRow({
       >
         <div className="min-w-0">
           <div className="flex items-center gap-2.5">
-            {isGraded ? (
-              <div
-                className="h-7 px-2 rounded flex-shrink-0 flex items-center justify-center text-[10px] font-bold tracking-wider border"
-                style={{
-                  background: product.psa_grade === 10
-                    ? 'linear-gradient(135deg, rgba(251,191,36,0.15), rgba(251,191,36,0.3))'
-                    : 'linear-gradient(135deg, rgba(148,163,184,0.15), rgba(148,163,184,0.3))',
-                  borderColor: product.psa_grade === 10 ? '#fbbf2444' : '#94a3b844',
-                  color: product.psa_grade === 10 ? '#fbbf24' : '#94a3b8',
-                }}
-              >
-                PSA {product.psa_grade}
-              </div>
-            ) : (
-              <div
-                className="w-7 h-7 rounded flex-shrink-0 flex items-center justify-center text-sm border"
-                style={{
-                  background: `linear-gradient(135deg, ${setColor}22, ${setColor}44)`,
-                  borderColor: `${setColor}33`,
-                }}
-              >
-                {icon}
-              </div>
-            )}
+            <ProductThumb product={product} size={28} />
             <div className="min-w-0">
               <div className="text-sm text-slate-200 truncate">
                 {isGraded ? product.card_name ?? product.name : product.name}
@@ -122,30 +160,7 @@ export default function ProductRow({
             : undefined,
         }}
       >
-        {isGraded ? (
-          <div
-            className="h-7 px-1.5 rounded flex-shrink-0 flex items-center justify-center text-[9px] font-bold tracking-wider border"
-            style={{
-              background: product.psa_grade === 10
-                ? 'linear-gradient(135deg, rgba(251,191,36,0.15), rgba(251,191,36,0.3))'
-                : 'linear-gradient(135deg, rgba(148,163,184,0.15), rgba(148,163,184,0.3))',
-              borderColor: product.psa_grade === 10 ? '#fbbf2444' : '#94a3b844',
-              color: product.psa_grade === 10 ? '#fbbf24' : '#94a3b8',
-            }}
-          >
-            PSA&nbsp;{product.psa_grade}
-          </div>
-        ) : (
-          <div
-            className="w-7 h-7 rounded flex-shrink-0 flex items-center justify-center text-sm border"
-            style={{
-              background: `linear-gradient(135deg, ${setColor}22, ${setColor}44)`,
-              borderColor: `${setColor}33`,
-            }}
-          >
-            {icon}
-          </div>
-        )}
+        <ProductThumb product={product} size={28} />
 
         <div className="flex-1 min-w-0">
           <div className="text-sm text-slate-200 truncate">

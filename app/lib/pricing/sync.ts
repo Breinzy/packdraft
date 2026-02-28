@@ -12,9 +12,20 @@ interface SyncResult {
   skipped: number;
 }
 
+const BATCH_SIZE = 50;
+const BATCH_DELAY_MS = 62_000;
+
+function chunk<T>(arr: T[], size: number): T[][] {
+  const chunks: T[][] = [];
+  for (let i = 0; i < arr.length; i += size) {
+    chunks.push(arr.slice(i, i + size));
+  }
+  return chunks;
+}
+
 /**
  * Sync prices from PokemonPriceTracker API for all active products.
- * Sealed products use /sealed-products, graded cards use /cards with eBay data.
+ * Processes in batches of 50 with 62s delays to respect 60 credits/minute.
  */
 export async function syncPrices(supabase: SupabaseClient): Promise<SyncResult> {
   const errors: string[] = [];
@@ -43,24 +54,33 @@ export async function syncPrices(supabase: SupabaseClient): Promise<SyncResult> 
     errors.push(`${noId.length} products missing tcgplayer_id, skipped`);
   }
 
-  // Fetch sealed product prices
-  if (sealedProducts.length > 0) {
-    const sealedIds = sealedProducts.map((p) => Number(p.tcgplayer_id));
+  // Sealed products -- 1 credit each, batch by 50
+  const sealedBatches = chunk(sealedProducts, BATCH_SIZE);
+  for (let bi = 0; bi < sealedBatches.length; bi++) {
+    if (bi > 0) await new Promise((r) => setTimeout(r, BATCH_DELAY_MS));
+
+    const batch = sealedBatches[bi];
+    const ids = batch.map((p) => Number(p.tcgplayer_id));
+
     let sealedData: SealedProduct[] = [];
     try {
-      sealedData = await getSealedProductPrices(sealedIds);
+      sealedData = await getSealedProductPrices(ids);
     } catch (err) {
-      errors.push(`Sealed products fetch failed: ${err}`);
+      errors.push(`Sealed batch ${bi} fetch failed: ${err}`);
+      continue;
     }
 
-    const sealedByTcgId = new Map(
-      sealedData.map((s) => [s.tcgPlayerId, s])
-    );
+    const byTcgId = new Map(sealedData.map((s) => [s.tcgPlayerId, s]));
 
-    for (const product of sealedProducts) {
-      const apiData = sealedByTcgId.get(Number(product.tcgplayer_id));
-      if (!apiData?.prices?.market) {
-        errors.push(`No price data returned for sealed product: ${product.name}`);
+    for (const product of batch) {
+      const apiData = byTcgId.get(Number(product.tcgplayer_id));
+      if (!apiData) {
+        errors.push(`No data returned for sealed product: ${product.name}`);
+        continue;
+      }
+      const price = apiData.unopenedPrice ?? apiData.prices?.market;
+      if (!price) {
+        errors.push(`No price for sealed product: ${product.name}`);
         continue;
       }
 
@@ -68,7 +88,7 @@ export async function syncPrices(supabase: SupabaseClient): Promise<SyncResult> 
 
       const { error: insertError } = await supabase.from('price_snapshots').insert({
         product_id: product.id,
-        price: apiData.prices.market,
+        price,
         change_7d: change7d,
         volume: 0,
         source: 'pokemonpricetracker',
@@ -82,28 +102,34 @@ export async function syncPrices(supabase: SupabaseClient): Promise<SyncResult> 
     }
   }
 
-  // Fetch graded card prices
-  if (gradedProducts.length > 0) {
-    const gradedIds = gradedProducts.map((p) => Number(p.tcgplayer_id));
-    let cardData: Card[] = [];
-    try {
-      cardData = await getGradedCardPrices(gradedIds, { includeEbay: true });
-    } catch (err) {
-      errors.push(`Graded cards fetch failed: ${err}`);
+  // Graded cards -- 2 credits each (includeEbay), batch by 25
+  const gradedBatchSize = Math.floor(BATCH_SIZE / 2);
+  const gradedBatches = chunk(gradedProducts, gradedBatchSize);
+  for (let bi = 0; bi < gradedBatches.length; bi++) {
+    if (bi > 0 || sealedBatches.length > 0) {
+      await new Promise((r) => setTimeout(r, BATCH_DELAY_MS));
     }
 
-    const cardsByTcgId = new Map(
-      cardData.map((c) => [c.tcgPlayerId, c])
-    );
+    const batch = gradedBatches[bi];
+    const ids = batch.map((p) => Number(p.tcgplayer_id));
 
-    for (const product of gradedProducts) {
-      const apiData = cardsByTcgId.get(Number(product.tcgplayer_id));
+    let cardData: Card[] = [];
+    try {
+      cardData = await getGradedCardPrices(ids, { includeEbay: true });
+    } catch (err) {
+      errors.push(`Graded batch ${bi} fetch failed: ${err}`);
+      continue;
+    }
+
+    const byTcgId = new Map(cardData.map((c) => [c.tcgPlayerId, c]));
+
+    for (const product of batch) {
+      const apiData = byTcgId.get(Number(product.tcgplayer_id));
       if (!apiData) {
         errors.push(`No data returned for graded card: ${product.name}`);
         continue;
       }
 
-      // For graded cards, prefer eBay PSA data over TCGPlayer market price
       const price = getGradedPrice(apiData, product.name);
       if (price === null) {
         errors.push(`No price data for graded card: ${product.name}`);
@@ -146,7 +172,6 @@ function getGradedPrice(card: Card, productName: string): number | null {
   const isPsa10 = productName.toLowerCase().includes('psa 10');
   const isPsa9 = productName.toLowerCase().includes('psa 9');
 
-  // API returns data in ebay.salesByGrade.psa10/psa9
   const psa10 = card.ebay?.salesByGrade?.psa10 ?? card.ebay?.psa10;
   const psa9 = card.ebay?.salesByGrade?.psa9 ?? card.ebay?.psa9;
 

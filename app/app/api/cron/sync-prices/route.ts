@@ -2,10 +2,8 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { syncPrices } from '@/lib/pricing/sync';
 
-/**
- * Price sync cron -- runs every 6 hours via Vercel Cron.
- * Fetches latest prices from PokemonPriceTracker and inserts snapshots.
- */
+export const maxDuration = 900;
+
 export async function GET(request: Request) {
   const authHeader = request.headers.get('authorization');
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {

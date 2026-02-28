@@ -54,6 +54,15 @@ export default async function DashboardPage() {
     .limit(1)
     .single();
 
+  // Fetch last completed contest for results link
+  const { data: lastCompleted } = await supabase
+    .from('contests')
+    .select('id, ends_at')
+    .eq('status', 'complete')
+    .order('ends_at', { ascending: false })
+    .limit(1)
+    .single();
+
   // Fetch league if assigned
   let league: League | null = null;
   if (profile?.current_league_id) {
@@ -102,7 +111,7 @@ export default async function DashboardPage() {
             itemCount={portfolioItemCount}
             hasContest={!!contest}
           />
-          <QuickActions />
+          <QuickActions lastCompletedContestId={lastCompleted?.id ?? null} />
         </div>
       </main>
     </>
@@ -298,7 +307,7 @@ function PortfolioCard({
   );
 }
 
-function QuickActions() {
+function QuickActions({ lastCompletedContestId }: { lastCompletedContestId: string | null }) {
   return (
     <div className="grid grid-cols-2 md:flex md:flex-wrap gap-3 md:gap-4">
       <Link
@@ -315,11 +324,21 @@ function QuickActions() {
         <div className="text-lg mb-1">📊</div>
         <div className="text-xs md:text-sm font-bold text-white tracking-widest">LEADERBOARD</div>
       </Link>
-      <div className="col-span-2 md:flex-1 md:min-w-[180px] bg-white/[0.03] border border-white/[0.04] rounded-xl px-4 md:px-6 py-4 md:py-5 text-center opacity-40 cursor-not-allowed">
-        <div className="text-lg mb-1">🏆</div>
-        <div className="text-xs md:text-sm font-bold text-slate-500 tracking-widest">BROWSE LEAGUES</div>
-        <div className="text-[10px] md:text-xs text-slate-700 tracking-wider mt-1">COMING SOON</div>
-      </div>
+      {lastCompletedContestId ? (
+        <Link
+          href={`/results/${lastCompletedContestId}`}
+          className="col-span-2 md:flex-1 md:min-w-[180px] bg-white/[0.03] border border-white/[0.06] rounded-xl px-4 md:px-6 py-4 md:py-5 text-center hover:bg-white/[0.06] transition-colors"
+        >
+          <div className="text-lg mb-1">🏆</div>
+          <div className="text-xs md:text-sm font-bold text-white tracking-widest">LAST RESULTS</div>
+        </Link>
+      ) : (
+        <div className="col-span-2 md:flex-1 md:min-w-[180px] bg-white/[0.03] border border-white/[0.04] rounded-xl px-4 md:px-6 py-4 md:py-5 text-center opacity-40 cursor-not-allowed">
+          <div className="text-lg mb-1">🏆</div>
+          <div className="text-xs md:text-sm font-bold text-slate-500 tracking-widest">RESULTS</div>
+          <div className="text-[10px] md:text-xs text-slate-700 tracking-wider mt-1">NO COMPLETED CONTESTS</div>
+        </div>
+      )}
     </div>
   );
 }

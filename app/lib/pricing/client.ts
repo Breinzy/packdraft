@@ -16,9 +16,24 @@ export interface SetsResponse {
   data: SetInfo[];
 }
 
+export interface ApiPagination {
+  total: number;
+  count?: number;
+  limit: number;
+  offset: number;
+  hasMore?: boolean;
+}
+
 export interface SealedProductResponse {
   data: SealedProduct[];
-  pagination?: { total: number; limit: number; offset: number };
+  pagination?: ApiPagination;
+  metadata?: ApiPagination;
+}
+
+export interface CardResponse {
+  data: Card[];
+  pagination?: ApiPagination;
+  metadata?: ApiPagination;
 }
 
 export interface SealedProduct {
@@ -27,6 +42,7 @@ export interface SealedProduct {
   setName?: string;
   setSlug?: string;
   imageUrl?: string;
+  unopenedPrice?: number;
   prices?: {
     market?: number;
     low?: number;
@@ -34,11 +50,6 @@ export interface SealedProduct {
     high?: number;
   };
   priceHistory?: PriceHistoryEntry[];
-}
-
-export interface CardResponse {
-  data: Card[];
-  pagination?: { total: number; limit: number; offset: number };
 }
 
 export interface Card {
@@ -83,6 +94,10 @@ export interface PriceHistoryEntry {
   price: number;
 }
 
+function getTotal(res: { pagination?: ApiPagination; metadata?: ApiPagination }): number {
+  return res.pagination?.total ?? res.metadata?.total ?? 0;
+}
+
 const MAX_RETRIES = 1;
 const INITIAL_BACKOFF_MS = 5000;
 
@@ -104,13 +119,14 @@ async function apiFetch<T>(path: string, params: Record<string, string> = {}): P
     });
 
     if (res.status === 429) {
+      const body = await res.text().catch(() => '');
+      const retryAfter = res.headers.get('Retry-After');
       if (attempt < MAX_RETRIES) {
-        const backoff = INITIAL_BACKOFF_MS * Math.pow(2, attempt);
-        console.warn(`[api] 429 on ${path}, retry ${attempt + 1}/${MAX_RETRIES} in ${backoff}ms`);
+        const backoff = retryAfter ? Number(retryAfter) * 1000 : INITIAL_BACKOFF_MS * Math.pow(2, attempt);
         await new Promise((r) => setTimeout(r, backoff));
         continue;
       }
-      throw new Error('PokemonPriceTracker rate limit exceeded after retries');
+      throw new Error(`PokemonPriceTracker rate limit exceeded after retries: ${body}`);
     }
 
     if (!res.ok) {
@@ -145,8 +161,8 @@ export async function getSealedProductPrices(
       if (response.data?.length) {
         results.push(...response.data);
       }
-    } catch (err) {
-      console.error(`Failed to fetch sealed product ${id}:`, err);
+    } catch {
+      // individual product failures are silent; caller gets partial results
     }
   }
 
@@ -175,8 +191,8 @@ export async function getGradedCardPrices(
       if (response.data?.length) {
         results.push(...response.data);
       }
-    } catch (err) {
-      console.error(`Failed to fetch card ${id}:`, err);
+    } catch {
+      // individual card failures are silent; caller gets partial results
     }
   }
 
@@ -206,13 +222,34 @@ export async function getSealedProductsBySet(
   try {
     const response = await apiFetch<SealedProductResponse>('/sealed-products', {
       set: setSlug,
-      limit: '100',
+      limit: '20',
     });
     return response.data ?? [];
-  } catch (err) {
-    console.error(`Failed to fetch sealed products for set ${setSlug}:`, err);
+  } catch {
     return [];
   }
+}
+
+/**
+ * Fetch sealed products by search term, paginated.
+ * Cost: 1 credit per product returned.
+ */
+export async function getSealedProductsBySearch(options: {
+  search: string;
+  limit?: number;
+  offset?: number;
+}): Promise<{ products: SealedProduct[]; total: number }> {
+  const params: Record<string, string> = {
+    search: options.search,
+    limit: String(options.limit ?? 20),
+  };
+  if (options.offset) params.offset = String(options.offset);
+
+  const response = await apiFetch<SealedProductResponse>('/sealed-products', params);
+  return {
+    products: response.data ?? [],
+    total: getTotal(response),
+  };
 }
 
 /**
@@ -239,6 +276,6 @@ export async function getTopCards(options: {
   const response = await apiFetch<CardResponse>('/cards', params);
   return {
     cards: response.data ?? [],
-    total: response.pagination?.total ?? 0,
+    total: getTotal(response),
   };
 }
