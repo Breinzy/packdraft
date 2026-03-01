@@ -79,7 +79,7 @@ export default function Ticker() {
         const product = hotPick.products as unknown as { name: string; image_code: string };
         tickerItems.push({
           label: 'HOT PICK',
-          value: `${product.image_code} +${hotPick.change_7d}%`,
+          value: `${product.name} +${hotPick.change_7d}%`,
           color: '#34d399',
         });
       }

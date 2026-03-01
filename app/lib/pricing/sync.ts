@@ -113,6 +113,21 @@ export async function syncPrices(supabase: SupabaseClient): Promise<SyncResult> 
     const batch = gradedBatches[bi];
     const ids = batch.map((p) => Number(p.tcgplayer_id));
 
+    // Fetch snapshots from ~7 days ago to compute change_7d
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    const { data: oldSnapshots } = await supabase
+      .from('price_snapshots')
+      .select('product_id, price')
+      .in('product_id', batch.map((p) => p.id))
+      .lte('recorded_at', sevenDaysAgo)
+      .order('recorded_at', { ascending: false });
+    const prevPrices = new Map<string, number>();
+    for (const snap of oldSnapshots ?? []) {
+      if (!prevPrices.has(snap.product_id)) {
+        prevPrices.set(snap.product_id, Number(snap.price));
+      }
+    }
+
     let cardData: Card[] = [];
     try {
       cardData = await getGradedCardPrices(ids, { includeEbay: true });
@@ -136,10 +151,14 @@ export async function syncPrices(supabase: SupabaseClient): Promise<SyncResult> 
         continue;
       }
 
+      const prevPrice = prevPrices.get(product.id);
+      const change_7d =
+        prevPrice && prevPrice > 0 ? ((price - prevPrice) / prevPrice) * 100 : 0;
+
       const { error: insertError } = await supabase.from('price_snapshots').insert({
         product_id: product.id,
         price,
-        change_7d: 0,
+        change_7d,
         volume: 0,
         source: 'pokemonpricetracker',
       });

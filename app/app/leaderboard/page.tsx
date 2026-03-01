@@ -25,6 +25,14 @@ async function buildLeaderboard(
   const { data: portfolios } = await query;
   if (!portfolios || portfolios.length === 0) return [];
 
+  // Fetch league names for all portfolios
+  const uniqueLeagueIds = [...new Set(portfolios.map((p) => p.league_id).filter(Boolean))];
+  const { data: leagues } = await supabase
+    .from('leagues')
+    .select('id, name')
+    .in('id', uniqueLeagueIds);
+  const leagueNameMap = new Map((leagues ?? []).map((l) => [l.id, l.name]));
+
   // Fetch all portfolio items for these portfolios
   const portfolioIds = portfolios.map((p) => p.id);
   const { data: allItems } = await supabase
@@ -65,6 +73,7 @@ async function buildLeaderboard(
       portfolio: p as unknown as Portfolio,
       total_value: totalValue,
       return_pct: returnPct,
+      league_name: leagueNameMap.get(p.league_id)?.toUpperCase(),
     };
   });
 

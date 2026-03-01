@@ -94,6 +94,7 @@ export interface LeaderboardEntry {
   portfolio: Portfolio;
   total_value: number;
   return_pct: number;
+  league_name?: string;
 }
 
 export const BUDGET = 5000;

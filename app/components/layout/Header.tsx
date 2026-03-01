@@ -111,13 +111,18 @@ export default function Header() {
             <Link href="/leaderboard" className="text-slate-400 hover:text-white transition-colors">
               LEADERBOARD
             </Link>
+            {isSignedIn && (
+              <Link href="/admin" className="text-slate-600 hover:text-slate-400 transition-colors text-sm">
+                ADMIN
+              </Link>
+            )}
           </nav>
 
           {isSignedIn ? (
             <div className="flex items-center gap-4">
-              <span className="text-base text-accent-light tracking-wider">
+              <Link href="/settings" className="text-base text-accent-light tracking-wider hover:text-white transition-colors">
                 {getDisplayName()}
-              </span>
+              </Link>
               <button
                 onClick={handleSignOut}
                 className="text-sm px-5 py-2 rounded-lg border border-white/[0.08] text-slate-500 hover:text-white hover:border-white/20 tracking-wider"
@@ -196,7 +201,13 @@ export default function Header() {
           <div className="mt-auto p-6 border-t border-white/[0.06]">
             {isSignedIn ? (
               <div className="space-y-4">
-                <div className="text-sm text-accent-light tracking-wider">{getDisplayName()}</div>
+                <Link
+                  href="/settings"
+                  onClick={() => setMenuOpen(false)}
+                  className="block text-sm text-accent-light tracking-wider hover:text-white transition-colors"
+                >
+                  {getDisplayName()} · SETTINGS
+                </Link>
                 <button
                   onClick={() => { handleSignOut(); setMenuOpen(false); }}
                   className="w-full text-sm py-3 rounded-lg border border-white/[0.08] text-slate-500 hover:text-white tracking-wider"

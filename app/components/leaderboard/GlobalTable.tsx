@@ -68,8 +68,8 @@ export default function GlobalTable({ entries, currentUserId }: GlobalTableProps
                       <span className="ml-1.5 text-xs" style={{ color: '#9fc0e6' }}>(YOU)</span>
                     )}
                   </span>
-                  <span className="text-xs text-accent-light tracking-wider">
-                    LEAGUE
+                  <span className="text-xs text-accent-light tracking-wider truncate">
+                    {entry.league_name ?? '—'}
                   </span>
                   <span className="text-right text-sm font-semibold text-white">
                     {formatCurrency(entry.total_value)}

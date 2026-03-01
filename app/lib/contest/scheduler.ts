@@ -1,15 +1,25 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 /**
+ * Returns the UTC offset in hours for America/New_York at the given date.
+ * Returns 5 for EST (winter) and 4 for EDT (summer).
+ */
+function getNYOffsetHours(date: Date): number {
+  const utcMs = date.getTime();
+  const nyMs = new Date(date.toLocaleString('en-US', { timeZone: 'America/New_York' })).getTime();
+  return Math.round((utcMs - nyMs) / (1000 * 60 * 60));
+}
+
+/**
  * Compute the next weekly contest window.
  *
- * Registration: Sunday 00:00 EST -> Monday 00:00 EST
- * Contest:      Monday 00:00 EST -> Sunday 00:00 EST (7 days)
+ * Registration: Sunday 00:00 ET -> Monday 00:00 ET
+ * Contest:      Monday 00:00 ET -> Sunday 00:00 ET (7 days)
  *
- * All times are stored in UTC. EST = UTC-5.
+ * All times are stored in UTC. Offset is computed dynamically (EST=UTC-5, EDT=UTC-4).
  */
 export function getNextContestDates(now = new Date()) {
-  const EST_OFFSET_HOURS = 5;
+  const EST_OFFSET_HOURS = getNYOffsetHours(now);
 
   const estNow = new Date(now.getTime() - EST_OFFSET_HOURS * 60 * 60 * 1000);
   const estDay = estNow.getUTCDay();
