@@ -2,15 +2,15 @@
   "crons": [
     {
       "path": "/api/cron/tick",
-      "schedule": "*/15 * * * *"
+      "schedule": "0 12 * * *"
     },
     {
       "path": "/api/cron/sync-prices",
-      "schedule": "0 */6 * * *"
+      "schedule": "0 6 * * *"
     },
     {
       "path": "/api/cron/create-contest",
-      "schedule": "0 * * * 6"
+      "schedule": "0 18 * * 6"
     },
     {
       "path": "/api/admin/import-products",
