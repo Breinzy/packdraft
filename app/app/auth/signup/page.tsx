@@ -11,6 +11,7 @@ export default function SignupPage() {
   const [displayName, setDisplayName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [confirmEmail, setConfirmEmail] = useState(false);
   const router = useRouter();
   const supabase = createClient();
 
@@ -19,7 +20,7 @@ export default function SignupPage() {
     setError('');
     setLoading(true);
 
-    const { error: signUpError } = await supabase.auth.signUp({
+    const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -33,7 +34,12 @@ export default function SignupPage() {
       return;
     }
 
-    router.push('/dashboard');
+    if (data.session) {
+      router.push('/dashboard');
+    } else {
+      setConfirmEmail(true);
+      setLoading(false);
+    }
   }
 
   async function handleGoogleSignup() {
@@ -44,6 +50,33 @@ export default function SignupPage() {
       },
     });
     if (error) setError(error.message);
+  }
+
+  if (confirmEmail) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-6">
+        <div className="w-full max-w-md text-center">
+          <div
+            className="inline-flex items-center justify-center w-20 h-20 rounded-full text-3xl mb-8"
+            style={{ background: 'linear-gradient(135deg, #6e9bcf, #b0c4de)' }}
+          >
+            ✉
+          </div>
+          <h1 className="text-3xl font-bold tracking-widest text-white mb-4">CHECK YOUR EMAIL</h1>
+          <p className="text-base text-slate-500 tracking-wide mb-2">
+            We sent a confirmation link to
+          </p>
+          <p className="text-base text-accent-light font-mono mb-8">{email}</p>
+          <p className="text-sm text-slate-600 tracking-wide">
+            Click the link in the email to activate your account, then{' '}
+            <Link href="/auth/login" className="text-accent-light hover:text-white transition-colors">
+              sign in
+            </Link>
+            .
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (

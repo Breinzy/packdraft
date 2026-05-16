@@ -7,6 +7,11 @@ export default async function AdminPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/auth/login');
 
+  const adminEmails = (process.env.ADMIN_EMAILS ?? '').split(',').map((e) => e.trim()).filter(Boolean);
+  if (adminEmails.length > 0 && !adminEmails.includes(user.email ?? '')) {
+    redirect('/dashboard');
+  }
+
   // Current contest
   const { data: contest } = await supabase
     .from('contests')

@@ -5,7 +5,7 @@ import { autoLockPortfolios } from '@/lib/contest/autoLock';
 import { scoreContest } from '@/lib/contest/scoring';
 
 /**
- * Master lifecycle cron -- runs every 15 minutes via Vercel Cron.
+ * Master lifecycle cron -- runs daily at noon UTC via Vercel Cron.
  * Transitions contest statuses, auto-locks portfolios, and scores completed contests.
  */
 export async function GET(request: Request) {
