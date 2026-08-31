@@ -1,5 +1,33 @@
 # Packdraft — Supabase setup
 
+There are two separate connections. They are easy to mix up.
+
+| Connection | Who uses it | What it is for |
+|---|---|---|
+| **Supabase MCP** | The coding agent (Cursor) | Apply migrations, inspect tables, run SQL on your behalf |
+| **App env vars** | The Packdraft Next.js app | Auth, trading RPCs, admin, price sync |
+
+MCP does **not** replace the app keys. Even with MCP connected, `/assets` and join/trade still need `NEXT_PUBLIC_SUPABASE_*` and `SUPABASE_SERVICE_ROLE_KEY` on the environment that runs the app (Vercel, `app/.env.local`, Cloud Agent secrets).
+
+## Supabase MCP (agent access)
+
+MCP is Cursor talking to Supabase as you. It is not the website talking to Supabase.
+
+Once connected, an agent can `list_tables`, `list_migrations`, `apply_migration`, and `execute_sql` instead of you pasting SQL in the dashboard. It still cannot sign players in, execute trades, or run `/admin` — those use the app env vars below.
+
+Official hosted server: [supabase.com/mcp](https://supabase.com/mcp) (`https://mcp.supabase.com/mcp`). This repo pins it to the existing project in `.cursor/mcp.json` (`project_ref=lximcqaunrovzonsbjkb`).
+
+1. Open the Packdraft repo in **Cursor desktop**.
+2. **Settings → Cursor Settings → Tools & MCP**.
+3. Find **supabase** and click **Connect** / **Authenticate**.
+4. Log in to Supabase in the browser and approve the org that owns project `lximcqaunrovzonsbjkb`.
+5. Confirm the server shows as connected (tools enabled). Restart Cursor if tools do not appear.
+6. Start a **new** Cloud Agent after that. This running Cloud Agent has no Supabase MCP tools, and a live agent will not pick up a newly authenticated server.
+
+You do not paste API keys into chat for MCP. It uses browser OAuth.
+
+Do not put a personal access token in `.cursor/mcp.json`. A Bearer token is only for CI-style agents that cannot open a browser, and it must stay in secrets, not git.
+
 Packdraft already has a hosted project. Do **not** create a new one and do **not** run `supabase db reset` (that would wipe the Pokémon catalog).
 
 Linked project ref: `lximcqaunrovzonsbjkb` (us-east-1).
@@ -48,7 +76,9 @@ Set the same names on the Packdraft Vercel project (Production + Preview).
 
 ## 3. Apply pending migrations
 
-CLI `db push` has previously failed on this project because the login role cannot `ALTER ROLE cli_login_postgres`. Prefer the SQL editor until that is fixed.
+Preferred path after MCP is connected: ask a **new** agent to `list_migrations` then `apply_migration` for any file not already on the project.
+
+Fallback if MCP is not connected: CLI `db push` has previously failed on this project because the login role cannot `ALTER ROLE cli_login_postgres`. Use the SQL editor instead.
 
 1. Open [SQL editor](https://supabase.com/dashboard/project/lximcqaunrovzonsbjkb/sql/new).
 2. Run, in order (skip a file if it was already applied):
