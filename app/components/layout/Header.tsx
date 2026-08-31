@@ -95,7 +95,7 @@ export default function Header() {
 
           {isSignedIn ? (
             <div className="flex items-center gap-4">
-              <Link href="/settings" className="text-base text-accent-light tracking-wider hover:text-white transition-colors min-h-11 inline-flex items-center">
+              <Link href={`/players/${user.id}`} className="text-base text-accent-light tracking-wider hover:text-white transition-colors min-h-11 inline-flex items-center">
                 {getDisplayName()}
               </Link>
               <button
@@ -158,7 +158,13 @@ export default function Header() {
           <div className="mt-auto p-6 border-t border-white/[0.06] pb-[max(1.5rem,env(safe-area-inset-bottom))]">
             {isSignedIn ? (
               <div className="space-y-4">
-                <p className="text-sm text-accent-light tracking-wider">{getDisplayName()}</p>
+                <Link
+                  href={`/players/${user.id}`}
+                  onClick={() => setMenuOpen(false)}
+                  className="block text-sm text-accent-light tracking-wider min-h-11"
+                >
+                  {getDisplayName()}
+                </Link>
                 <button
                   onClick={() => {
                     handleSignOut();

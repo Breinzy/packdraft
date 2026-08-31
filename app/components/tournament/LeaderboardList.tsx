@@ -1,6 +1,6 @@
-import { formatCurrency, formatReturn } from '@/lib/utils';
+import Link from 'next/link';
+import { formatCurrency, formatReturn, cn } from '@/lib/utils';
 import type { TournamentStanding } from '@/types';
-import { cn } from '@/lib/utils';
 
 export default function LeaderboardList({
   standings,
@@ -28,7 +28,9 @@ export default function LeaderboardList({
             <div className="flex items-baseline justify-between gap-3">
               <div className="min-w-0 flex items-baseline gap-3">
                 <span className="text-sm text-gold font-bold w-8 shrink-0">#{row.rank}</span>
-                <span className="text-sm text-white font-bold truncate">{row.display_name}</span>
+                <Link href={`/players/${row.user_id}`} className="text-sm text-white font-bold truncate hover:text-accent-light">
+                  {row.display_name}
+                </Link>
               </div>
               <span className="text-sm text-white shrink-0">{formatCurrency(row.portfolio_value)}</span>
             </div>

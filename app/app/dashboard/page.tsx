@@ -63,6 +63,12 @@ export default async function DashboardPage() {
               WELCOME BACK, {name.toUpperCase()}
             </h1>
             <p className="text-xs md:text-sm text-slate-500 tracking-wider">{typed.email}</p>
+            <Link
+              href={`/players/${user.id}`}
+              className="inline-flex min-h-11 items-center mt-3 text-xs tracking-widest text-accent-light"
+            >
+              VIEW RECORD
+            </Link>
           </div>
 
           <section className="space-y-3">
