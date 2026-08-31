@@ -26,3 +26,5 @@ Thumbs.db
 
 # supabase
 app/.supabase/
+supabase/.branches/
+supabase/.temp/
