@@ -12,10 +12,16 @@ export interface CreateTournamentInput {
   eligibleAssetTypes?: AssetType[];
 }
 
-export async function createTournament(
-  service: SupabaseClient,
-  input: CreateTournamentInput
-): Promise<{ id: string }> {
+export function parseCreateTournamentInput(input: CreateTournamentInput): {
+  name: string;
+  description: string;
+  startingBudget: number;
+  durationDays: number;
+  startsAt: Date;
+  tcgSlug: string;
+  eligibleAssetTypes: AssetType[];
+  createdBy: string | null;
+} {
   const name = input.name.trim();
   if (!name) throw new Error('Tournament name is required');
 
@@ -25,31 +31,52 @@ export async function createTournament(
   const durationDays = input.durationDays ?? 7;
   if (!(durationDays > 0)) throw new Error('Duration must be positive');
 
+  const startsAt = input.startsAt ? new Date(input.startsAt) : new Date();
+  if (Number.isNaN(startsAt.getTime())) throw new Error('Invalid start time');
+
+  return {
+    name,
+    description: input.description?.trim() ?? '',
+    startingBudget,
+    durationDays,
+    startsAt,
+    tcgSlug: input.tcgSlug ?? 'pokemon',
+    eligibleAssetTypes: input.eligibleAssetTypes ?? ['sealed', 'graded', 'single'],
+    createdBy: input.createdBy ?? null,
+  };
+}
+
+export async function createTournament(
+  service: SupabaseClient,
+  input: CreateTournamentInput
+): Promise<{ id: string }> {
+  const parsed = parseCreateTournamentInput(input);
+
   const { data: tcg, error: tcgError } = await service
     .from('tcgs')
     .select('id')
-    .eq('slug', input.tcgSlug ?? 'pokemon')
+    .eq('slug', parsed.tcgSlug)
     .maybeSingle();
   if (tcgError) throw new Error(`Failed to load TCG: ${tcgError.message}`);
   if (!tcg) throw new Error('Pokémon TCG is not seeded. Apply the Phase 2 migration first.');
 
-  const startsAt = input.startsAt ? new Date(input.startsAt) : new Date();
-  if (Number.isNaN(startsAt.getTime())) throw new Error('Invalid start time');
-  const tradingClosesAt = new Date(startsAt.getTime() + durationDays * 24 * 60 * 60 * 1000);
+  const tradingClosesAt = new Date(
+    parsed.startsAt.getTime() + parsed.durationDays * 24 * 60 * 60 * 1000
+  );
 
   const { data, error } = await service
     .from('tournaments')
     .insert({
-      name,
-      description: input.description?.trim() ?? '',
+      name: parsed.name,
+      description: parsed.description,
       tcg_id: tcg.id,
-      starting_budget: startingBudget,
-      starts_at: startsAt.toISOString(),
+      starting_budget: parsed.startingBudget,
+      starts_at: parsed.startsAt.toISOString(),
       trading_closes_at: tradingClosesAt.toISOString(),
       ends_at: tradingClosesAt.toISOString(),
-      status: startsAt.getTime() <= Date.now() ? 'active' : 'upcoming',
-      created_by: input.createdBy ?? null,
-      eligible_asset_types: input.eligibleAssetTypes ?? ['sealed', 'graded', 'single'],
+      status: parsed.startsAt.getTime() <= Date.now() ? 'active' : 'upcoming',
+      created_by: parsed.createdBy,
+      eligible_asset_types: parsed.eligibleAssetTypes,
     })
     .select('id')
     .single();
