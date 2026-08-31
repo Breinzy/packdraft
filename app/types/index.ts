@@ -63,7 +63,120 @@ export interface CurrentPrice {
   change7d: number;
   volume: number;
   stale: boolean;
+  snapshotId?: string;
 }
+
+export type TournamentStatus =
+  | 'upcoming'
+  | 'active'
+  | 'locked'
+  | 'settling'
+  | 'completed'
+  | 'archived';
+
+export type TradeSide = 'buy' | 'sell';
+
+export interface Tournament {
+  id: string;
+  name: string;
+  description: string;
+  tcg_id: string;
+  starting_budget: number;
+  starts_at: string;
+  trading_closes_at: string;
+  ends_at: string;
+  status: TournamentStatus;
+  rules: Record<string, unknown>;
+  prize_info: Record<string, unknown>;
+  eligible_asset_types: AssetType[];
+  created_by: string | null;
+  created_at: string;
+  settled_at: string | null;
+}
+
+export interface TournamentPortfolio {
+  id: string;
+  tournament_id: string;
+  user_id: string;
+  starting_cash: number;
+  cash: number;
+  created_at: string;
+}
+
+export interface TournamentPosition {
+  id: string;
+  portfolio_id: string;
+  asset_id: string;
+  quantity: number;
+  average_cost: number;
+}
+
+export interface TournamentTransaction {
+  id: string;
+  portfolio_id: string;
+  asset_id: string;
+  side: TradeSide;
+  quantity: number;
+  execution_price: number;
+  total_value: number;
+  executed_at: string;
+  price_snapshot_id: string | null;
+}
+
+export interface TournamentResult {
+  tournament_id: string;
+  user_id: string;
+  portfolio_id: string;
+  cash: number;
+  holdings_value: number;
+  final_value: number;
+  return_pct: number;
+  rank: number;
+  locked_at: string;
+}
+
+export interface TournamentStanding {
+  user_id: string;
+  display_name: string;
+  cash: number;
+  holdings_value: number;
+  portfolio_value: number;
+  return_pct: number;
+  rank: number;
+  frozen: boolean;
+  joined_at: string;
+}
+
+export interface CatalogAsset {
+  id: string;
+  name: string;
+  asset_type: AssetType;
+  image_url: string | null;
+  external_id: string | null;
+  metadata: Record<string, unknown>;
+  tcg_id: string;
+  tcg_name: string | null;
+  tcg_slug: string | null;
+  set_id: string | null;
+  set_name: string | null;
+  price: number | null;
+  recorded_at: string | null;
+  change_7d: number | null;
+  volume: number | null;
+  source: string | null;
+  price_type: string | null;
+  condition: string | null;
+  stale: boolean;
+}
+
+export const TOURNAMENT_STATUS_LABELS: Record<TournamentStatus, string> = {
+  upcoming: 'Upcoming',
+  active: 'Active',
+  locked: 'Locked',
+  settling: 'Settling',
+  completed: 'Completed',
+  archived: 'Archived',
+};
 
 export const ASSET_TYPE_LABELS: Record<AssetType, string> = {
   sealed: 'Sealed',

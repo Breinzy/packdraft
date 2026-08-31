@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import type { Tournament } from '@/types';
+import StatusBadge from '@/components/tournament/StatusBadge';
 
 interface AdminStats {
   totalAssets: number;
@@ -18,18 +20,29 @@ interface ActionResult {
   [key: string]: unknown;
 }
 
-export default function AdminPanel({ stats }: { stats: AdminStats }) {
+export default function AdminPanel({
+  stats,
+  tournaments,
+}: {
+  stats: AdminStats;
+  tournaments: Tournament[];
+}) {
   const [results, setResults] = useState<Record<string, ActionResult | null>>({});
   const [loading, setLoading] = useState<Record<string, boolean>>({});
+  const [name, setName] = useState('Weekly Pokémon');
+  const [description, setDescription] = useState('Highest virtual portfolio wins.');
+  const [budget, setBudget] = useState('10000');
+  const [days, setDays] = useState('7');
+  const [settleId, setSettleId] = useState(tournaments[0]?.id ?? '');
 
-  async function runAction(action: string) {
+  async function runAction(action: string, extra?: Record<string, unknown>) {
     setLoading((l) => ({ ...l, [action]: true }));
     setResults((r) => ({ ...r, [action]: null }));
     try {
       const res = await fetch('/api/admin/proxy', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action }),
+        body: JSON.stringify({ action, ...extra }),
       });
       const data = await res.json();
       setResults((r) => ({ ...r, [action]: data }));
@@ -48,6 +61,7 @@ export default function AdminPanel({ stats }: { stats: AdminStats }) {
       description: 'Normalize PokemonPriceTracker catalog into assets + snapshots',
       warn: true,
     },
+    { id: 'tick-tournaments', label: 'TICK TOURNAMENTS', description: 'Advance lifecycle and settle locked books' },
   ];
 
   return (
@@ -72,7 +86,7 @@ export default function AdminPanel({ stats }: { stats: AdminStats }) {
         </Link>
       </header>
 
-      <main className="px-4 md:px-6 py-6 md:py-8 max-w-4xl mx-auto space-y-6">
+      <main className="px-4 md:px-6 py-6 md:py-8 max-w-4xl mx-auto space-y-8">
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {[
             { label: 'ACTIVE ASSETS', value: stats.totalAssets },
@@ -83,6 +97,7 @@ export default function AdminPanel({ stats }: { stats: AdminStats }) {
               label: 'LAST SYNC',
               value: stats.lastSync ? new Date(stats.lastSync).toLocaleString() : 'Never',
             },
+            { label: 'TOURNAMENTS', value: tournaments.length },
           ].map((stat) => (
             <div key={stat.label} className="bg-white/[0.02] border border-white/[0.06] rounded-lg px-4 py-3">
               <div className="text-[10px] text-slate-600 tracking-widest mb-1">{stat.label}</div>
@@ -130,6 +145,113 @@ export default function AdminPanel({ stats }: { stats: AdminStats }) {
               )}
             </div>
           ))}
+        </div>
+
+        <div className="space-y-3">
+          <div className="text-xs text-slate-600 tracking-widest">CREATE TOURNAMENT</div>
+          <div className="bg-white/[0.02] border border-white/[0.06] rounded-lg p-4 space-y-3">
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Name"
+              className="w-full min-h-11 rounded-xl bg-white/[0.04] border border-white/[0.08] px-4 text-white"
+            />
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Description"
+              className="w-full min-h-20 rounded-xl bg-white/[0.04] border border-white/[0.08] px-4 py-3 text-white"
+            />
+            <div className="grid grid-cols-2 gap-3">
+              <label className="text-xs text-slate-500 tracking-wider">
+                BUDGET
+                <input
+                  value={budget}
+                  onChange={(e) => setBudget(e.target.value)}
+                  className="mt-1 w-full min-h-11 rounded-xl bg-white/[0.04] border border-white/[0.08] px-4 text-white"
+                />
+              </label>
+              <label className="text-xs text-slate-500 tracking-wider">
+                DAYS
+                <input
+                  value={days}
+                  onChange={(e) => setDays(e.target.value)}
+                  className="mt-1 w-full min-h-11 rounded-xl bg-white/[0.04] border border-white/[0.08] px-4 text-white"
+                />
+              </label>
+            </div>
+            <button
+              type="button"
+              onClick={() =>
+                runAction('create-tournament', {
+                  name,
+                  description,
+                  startingBudget: Number(budget),
+                  durationDays: Number(days),
+                })
+              }
+              disabled={loading['create-tournament']}
+              className="px-5 py-2.5 min-h-11 rounded-lg text-sm font-bold tracking-widest text-white disabled:opacity-50"
+              style={{ background: 'rgba(110,155,207,0.2)', border: '1px solid rgba(110,155,207,0.4)' }}
+            >
+              {loading['create-tournament'] ? 'CREATING…' : 'CREATE'}
+            </button>
+            {results['create-tournament'] ? (
+              <div className="text-xs font-mono text-green break-all">
+                {JSON.stringify(results['create-tournament'])}
+              </div>
+            ) : null}
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <div className="text-xs text-slate-600 tracking-widest">SETTLE ONE</div>
+          <div className="flex flex-col md:flex-row gap-2">
+            <select
+              value={settleId}
+              onChange={(e) => setSettleId(e.target.value)}
+              className="flex-1 min-h-11 rounded-xl bg-white/[0.04] border border-white/[0.08] px-3 text-sm text-slate-300"
+            >
+              <option value="">Select tournament</option>
+              {tournaments.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name} ({t.status})
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              disabled={!settleId || loading['settle-tournament']}
+              onClick={() => runAction('settle-tournament', { tournamentId: settleId })}
+              className="px-5 min-h-11 rounded-lg text-sm font-bold tracking-widest text-gold disabled:opacity-40"
+              style={{ border: '1px solid rgba(251,191,36,0.3)' }}
+            >
+              SETTLE
+            </button>
+          </div>
+          {results['settle-tournament'] ? (
+            <div className="text-xs font-mono break-all text-slate-400">
+              {JSON.stringify(results['settle-tournament'])}
+            </div>
+          ) : null}
+        </div>
+
+        <div className="space-y-2">
+          <div className="text-xs text-slate-600 tracking-widest">TOURNAMENTS</div>
+          {tournaments.length === 0 ? (
+            <p className="text-sm text-slate-500">None yet. Apply the Phase 5–10 migration, then create one.</p>
+          ) : (
+            tournaments.map((t) => (
+              <Link
+                key={t.id}
+                href={`/tournaments/${t.id}`}
+                className="flex items-center justify-between gap-3 bg-white/[0.02] border border-white/[0.06] rounded-lg px-4 py-3"
+              >
+                <span className="text-sm text-white truncate">{t.name}</span>
+                <StatusBadge status={t.status} />
+              </Link>
+            ))
+          )}
         </div>
       </main>
     </div>

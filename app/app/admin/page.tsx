@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { isAdminEmail } from '@/lib/auth/admin';
 import AdminPanel from './AdminPanel';
+import { listTournaments } from '@/lib/tournament/queries';
 
 export const dynamic = 'force-dynamic';
 
@@ -43,6 +44,8 @@ export default async function AdminPage() {
     .select('*', { count: 'exact', head: true })
     .not('asset_id', 'is', null);
 
+  const tournaments = await listTournaments(supabase);
+
   return (
     <AdminPanel
       stats={{
@@ -52,6 +55,7 @@ export default async function AdminPage() {
         snapshotCount: staleHint ?? 0,
         lastSync: lastSync?.recorded_at ?? null,
       }}
+      tournaments={tournaments}
     />
   );
 }

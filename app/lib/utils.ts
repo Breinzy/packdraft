@@ -11,6 +11,11 @@ export function formatPct(value: number, showSign = true): string {
   return `${sign}${value.toFixed(1)}%`;
 }
 
+export function formatReturn(value: number): string {
+  const sign = value > 0 ? '+' : '';
+  return `${sign}${value.toFixed(2)}%`;
+}
+
 export function formatCountdown(target: string): string {
   const diff = new Date(target).getTime() - Date.now();
   if (diff <= 0) return 'ENDED';

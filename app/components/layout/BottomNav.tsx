@@ -1,13 +1,16 @@
 import Link from 'next/link';
 
+export type BottomNavKey = 'dashboard' | 'market' | 'play' | 'settings';
+
 interface BottomNavProps {
-  active: 'dashboard' | 'settings';
+  active: BottomNavKey;
 }
 
 export default function BottomNav({ active }: BottomNavProps) {
   const items = [
     { href: '/dashboard', key: 'dashboard' as const, label: 'HOME' },
-    { href: '/settings', key: 'settings' as const, label: 'SETTINGS' },
+    { href: '/assets', key: 'market' as const, label: 'MARKET' },
+    { href: '/tournaments', key: 'play' as const, label: 'PLAY' },
   ];
 
   return (
@@ -15,7 +18,7 @@ export default function BottomNav({ active }: BottomNavProps) {
       className="md:hidden fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background/95 backdrop-blur-xl"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
-      <div className="grid grid-cols-2">
+      <div className="grid grid-cols-3">
         {items.map((item) => {
           const isActive = item.key === active;
           return (

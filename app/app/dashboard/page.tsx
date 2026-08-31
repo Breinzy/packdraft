@@ -1,7 +1,12 @@
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import AppShell from '@/components/layout/AppShell';
+import StatusBadge from '@/components/tournament/StatusBadge';
 import type { Profile } from '@/types';
+import { getUserActiveBooks } from '@/lib/tournament/queries';
+import { formatCurrency } from '@/lib/utils';
+import { canTradeStatus } from '@/lib/tournament/lifecycle';
 
 export const dynamic = 'force-dynamic';
 
@@ -45,6 +50,9 @@ export default async function DashboardPage() {
 
   const typed = profile as Profile;
   const name = typed.display_name || typed.email.split('@')[0];
+  const books = await getUserActiveBooks(supabase, user.id);
+  const live = books.filter((b) => canTradeStatus(b.tournament.status) || b.tournament.status === 'upcoming');
+  const past = books.filter((b) => !live.includes(b));
 
   return (
     <AppShell nav="dashboard">
@@ -57,32 +65,61 @@ export default async function DashboardPage() {
             <p className="text-xs md:text-sm text-slate-500 tracking-wider">{typed.email}</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-            <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl px-5 py-6 md:px-8 md:py-8">
-              <div className="text-[10px] md:text-xs text-slate-600 tracking-widest mb-3 md:mb-4">
-                TOURNAMENT
-              </div>
-              <div className="text-sm md:text-base text-slate-400 tracking-wider mb-2">
-                NO ACTIVE TOURNAMENT
-              </div>
-              <p className="text-xs md:text-sm text-slate-600 tracking-wider leading-relaxed">
-                Isolated tournaments with virtual cash and live market prices are next. Your
-                account is ready.
-              </p>
+          <section className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xs tracking-widest text-slate-600">YOUR TOURNAMENTS</h2>
+              <Link href="/tournaments" className="text-xs tracking-widest text-accent-light min-h-11 inline-flex items-center">
+                ALL
+              </Link>
             </div>
+            {books.length === 0 ? (
+              <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl px-5 py-6">
+                <p className="text-sm text-slate-400 tracking-wider mb-3">No tournament book yet.</p>
+                <Link
+                  href="/tournaments"
+                  className="inline-flex min-h-12 items-center px-5 rounded-xl text-sm font-bold tracking-widest text-white"
+                  style={{ background: 'linear-gradient(135deg, #5b89bf, #4a78ae)' }}
+                >
+                  FIND A TOURNAMENT
+                </Link>
+              </div>
+            ) : (
+              <ul className="space-y-3">
+                {[...live, ...past].map(({ tournament, portfolio }) => (
+                  <li key={tournament.id}>
+                    <Link
+                      href={`/tournaments/${tournament.id}`}
+                      className="block bg-white/[0.03] border border-white/[0.06] rounded-2xl px-5 py-4 hover:border-white/20"
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-white font-bold truncate">{tournament.name}</span>
+                        <StatusBadge status={tournament.status} />
+                      </div>
+                      <div className="mt-2 text-xs text-slate-500 tracking-wider">
+                        CASH {formatCurrency(portfolio.cash)}
+                      </div>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
 
-            <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl px-5 py-6 md:px-8 md:py-8">
-              <div className="text-[10px] md:text-xs text-slate-600 tracking-widest mb-3 md:mb-4">
-                MARKET
-              </div>
-              <div className="text-sm md:text-base text-slate-400 tracking-wider mb-2">
-                POKÉMON PRICES
-              </div>
-              <p className="text-xs md:text-sm text-slate-600 tracking-wider leading-relaxed">
-                Packdraft stores normalized snapshots from PokemonPriceTracker. Trading UI ships
-                after the tournament engine.
-              </p>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Link
+              href="/assets"
+              className="bg-white/[0.03] border border-white/[0.06] rounded-2xl px-5 py-6 hover:border-white/20"
+            >
+              <div className="text-[10px] text-slate-600 tracking-widest mb-3">MARKET</div>
+              <div className="text-sm text-white tracking-wider">Browse Pokémon assets</div>
+            </Link>
+            <Link
+              href="/tournaments"
+              className="bg-white/[0.03] border border-white/[0.06] rounded-2xl px-5 py-6 hover:border-white/20"
+            >
+              <div className="text-[10px] text-slate-600 tracking-widest mb-3">PLAY</div>
+              <div className="text-sm text-white tracking-wider">Join a tournament</div>
+            </Link>
           </div>
         </div>
       </main>

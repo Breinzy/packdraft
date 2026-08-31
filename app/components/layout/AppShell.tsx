@@ -1,9 +1,9 @@
 import Header from '@/components/layout/Header';
-import BottomNav from '@/components/layout/BottomNav';
+import BottomNav, { type BottomNavKey } from '@/components/layout/BottomNav';
 
 interface AppShellProps {
   children: React.ReactNode;
-  nav?: 'dashboard' | 'settings' | 'none';
+  nav?: BottomNavKey | 'none';
 }
 
 export default function AppShell({ children, nav = 'none' }: AppShellProps) {

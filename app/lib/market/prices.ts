@@ -3,6 +3,7 @@ import { isPriceStale } from './stale';
 import type { CurrentPrice } from '@/types';
 
 interface SnapshotRow {
+  id?: string;
   asset_id: string;
   price: number | string;
   recorded_at: string;
@@ -24,6 +25,7 @@ function toCurrentPrice(row: SnapshotRow, now: Date): CurrentPrice {
     change7d: Number(row.change_7d ?? 0),
     volume: row.volume ?? 0,
     stale: isPriceStale(row.recorded_at, now),
+    snapshotId: row.id,
   };
 }
 
@@ -37,7 +39,7 @@ export async function getPriceAt(
 ): Promise<CurrentPrice | null> {
   const { data, error } = await supabase
     .from('price_snapshots')
-    .select('asset_id, price, recorded_at, source, price_type, condition, change_7d, volume')
+    .select('id, asset_id, price, recorded_at, source, price_type, condition, change_7d, volume')
     .eq('asset_id', assetId)
     .lte('recorded_at', at.toISOString())
     .order('recorded_at', { ascending: false })
@@ -69,7 +71,7 @@ export async function getCurrentPrices(
 
   const { data, error } = await supabase
     .from('price_snapshots')
-    .select('asset_id, price, recorded_at, source, price_type, condition, change_7d, volume')
+    .select('id, asset_id, price, recorded_at, source, price_type, condition, change_7d, volume')
     .in('asset_id', assetIds)
     .lte('recorded_at', now.toISOString())
     .order('recorded_at', { ascending: false });
@@ -84,4 +86,37 @@ export async function getCurrentPrices(
   }
 
   return prices;
+}
+
+export interface PriceHistoryPoint {
+  price: number;
+  recordedAt: string;
+  snapshotId: string;
+}
+
+export async function getPriceHistory(
+  supabase: SupabaseClient,
+  assetId: string,
+  options: { limit?: number; before?: Date } = {}
+): Promise<PriceHistoryPoint[]> {
+  const limit = options.limit ?? 60;
+  const before = options.before ?? new Date();
+
+  const { data, error } = await supabase
+    .from('price_snapshots')
+    .select('id, price, recorded_at')
+    .eq('asset_id', assetId)
+    .lte('recorded_at', before.toISOString())
+    .order('recorded_at', { ascending: true })
+    .limit(limit);
+
+  if (error) {
+    throw new Error(`Failed to load price history for asset ${assetId}: ${error.message}`);
+  }
+
+  return (data ?? []).map((row) => ({
+    snapshotId: row.id as string,
+    price: Number(row.price),
+    recordedAt: row.recorded_at as string,
+  }));
 }

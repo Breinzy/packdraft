@@ -17,7 +17,8 @@ export async function POST(request: Request) {
   }
 
   const supabase = createServiceClient();
-  const { action } = (await request.json()) as { action: string };
+  const body = (await request.json()) as Record<string, unknown>;
+  const action = typeof body.action === 'string' ? body.action : '';
 
   try {
     if (action === 'sync-prices') {
@@ -37,6 +38,42 @@ export async function POST(request: Request) {
         headers: { Authorization: `Bearer ${secret}` },
       }).catch(() => {});
       return NextResponse.json({ ok: true, message: 'Import started — check server logs for progress' });
+    }
+
+    if (action === 'create-tournament') {
+      const { createTournament } = await import('@/lib/tournament/admin');
+      const startingBudget =
+        typeof body.startingBudget === 'number' ? body.startingBudget : Number(body.startingBudget);
+      const durationDays =
+        typeof body.durationDays === 'number' ? body.durationDays : Number(body.durationDays);
+      const result = await createTournament(supabase, {
+        name: typeof body.name === 'string' ? body.name : '',
+        description: typeof body.description === 'string' ? body.description : '',
+        startingBudget: Number.isFinite(startingBudget) ? startingBudget : 10000,
+        durationDays: Number.isFinite(durationDays) && durationDays > 0 ? durationDays : 7,
+        createdBy: user.id,
+      });
+      return NextResponse.json({ ok: true, ...result });
+    }
+
+    if (action === 'tick-tournaments') {
+      const { tickTournaments } = await import('@/lib/tournament/queries');
+      const result = await tickTournaments(supabase);
+      return NextResponse.json({ ok: true, result });
+    }
+
+    if (action === 'settle-tournament') {
+      const tournamentId = typeof body.tournamentId === 'string' ? body.tournamentId : '';
+      if (!tournamentId) {
+        return NextResponse.json({ error: 'tournamentId is required' }, { status: 400 });
+      }
+      const { data, error } = await supabase.rpc('settle_tournament', {
+        p_tournament_id: tournamentId,
+      });
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 400 });
+      }
+      return NextResponse.json({ ok: true, result: data });
     }
 
     return NextResponse.json({ error: 'Unknown action' }, { status: 400 });

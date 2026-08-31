@@ -27,7 +27,7 @@ export default function HomePage() {
           </div>
 
           <Link
-            href="/auth/login"
+            href="/tournaments"
             className="inline-flex items-center justify-center whitespace-nowrap w-full max-w-xs md:min-w-[280px] md:w-auto px-10 md:px-16 py-4 md:py-5 min-h-14 rounded-2xl text-lg md:text-xl font-bold tracking-widest text-white transition-all hover:opacity-90"
             style={{
               background: 'linear-gradient(135deg, #5b89bf, #4a78ae)',
@@ -35,12 +35,16 @@ export default function HomePage() {
               boxShadow: '0 0 48px rgba(110,155,207,0.2)',
             }}
           >
-            GET STARTED
+            PLAY
           </Link>
 
           <div className="text-xs md:text-sm text-slate-700 tracking-wider space-y-2">
             <p>NO REAL MONEY · SIMULATED PORTFOLIOS</p>
-            <p>TOURNAMENTS COMING NEXT</p>
+            <p>
+              <Link href="/assets" className="text-slate-500 hover:text-white">
+                BROWSE MARKET
+              </Link>
+            </p>
           </div>
         </div>
       </main>

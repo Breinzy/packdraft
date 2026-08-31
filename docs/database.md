@@ -67,9 +67,48 @@ Immutable historical market prices. “Current price” is the latest row for an
 
 Writes use the service role. Clients may `SELECT`.
 
+## Tournament data (Phases 5–10)
+
+Tournament money is isolated from Career Mode and from the unused legacy `portfolios` table.
+
+### `tournaments`
+
+One competition. Status: `upcoming | active | locked | settling | completed | archived`.
+
+| Column | Role |
+|---|---|
+| `starting_budget` | Virtual cash each joiner receives |
+| `starts_at` | Becomes `active` |
+| `trading_closes_at` | Becomes `locked`; settlement as-of time |
+| `ends_at` | Display / archive boundary |
+| `tcg_id` | Eligible catalog |
+| `eligible_asset_types` | Default sealed, graded, single |
+
+### `tournament_portfolios`
+
+One book per `(tournament_id, user_id)`. `starting_cash` and `cash` never leave this tournament.
+
+### `tournament_participants`
+
+Join record (`joined_at` breaks ranking ties).
+
+### `tournament_positions`
+
+Integer quantity + `average_cost` per asset in a book.
+
+### `tournament_transactions`
+
+Immutable buy/sell ledger. Execution price comes from Packdraft snapshots, never from the client.
+
+### `tournament_settlement_prices` / `tournament_results`
+
+Frozen at close. See `docs/settlement.md`.
+
+Writes go through security-definer RPCs executed by the service role after the Next.js API authenticates the user: `join_tournament`, `execute_tournament_trade`, `settle_tournament`, `tick_tournaments`. `get_tournament_standings` is readable by anon/authenticated.
+
 ## Reserved domains (not implemented)
 
-Tournament, Career, and Market Event tables are **not** created in this migration. Those phases add isolated schema. Do not store tournament cash on `profiles`.
+Career Mode and Market Event tables are **not** created in this migration. Do not store tournament cash on `profiles`.
 
 ## Legacy tables (unused by the app)
 

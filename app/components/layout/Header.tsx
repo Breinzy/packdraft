@@ -1,15 +1,24 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { tryCreateBrowserClient } from '@/lib/supabase/client';
 import type { Profile } from '@/types';
 import type { User } from '@supabase/supabase-js';
 
+const NAV = [
+  { href: '/dashboard', label: 'DASHBOARD' },
+  { href: '/assets', label: 'MARKET' },
+  { href: '/tournaments', label: 'PLAY' },
+  { href: '/settings', label: 'SETTINGS' },
+];
+
 export default function Header() {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     const client = tryCreateBrowserClient();
@@ -67,16 +76,21 @@ export default function Header() {
 
         <div className="hidden md:flex gap-8 items-center">
           <nav className="flex gap-6 items-center text-base tracking-wider">
-            {isSignedIn && (
-              <Link href="/dashboard" className="text-slate-400 hover:text-white transition-colors min-h-11 inline-flex items-center">
-                DASHBOARD
-              </Link>
-            )}
-            {isSignedIn && (
-              <Link href="/settings" className="text-slate-400 hover:text-white transition-colors min-h-11 inline-flex items-center">
-                SETTINGS
-              </Link>
-            )}
+            {NAV.map((item) => {
+              if (!isSignedIn && item.href === '/settings') return null;
+              const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`min-h-11 inline-flex items-center transition-colors ${
+                    active ? 'text-white' : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
           </nav>
 
           {isSignedIn ? (
@@ -126,24 +140,19 @@ export default function Header() {
           </div>
 
           <nav className="flex flex-col py-4">
-            {isSignedIn && (
-              <Link
-                href="/dashboard"
-                onClick={() => setMenuOpen(false)}
-                className="px-6 py-4 min-h-11 text-base tracking-widest text-slate-300 hover:text-white hover:bg-white/[0.03] transition-colors"
-              >
-                DASHBOARD
-              </Link>
-            )}
-            {isSignedIn && (
-              <Link
-                href="/settings"
-                onClick={() => setMenuOpen(false)}
-                className="px-6 py-4 min-h-11 text-base tracking-widest text-slate-300 hover:text-white hover:bg-white/[0.03] transition-colors"
-              >
-                SETTINGS
-              </Link>
-            )}
+            {NAV.map((item) => {
+              if (!isSignedIn && item.href === '/settings') return null;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setMenuOpen(false)}
+                  className="px-6 py-4 min-h-11 text-base tracking-widest text-slate-300 hover:text-white hover:bg-white/[0.03] transition-colors"
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
           </nav>
 
           <div className="mt-auto p-6 border-t border-white/[0.06] pb-[max(1.5rem,env(safe-area-inset-bottom))]">

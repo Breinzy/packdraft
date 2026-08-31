@@ -42,15 +42,15 @@ Do not reconstruct prices from holdings.
 
 A current snapshot is **stale** when `now - recorded_at` exceeds **36 hours**.
 
-Sync is scheduled daily. 36 hours is a one-miss buffer. Stale flags are informational in this phase (no trading yet). Later phases must refuse or warn on stale quotes before execution and settlement.
+Sync is scheduled daily. 36 hours is a one-miss buffer. Stale flags are informational in the asset browser. Trading still uses the latest stored snapshot when one exists (the server looks up the price; the client cannot submit a price). Settlement uses the latest snapshot at or before `trading_closes_at` and fails if a held asset has no such row.
 
 ## History
 
 Every sync **inserts** a new snapshot. Existing rows are not updated. This is how Packdraft answers “what was this worth at time T?”
 
-## Settlement (not implemented)
+## Settlement
 
-Tournament settlement (Phase 10) must freeze prices at close and must not revalue completed results from a later live tick. Phase 15 will add volume floors, outlier filters, and a documented settlement window. Until then, do not treat “last provider tick” as a prize-grade settlement price.
+See `docs/settlement.md`. Completed `tournament_results` are never recomputed from a later live tick.
 
 ## Failure behavior
 
