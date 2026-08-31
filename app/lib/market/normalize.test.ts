@@ -1,13 +1,12 @@
-import assert from 'node:assert/strict';
-import { describe, it } from 'node:test';
+import { describe, expect, it } from 'vitest';
 import {
   classifySealedSubtype,
   gradedPriceAmount,
   normalizeGradedCard,
   normalizeSealedProduct,
   sealedPriceAmount,
-} from './normalize.ts';
-import type { Card, SealedProduct } from '../pricing/client.ts';
+} from './normalize';
+import type { Card, SealedProduct } from '../pricing/client';
 
 describe('sealedPriceAmount', () => {
   it('prefers unopenedPrice over market', () => {
@@ -17,7 +16,7 @@ describe('sealedPriceAmount', () => {
       unopenedPrice: 120,
       prices: { market: 99 },
     });
-    assert.deepEqual(result, { price: 120, priceType: 'unopened' });
+    expect(result).toEqual({ price: 120, priceType: 'unopened' });
   });
 
   it('falls back to TCGPlayer market', () => {
@@ -26,11 +25,11 @@ describe('sealedPriceAmount', () => {
       name: 'Box',
       prices: { market: 88 },
     });
-    assert.deepEqual(result, { price: 88, priceType: 'market' });
+    expect(result).toEqual({ price: 88, priceType: 'market' });
   });
 
   it('returns null when no positive price exists', () => {
-    assert.equal(sealedPriceAmount({ tcgPlayerId: 1, name: 'Box' }), null);
+    expect(sealedPriceAmount({ tcgPlayerId: 1, name: 'Box' })).toBeNull();
   });
 });
 
@@ -45,7 +44,7 @@ describe('gradedPriceAmount', () => {
         },
       },
     };
-    assert.deepEqual(gradedPriceAmount(card, 10), {
+    expect(gradedPriceAmount(card, 10)).toEqual({
       price: 250,
       priceType: 'ebay_smart',
       volume: 12,
@@ -62,12 +61,12 @@ describe('normalizeSealedProduct', () => {
       unopenedPrice: 55,
     };
     const result = normalizeSealedProduct(product, 'pokemonpricetracker', '2026-08-31T00:00:00.000Z');
-    assert.ok(result);
-    assert.equal(result.asset.assetType, 'sealed');
-    assert.equal(result.asset.externalId, '42');
-    assert.equal(result.price?.price, 55);
-    assert.equal(result.price?.condition, 'unopened');
-    assert.equal(result.asset.metadata.sealedSubtype, 'etb');
+    expect(result).toBeTruthy();
+    expect(result?.asset.assetType).toBe('sealed');
+    expect(result?.asset.externalId).toBe('42');
+    expect(result?.price?.price).toBe(55);
+    expect(result?.price?.condition).toBe('unopened');
+    expect(result?.asset.metadata.sealedSubtype).toBe('etb');
   });
 });
 
@@ -81,17 +80,17 @@ describe('normalizeGradedCard', () => {
       ebay: { psa10: { avg: 400, count: 3 } },
     };
     const result = normalizeGradedCard(card, 10, 'pokemonpricetracker', '2026-08-31T00:00:00.000Z');
-    assert.ok(result);
-    assert.equal(result.asset.name, 'Charizard 4 PSA 10');
-    assert.equal(result.price?.price, 400);
-    assert.equal(result.price?.priceType, 'ebay_average');
+    expect(result).toBeTruthy();
+    expect(result?.asset.name).toBe('Charizard 4 PSA 10');
+    expect(result?.price?.price).toBe(400);
+    expect(result?.price?.priceType).toBe('ebay_average');
   });
 });
 
 describe('classifySealedSubtype', () => {
   it('classifies common sealed names', () => {
-    assert.equal(classifySealedSubtype('Surging Sparks Booster Box'), 'booster_box');
-    assert.equal(classifySealedSubtype('Elite Trainer Box'), 'etb');
-    assert.equal(classifySealedSubtype('Ultra Premium Collection'), 'upc');
+    expect(classifySealedSubtype('Surging Sparks Booster Box')).toBe('booster_box');
+    expect(classifySealedSubtype('Elite Trainer Box')).toBe('etb');
+    expect(classifySealedSubtype('Ultra Premium Collection')).toBe('upc');
   });
 });

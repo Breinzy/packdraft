@@ -14,20 +14,20 @@ export default function SettingsPage() {
   const router = useRouter();
 
   useEffect(() => {
-    const supabase = tryCreateBrowserClient();
-    if (!supabase) {
+    const client = tryCreateBrowserClient();
+    if (!client) {
       router.push('/auth/login');
       return;
     }
 
-    async function init() {
-      const { data: { user } } = await supabase.auth.getUser();
+    async function init(db: NonNullable<typeof client>) {
+      const { data: { user } } = await db.auth.getUser();
       if (!user) {
         router.push('/auth/login');
         return;
       }
 
-      const { data: profile } = await supabase
+      const { data: profile } = await db
         .from('profiles')
         .select('display_name')
         .eq('id', user.id)
@@ -36,7 +36,7 @@ export default function SettingsPage() {
       setDisplayName(profile?.display_name ?? '');
       setChecking(false);
     }
-    init();
+    init(client);
   }, [router]);
 
   async function handleSubmit(e: React.FormEvent) {

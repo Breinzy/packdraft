@@ -12,16 +12,16 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    const supabase = tryCreateBrowserClient();
-    if (!supabase) return;
+    const client = tryCreateBrowserClient();
+    if (!client) return;
 
-    async function load() {
+    async function load(db: NonNullable<typeof client>) {
       const {
         data: { user: authUser },
-      } = await supabase.auth.getUser();
+      } = await db.auth.getUser();
       if (!authUser) return;
       setUser(authUser);
-      const { data } = await supabase
+      const { data } = await db
         .from('profiles')
         .select('*')
         .eq('id', authUser.id)
@@ -29,7 +29,7 @@ export default function Header() {
       if (data) setProfile(data as Profile);
     }
 
-    load();
+    load(client);
   }, []);
 
   async function handleSignOut() {
