@@ -2,7 +2,8 @@ import Link from 'next/link';
 import AppShell from '@/components/layout/AppShell';
 import AssetCard from '@/components/market/AssetCard';
 import { listSets, searchCatalog } from '@/lib/market/catalog';
-import { createClient } from '@/lib/supabase/server';
+import { tryCreateServerClient } from '@/lib/supabase/server';
+import NeedsDatabase from '@/components/ui/NeedsDatabase';
 import type { AssetType } from '@/types';
 
 export const dynamic = 'force-dynamic';
@@ -25,17 +26,41 @@ export default async function AssetsPage({
   searchParams: Promise<{ q?: string; type?: string; set?: string; page?: string; tournament?: string }>;
 }) {
   const sp = await searchParams;
-  const supabase = await createClient();
+  const supabase = await tryCreateServerClient();
   const q = sp.q ?? '';
   const assetType = asType(sp.type);
   const setId = sp.set || undefined;
   const page = Number(sp.page ?? '1') || 1;
   const tournament = sp.tournament;
 
-  const [catalog, sets] = await Promise.all([
-    searchCatalog(supabase, { q, assetType, setId, page }),
-    listSets(supabase),
-  ]);
+  if (!supabase) {
+    return (
+      <AppShell nav="market">
+        <main className="px-4 md:px-8 py-6 md:py-10 max-w-5xl mx-auto space-y-6">
+          <h1 className="text-xl md:text-3xl font-bold tracking-widest text-white">MARKET</h1>
+          <NeedsDatabase feature="The asset catalog" />
+        </main>
+      </AppShell>
+    );
+  }
+
+  let catalog;
+  let sets;
+  try {
+    [catalog, sets] = await Promise.all([
+      searchCatalog(supabase, { q, assetType, setId, page }),
+      listSets(supabase),
+    ]);
+  } catch {
+    return (
+      <AppShell nav="market">
+        <main className="px-4 md:px-8 py-6 md:py-10 max-w-5xl mx-auto space-y-6">
+          <h1 className="text-xl md:text-3xl font-bold tracking-widest text-white">MARKET</h1>
+          <NeedsDatabase feature="The asset catalog" />
+        </main>
+      </AppShell>
+    );
+  }
 
   function pageHref(nextPage: number) {
     const params = new URLSearchParams();

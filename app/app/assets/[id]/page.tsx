@@ -7,7 +7,8 @@ import TradeTicket from '@/components/tournament/TradeTicket';
 import { getCatalogAsset, asAsset } from '@/lib/market/catalog';
 import { assetImageSrc } from '@/lib/market/images';
 import { getPriceHistory } from '@/lib/market/prices';
-import { createClient } from '@/lib/supabase/server';
+import { tryCreateServerClient } from '@/lib/supabase/server';
+import NeedsDatabase from '@/components/ui/NeedsDatabase';
 import { getUserActiveBooks, getUserPortfolio, getHoldings } from '@/lib/tournament/queries';
 import { canTradeStatus } from '@/lib/tournament/lifecycle';
 import { formatCurrency, formatPct } from '@/lib/utils';
@@ -24,16 +25,42 @@ export default async function AssetDetailPage({
 }) {
   const { id } = await params;
   const sp = await searchParams;
-  const supabase = await createClient();
-  const asset = await getCatalogAsset(supabase, id);
+  const supabase = await tryCreateServerClient();
+  if (!supabase) {
+    return (
+      <AppShell nav="market">
+        <main className="px-4 md:px-8 py-6 md:py-10 max-w-5xl mx-auto space-y-6">
+          <h1 className="text-xl font-bold tracking-widest text-white">ASSET</h1>
+          <NeedsDatabase feature="Asset detail" />
+        </main>
+      </AppShell>
+    );
+  }
+  let asset;
+  try {
+    asset = await getCatalogAsset(supabase, id);
+  } catch {
+    return (
+      <AppShell nav="market">
+        <main className="px-4 md:px-8 py-6 md:py-10 max-w-5xl mx-auto space-y-6">
+          <h1 className="text-xl font-bold tracking-widest text-white">ASSET</h1>
+          <NeedsDatabase feature="Asset detail" />
+        </main>
+      </AppShell>
+    );
+  }
   if (!asset) notFound();
 
-  const history = await getPriceHistory(supabase, id);
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const history = await getPriceHistory(supabase, id).catch(() => []);
+  let user = null;
+  try {
+    const auth = await supabase.auth.getUser();
+    user = auth.data.user;
+  } catch {
+    user = null;
+  }
 
-  const books = user ? await getUserActiveBooks(supabase, user.id) : [];
+  const books = user ? await getUserActiveBooks(supabase, user.id).catch(() => []) : [];
   const tradeable = books.filter((b) => canTradeStatus(b.tournament.status));
   const selected =
     tradeable.find((b) => b.tournament.id === sp.tournament) ??

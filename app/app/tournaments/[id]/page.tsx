@@ -6,7 +6,7 @@ import JoinButton from '@/components/tournament/JoinButton';
 import HoldingsList, { type HoldingView } from '@/components/tournament/HoldingsList';
 import LeaderboardList from '@/components/tournament/LeaderboardList';
 import TradeHistory from '@/components/tournament/TradeHistory';
-import { createClient } from '@/lib/supabase/server';
+import { tryCreateServerClient } from '@/lib/supabase/server';
 import { tryCreateServiceClient } from '@/lib/supabase/service';
 import {
   getHoldings,
@@ -20,6 +20,8 @@ import { getCurrentPrices } from '@/lib/market/prices';
 import { canJoinStatus, canTradeStatus, isSettledStatus, TOURNAMENT_STATUS_HELP } from '@/lib/tournament/lifecycle';
 import { formatCountdown, formatCurrency, formatReturn } from '@/lib/utils';
 import { returnPct } from '@/lib/money';
+import NeedsDatabase from '@/components/ui/NeedsDatabase';
+import type { TournamentPortfolio, TournamentStanding } from '@/types';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,7 +31,17 @@ export default async function TournamentDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const supabase = await createClient();
+  const supabase = await tryCreateServerClient();
+  if (!supabase) {
+    return (
+      <AppShell nav="play">
+        <main className="px-4 md:px-8 py-6 md:py-10 max-w-5xl mx-auto space-y-6">
+          <h1 className="text-xl font-bold tracking-widest text-white">TOURNAMENT</h1>
+          <NeedsDatabase feature="This tournament" />
+        </main>
+      </AppShell>
+    );
+  }
   const service = tryCreateServiceClient();
   if (service) {
     try {
@@ -39,17 +51,40 @@ export default async function TournamentDetailPage({
     }
   }
 
-  const tournament = await getTournament(supabase, id);
+  let tournament;
+  try {
+    tournament = await getTournament(supabase, id);
+  } catch {
+    return (
+      <AppShell nav="play">
+        <main className="px-4 md:px-8 py-6 md:py-10 max-w-5xl mx-auto space-y-6">
+          <h1 className="text-xl font-bold tracking-widest text-white">TOURNAMENT</h1>
+          <NeedsDatabase feature="This tournament" />
+        </main>
+      </AppShell>
+    );
+  }
   if (!tournament) notFound();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let user = null;
+  try {
+    const auth = await supabase.auth.getUser();
+    user = auth.data.user;
+  } catch {
+    user = null;
+  }
 
-  const [standings, portfolio] = await Promise.all([
-    getStandings(supabase, id),
-    user ? getUserPortfolio(supabase, id, user.id) : Promise.resolve(null),
-  ]);
+  let standings: TournamentStanding[] = [];
+  let portfolio: TournamentPortfolio | null = null;
+  try {
+    [standings, portfolio] = await Promise.all([
+      getStandings(supabase, id),
+      user ? getUserPortfolio(supabase, id, user.id) : Promise.resolve(null),
+    ]);
+  } catch {
+    standings = [];
+    portfolio = null;
+  }
 
   const myStanding = user ? standings.find((s) => s.user_id === user.id) : undefined;
   const holdingsRaw = portfolio ? await getHoldings(supabase, portfolio.id) : [];

@@ -1,16 +1,27 @@
 import Link from 'next/link';
 import AppShell from '@/components/layout/AppShell';
 import StatusBadge from '@/components/tournament/StatusBadge';
-import { createClient } from '@/lib/supabase/server';
+import { tryCreateServerClient } from '@/lib/supabase/server';
 import { tryCreateServiceClient } from '@/lib/supabase/service';
 import { listTournaments, tickTournaments } from '@/lib/tournament/queries';
 import { formatCountdown, formatCurrency } from '@/lib/utils';
 import { TOURNAMENT_STATUS_HELP } from '@/lib/tournament/lifecycle';
+import NeedsDatabase from '@/components/ui/NeedsDatabase';
 
 export const dynamic = 'force-dynamic';
 
 export default async function TournamentsPage() {
-  const supabase = await createClient();
+  const supabase = await tryCreateServerClient();
+  if (!supabase) {
+    return (
+      <AppShell nav="play">
+        <main className="px-4 md:px-8 py-6 md:py-10 max-w-4xl mx-auto space-y-6">
+          <h1 className="text-xl md:text-3xl font-bold tracking-widest text-white">PLAY</h1>
+          <NeedsDatabase feature="Tournaments" />
+        </main>
+      </AppShell>
+    );
+  }
   const service = tryCreateServiceClient();
   if (service) {
     try {
@@ -20,7 +31,19 @@ export default async function TournamentsPage() {
     }
   }
 
-  const tournaments = await listTournaments(supabase);
+  let tournaments;
+  try {
+    tournaments = await listTournaments(supabase);
+  } catch {
+    return (
+      <AppShell nav="play">
+        <main className="px-4 md:px-8 py-6 md:py-10 max-w-4xl mx-auto space-y-6">
+          <h1 className="text-xl md:text-3xl font-bold tracking-widest text-white">PLAY</h1>
+          <NeedsDatabase feature="Tournaments" />
+        </main>
+      </AppShell>
+    );
+  }
 
   return (
     <AppShell nav="play">

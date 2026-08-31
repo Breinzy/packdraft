@@ -1,11 +1,9 @@
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
-import { getPublicEnv } from '@/lib/env';
+import { getOptionalPublicEnv, getPublicEnv } from '@/lib/env';
 
-export async function createClient() {
+async function cookieClient(supabaseUrl: string, supabasePublishableKey: string) {
   const cookieStore = await cookies();
-  const { supabaseUrl, supabasePublishableKey } = getPublicEnv();
-
   return createServerClient(supabaseUrl, supabasePublishableKey, {
     cookies: {
       getAll() {
@@ -22,4 +20,15 @@ export async function createClient() {
       },
     },
   });
+}
+
+export async function createClient() {
+  const { supabaseUrl, supabasePublishableKey } = getPublicEnv();
+  return cookieClient(supabaseUrl, supabasePublishableKey);
+}
+
+export async function tryCreateServerClient() {
+  const { supabaseUrl, supabasePublishableKey } = getOptionalPublicEnv();
+  if (!supabaseUrl || !supabasePublishableKey) return null;
+  return cookieClient(supabaseUrl, supabasePublishableKey);
 }
