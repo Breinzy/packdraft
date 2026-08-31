@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import { createClient, tryCreateBrowserClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 
 export default function OnboardingPage() {
@@ -10,9 +10,14 @@ export default function OnboardingPage() {
   const [error, setError] = useState('');
   const [checking, setChecking] = useState(true);
   const router = useRouter();
-  const supabase = createClient();
 
   useEffect(() => {
+    const supabase = tryCreateBrowserClient();
+    if (!supabase) {
+      router.push('/auth/login');
+      return;
+    }
+
     async function init() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -40,7 +45,7 @@ export default function OnboardingPage() {
       setChecking(false);
     }
     init();
-  }, [supabase, router]);
+  }, [router]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -60,6 +65,7 @@ export default function OnboardingPage() {
       return;
     }
 
+    const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       setError('Session expired. Please sign in again.');
@@ -83,6 +89,7 @@ export default function OnboardingPage() {
 
   async function handleSkip() {
     setLoading(true);
+    const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       router.push('/auth/login');
@@ -119,7 +126,7 @@ export default function OnboardingPage() {
             CHOOSE YOUR NAME
           </h1>
           <p className="text-base text-slate-500 tracking-wide">
-            THIS IS HOW YOU&apos;LL APPEAR ON LEADERBOARDS AND IN LEAGUES
+            THIS IS HOW YOU&apos;LL APPEAR ON LEADERBOARDS
           </p>
         </div>
 

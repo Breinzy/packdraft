@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import { createClient, tryCreateBrowserClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
-import Header from '@/components/layout/Header';
+import AppShell from '@/components/layout/AppShell';
 
 export default function SettingsPage() {
   const [displayName, setDisplayName] = useState('');
@@ -12,9 +12,14 @@ export default function SettingsPage() {
   const [error, setError] = useState('');
   const [checking, setChecking] = useState(true);
   const router = useRouter();
-  const supabase = createClient();
 
   useEffect(() => {
+    const supabase = tryCreateBrowserClient();
+    if (!supabase) {
+      router.push('/auth/login');
+      return;
+    }
+
     async function init() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -32,7 +37,7 @@ export default function SettingsPage() {
       setChecking(false);
     }
     init();
-  }, [supabase, router]);
+  }, [router]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -52,6 +57,7 @@ export default function SettingsPage() {
       return;
     }
 
+    const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       setError('Session expired. Please sign in again.');
@@ -81,8 +87,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <>
-      <Header />
+    <AppShell nav="settings">
       <main className="flex-1 overflow-y-auto px-4 md:px-6 py-8 md:py-12 max-w-lg mx-auto w-full">
         <div className="mb-10">
           <h1 className="text-2xl font-bold tracking-widest text-white mb-1">SETTINGS</h1>
@@ -138,6 +143,6 @@ export default function SettingsPage() {
           </form>
         </div>
       </main>
-    </>
+    </AppShell>
   );
 }

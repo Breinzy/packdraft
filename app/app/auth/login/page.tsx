@@ -12,7 +12,6 @@ function LoginForm() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const supabase = createClient();
 
   useEffect(() => {
     const urlError = searchParams.get('error');
@@ -26,6 +25,7 @@ function LoginForm() {
     setError('');
     setLoading(true);
 
+    const supabase = createClient();
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -37,10 +37,16 @@ function LoginForm() {
       return;
     }
 
-    router.push('/dashboard');
+    const nextParam = searchParams.get('next');
+    const next =
+      nextParam && nextParam.startsWith('/') && !nextParam.startsWith('//')
+        ? nextParam
+        : '/dashboard';
+    router.push(next);
   }
 
   async function handleGoogleLogin() {
+    const supabase = createClient();
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
@@ -127,7 +133,7 @@ function LoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-5 rounded-xl text-base font-bold tracking-widest text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-4"
+            className="w-full py-5 min-h-14 rounded-xl text-base font-bold tracking-widest text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-4"
             style={{
               background: 'linear-gradient(135deg, #5b89bf, #4a78ae)',
               border: '2px solid rgba(110,155,207,0.4)',
@@ -138,7 +144,13 @@ function LoginForm() {
           </button>
         </form>
 
-        <p className="text-center text-base text-slate-600 mt-12">
+        <p className="text-center text-sm text-slate-600 mt-6">
+          <Link href="/auth/forgot" className="text-accent-light hover:text-white transition-colors">
+            Forgot password?
+          </Link>
+        </p>
+
+        <p className="text-center text-base text-slate-600 mt-8">
           Don&apos;t have an account?{' '}
           <Link href="/auth/signup" className="text-accent-light hover:text-white transition-colors">
             Sign up

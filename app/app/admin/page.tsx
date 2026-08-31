@@ -1,75 +1,55 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import { isAdminEmail } from '@/lib/auth/admin';
 import AdminPanel from './AdminPanel';
+
+export const dynamic = 'force-dynamic';
 
 export default async function AdminPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect('/auth/login');
+  if (!isAdminEmail(user.email)) redirect('/dashboard');
 
-  const adminEmails = (process.env.ADMIN_EMAILS ?? '').split(',').map((e) => e.trim()).filter(Boolean);
-  if (adminEmails.length > 0 && !adminEmails.includes(user.email ?? '')) {
-    redirect('/dashboard');
-  }
-
-  // Current contest
-  const { data: contest } = await supabase
-    .from('contests')
-    .select('*')
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .single();
-
-  // Product counts
-  const { count: totalProducts } = await supabase
-    .from('products')
+  const { count: assetCount } = await supabase
+    .from('assets')
     .select('*', { count: 'exact', head: true })
-    .eq('is_active', true);
+    .eq('active', true);
 
   const { count: sealedCount } = await supabase
-    .from('products')
+    .from('assets')
     .select('*', { count: 'exact', head: true })
-    .eq('is_active', true)
-    .eq('category', 'sealed');
+    .eq('active', true)
+    .eq('asset_type', 'sealed');
 
   const { count: gradedCount } = await supabase
-    .from('products')
+    .from('assets')
     .select('*', { count: 'exact', head: true })
-    .eq('is_active', true)
-    .eq('category', 'graded');
+    .eq('active', true)
+    .eq('asset_type', 'graded');
 
-  // Last price sync
   const { data: lastSync } = await supabase
     .from('price_snapshots')
     .select('recorded_at')
+    .not('asset_id', 'is', null)
     .order('recorded_at', { ascending: false })
     .limit(1)
-    .single();
+    .maybeSingle();
 
-  // League count for current contest
-  const { count: leagueCount } = contest
-    ? await supabase
-        .from('leagues')
-        .select('*', { count: 'exact', head: true })
-        .eq('contest_id', contest.id)
-    : { count: 0 };
-
-  const { count: portfolioCount } = contest
-    ? await supabase
-        .from('portfolios')
-        .select('*', { count: 'exact', head: true })
-        .eq('contest_id', contest.id)
-    : { count: 0 };
+  const { count: staleHint } = await supabase
+    .from('price_snapshots')
+    .select('*', { count: 'exact', head: true })
+    .not('asset_id', 'is', null);
 
   return (
     <AdminPanel
-      contest={contest}
       stats={{
-        totalProducts: totalProducts ?? 0,
+        totalAssets: assetCount ?? 0,
         sealedCount: sealedCount ?? 0,
         gradedCount: gradedCount ?? 0,
-        leagueCount: leagueCount ?? 0,
-        portfolioCount: portfolioCount ?? 0,
+        snapshotCount: staleHint ?? 0,
         lastSync: lastSync?.recorded_at ?? null,
       }}
     />

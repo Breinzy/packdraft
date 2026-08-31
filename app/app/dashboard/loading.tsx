@@ -18,28 +18,15 @@ export default function DashboardLoading() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl px-5 py-6 md:px-8 md:py-8">
-              <div className="skeleton h-3 w-16 mb-4" />
-              <div className="skeleton h-5 md:h-6 w-40 mb-4" />
-              <div className="skeleton h-7 md:h-8 w-32 mb-1" />
-              <div className="skeleton h-3 w-24" />
+              <div className="skeleton h-3 w-24 mb-4" />
+              <div className="skeleton h-5 w-48 mb-3" />
+              <div className="skeleton h-16 w-full" />
             </div>
             <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl px-5 py-6 md:px-8 md:py-8">
-              <div className="skeleton h-3 w-16 mb-4" />
-              <div className="skeleton h-5 md:h-6 w-40 mb-3" />
-              <div className="flex gap-6">
-                <div className="skeleton h-10 w-20" />
-                <div className="skeleton h-10 w-20" />
-              </div>
+              <div className="skeleton h-3 w-20 mb-4" />
+              <div className="skeleton h-5 w-40 mb-3" />
+              <div className="skeleton h-16 w-full" />
             </div>
-          </div>
-          <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl px-5 py-6 md:px-8 md:py-8">
-            <div className="skeleton h-3 w-20 mb-4" />
-            <div className="grid grid-cols-3 gap-3 md:gap-6 mb-6">
-              <div className="skeleton h-12 w-full" />
-              <div className="skeleton h-12 w-full" />
-              <div className="skeleton h-12 w-full" />
-            </div>
-            <div className="skeleton h-10 w-40" />
           </div>
         </div>
       </main>

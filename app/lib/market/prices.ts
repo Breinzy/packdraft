@@ -1,0 +1,87 @@
+import type { SupabaseClient } from '@supabase/supabase-js';
+import { isPriceStale } from './stale';
+import type { CurrentPrice } from '@/types';
+
+interface SnapshotRow {
+  asset_id: string;
+  price: number | string;
+  recorded_at: string;
+  source: string;
+  price_type: string | null;
+  condition: string | null;
+  change_7d: number | string | null;
+  volume: number | null;
+}
+
+function toCurrentPrice(row: SnapshotRow, now: Date): CurrentPrice {
+  return {
+    assetId: row.asset_id,
+    price: Number(row.price),
+    recordedAt: row.recorded_at,
+    source: row.source,
+    priceType: row.price_type ?? 'market',
+    condition: row.condition,
+    change7d: Number(row.change_7d ?? 0),
+    volume: row.volume ?? 0,
+    stale: isPriceStale(row.recorded_at, now),
+  };
+}
+
+/**
+ * Latest Packdraft snapshot at or before `at`. Never calls an external provider.
+ */
+export async function getPriceAt(
+  supabase: SupabaseClient,
+  assetId: string,
+  at: Date = new Date()
+): Promise<CurrentPrice | null> {
+  const { data, error } = await supabase
+    .from('price_snapshots')
+    .select('asset_id, price, recorded_at, source, price_type, condition, change_7d, volume')
+    .eq('asset_id', assetId)
+    .lte('recorded_at', at.toISOString())
+    .order('recorded_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`Failed to load price for asset ${assetId}: ${error.message}`);
+  }
+  if (!data?.asset_id) return null;
+  return toCurrentPrice(data as SnapshotRow, at);
+}
+
+export async function getCurrentPrice(
+  supabase: SupabaseClient,
+  assetId: string,
+  now: Date = new Date()
+): Promise<CurrentPrice | null> {
+  return getPriceAt(supabase, assetId, now);
+}
+
+export async function getCurrentPrices(
+  supabase: SupabaseClient,
+  assetIds: string[],
+  now: Date = new Date()
+): Promise<Map<string, CurrentPrice>> {
+  const prices = new Map<string, CurrentPrice>();
+  if (assetIds.length === 0) return prices;
+
+  const { data, error } = await supabase
+    .from('price_snapshots')
+    .select('asset_id, price, recorded_at, source, price_type, condition, change_7d, volume')
+    .in('asset_id', assetIds)
+    .lte('recorded_at', now.toISOString())
+    .order('recorded_at', { ascending: false });
+
+  if (error) {
+    throw new Error(`Failed to load prices: ${error.message}`);
+  }
+
+  for (const row of data ?? []) {
+    if (!row.asset_id || prices.has(row.asset_id)) continue;
+    prices.set(row.asset_id, toCurrentPrice(row as SnapshotRow, now));
+  }
+
+  return prices;
+}

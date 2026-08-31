@@ -320,8 +320,8 @@ Phase 0 definition of done (clean `tsc` / lint / build, no unexplained legacy fe
 | Inspect repository | Done |
 | Categorize KEEP / REBUILD / DELETE / UNKNOWN | Done |
 | `docs/repository-audit.md` | This file |
-| Reset | **Blocked on user approval** |
-| Clean build / lint / types after reset | Not started |
-| Complete `.env.example` | Not started (belongs with reset / Phase 1) |
+| Reset | Executed in the foundation branch (obsolete contest/league application code removed; linked database not reset) |
+| Clean build / lint / types after reset | Follow-up on the foundation branch |
+| Complete `.env.example` | Done (repo root, names only) |
 
-**Stop.** Do not begin Phase 1 or delete files until the reset in §15 is approved.
+The weekly-league application layer was removed. Auth, Supabase clients, design tokens, and the PokemonPriceTracker HTTP client remain. Market catalog **data** on the linked project is preserved and mapped in Phase 2 rather than wiped.

@@ -3,6 +3,8 @@ app/node_modules/
 app/.next/
 
 # env files
+.env
+.env.local
 app/.env.local
 app/.env*.local
 

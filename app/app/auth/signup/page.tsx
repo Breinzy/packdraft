@@ -13,13 +13,13 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [confirmEmail, setConfirmEmail] = useState(false);
   const router = useRouter();
-  const supabase = createClient();
 
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
     setError('');
     setLoading(true);
 
+    const supabase = createClient();
     const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
@@ -43,6 +43,7 @@ export default function SignupPage() {
   }
 
   async function handleGoogleSignup() {
+    const supabase = createClient();
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
@@ -91,7 +92,7 @@ export default function SignupPage() {
           </div>
           <h1 className="text-3xl font-bold tracking-widest text-white mb-4">JOIN PACKDRAFT</h1>
           <p className="text-base text-slate-500 tracking-wide">
-            CREATE YOUR ACCOUNT · GET AUTO-ASSIGNED TO A LEAGUE
+            CREATE YOUR ACCOUNT · VIRTUAL MONEY · REAL MARKET PRICES
           </p>
         </div>
 
@@ -179,7 +180,7 @@ export default function SignupPage() {
               boxShadow: '0 0 24px rgba(110,155,207,0.18)',
             }}
           >
-            {loading ? 'CREATING ACCOUNT...' : 'SIGN UP & ENTER DRAFT'}
+            {loading ? 'CREATING ACCOUNT...' : 'CREATE ACCOUNT'}
           </button>
         </form>
 
