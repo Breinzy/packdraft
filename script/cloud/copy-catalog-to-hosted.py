@@ -112,6 +112,23 @@ def hosted_external_ids() -> set[str]:
     return found
 
 
+def pause_hosted_import_after_copy() -> None:
+    """Keep daily cron from restarting PokemonPriceTracker at sealed offset 0."""
+    status, body = hosted_request(
+        "/rest/v1/market_job_state?job=eq.catalog_import",
+        method="PATCH",
+        payload={"status": "paused", "stop_reason": "copied_from_local"},
+        prefer="return=representation",
+    )
+    if status in (200, 204) or (isinstance(body, list) and body):
+        print("==> Paused hosted catalog_import (copied_from_local)", flush=True)
+        return
+    if status == 404:
+        print("==> market_job_state missing; skip import pause", flush=True)
+        return
+    print(f"==> Could not pause catalog_import http={status} {str(body)[:120]}", flush=True)
+
+
 def copy_one(row: dict) -> tuple[bool, bool, str | None]:
     try:
         return _copy_one(row)
@@ -221,6 +238,7 @@ def main() -> int:
     print(f"==> Copying {len(rows)} remaining local active assets to hosted ({WORKERS} workers)", flush=True)
     if not rows:
         print("==> Done copied=0 snapped=0 errors=0 (nothing remaining)", flush=True)
+        pause_hosted_import_after_copy()
         return 0
     copied = 0
     snapped = 0
@@ -244,6 +262,7 @@ def main() -> int:
                 )
 
     print(f"==> Done copied={copied} snapped={snapped} errors={errors}", flush=True)
+    pause_hosted_import_after_copy()
     return 0 if errors == 0 else 1
 
 

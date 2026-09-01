@@ -525,6 +525,21 @@ def main() -> int:
     status, player_page = http_app(f"/players/{user_id}")
     check("player history page", status == 200, f"http {status}")
 
+    if HOSTED:
+        past = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(time.time() - 120))
+        for tid in (iso_id, settle_id):
+            if not tid:
+                continue
+            rest(
+                base,
+                service,
+                f"/rest/v1/tournaments?id=eq.{tid}",
+                method="PATCH",
+                payload={"trading_closes_at": past, "ends_at": past},
+                extra_headers={"Prefer": "return=minimal"},
+            )
+        rpc(base, service, "tick_tournaments", {})
+
     print_summary()
     failed = [name for name, ok, _ in RESULTS if not ok]
     return 1 if failed else 0

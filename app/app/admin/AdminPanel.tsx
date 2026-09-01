@@ -137,6 +137,16 @@ export default function AdminPanel({
             {importJob.last_error ? (
               <div className="text-xs text-red-400 break-all">{importJob.last_error}</div>
             ) : null}
+            {stats.totalAssets > 0 &&
+            importJob.status !== 'paused' &&
+            importJob.status !== 'completed' &&
+            importJob.sealed_imported === 0 &&
+            importJob.set_index === 0 ? (
+              <p className="text-xs text-yellow-400">
+                Catalog already has {stats.totalAssets.toLocaleString()} active assets. Pause import
+                before cron/admin starts a fresh PokemonPriceTracker ingest from sealed offset 0.
+              </p>
+            ) : null}
             <p className="text-xs text-slate-600">
               Full catalog is chunked: one Vercel run is ~4 minutes. Daily cron continues automatically after PPT
               regenerates at 06:00 UTC.
