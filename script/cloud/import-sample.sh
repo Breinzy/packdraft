@@ -43,12 +43,12 @@ THROTTLE_MS="${THROTTLE_MS:-1500}"
 CREDIT_BUDGET="${CREDIT_BUDGET:-300}"
 OUT="${TMPDIR:-/tmp}/packdraft-import-sample.json"
 
-echo "==> Importing real catalog (maxSets=$MAX_SETS maxCards=$MAX_CARDS throttleMs=$THROTTLE_MS creditBudget=$CREDIT_BUDGET)"
-echo "    Target: $BASE/api/admin/import-assets"
+echo "==> Importing real catalog sample (maxSets=$MAX_SETS maxCards=$MAX_CARDS throttleMs=$THROTTLE_MS creditBudget=$CREDIT_BUDGET)"
+echo "    Target: $BASE/api/admin/import-assets?mode=sample"
 
 HTTP_CODE="$(
   curl -sS -o "$OUT" -w '%{http_code}' -X POST \
-    "$BASE/api/admin/import-assets?maxSets=$MAX_SETS&maxCards=$MAX_CARDS&throttleMs=$THROTTLE_MS&creditBudget=$CREDIT_BUDGET" \
+    "$BASE/api/admin/import-assets?mode=sample&maxSets=$MAX_SETS&maxCards=$MAX_CARDS&throttleMs=$THROTTLE_MS&creditBudget=$CREDIT_BUDGET" \
     -H "Authorization: Bearer $CRON"
 )"
 cat "$OUT"

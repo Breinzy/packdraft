@@ -24,7 +24,7 @@ For every asset held in any tournament book:
 
 If any holding has no snapshot at or before close, settlement **fails**. Packdraft does not invent a price.
 
-Daily price sync runs at 06:00 UTC. Settlement therefore uses the last stored snapshot as of close, not a later live tick.
+Daily catalog import runs at 08:00 UTC. Daily price sync runs at 09:00 UTC. Both are after PokemonPriceTracker’s 06:00 UTC regenerate. Settlement at 07:00 UTC therefore uses the last stored snapshot as of close, not a later live tick.
 
 ## Final value
 

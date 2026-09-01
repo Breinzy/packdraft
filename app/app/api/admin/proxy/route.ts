@@ -34,10 +34,25 @@ export async function POST(request: Request) {
       const baseUrl = process.env.VERCEL_URL
         ? `https://${process.env.VERCEL_URL}`
         : 'http://localhost:3000';
-      fetch(`${baseUrl}/api/admin/import-assets?maxCards=1000&creditBudget=5000`, {
+      fetch(`${baseUrl}/api/admin/import-assets`, {
         headers: { Authorization: `Bearer ${secret}` },
       }).catch(() => {});
-      return NextResponse.json({ ok: true, message: 'Import started — check server logs for progress' });
+      return NextResponse.json({
+        ok: true,
+        message: 'Catalog import chunk started. It resumes from the saved cursor and stops at Vercel / PPT limits.',
+      });
+    }
+
+    if (action === 'pause-import') {
+      const { pauseJob } = await import('@/lib/market/job-state');
+      const state = await pauseJob(supabase, 'catalog_import');
+      return NextResponse.json({ ok: true, state });
+    }
+
+    if (action === 'resume-import') {
+      const { resumeJob } = await import('@/lib/market/job-state');
+      const state = await resumeJob(supabase, 'catalog_import');
+      return NextResponse.json({ ok: true, state });
     }
 
     if (action === 'create-tournament') {

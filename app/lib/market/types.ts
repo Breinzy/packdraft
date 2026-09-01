@@ -8,6 +8,9 @@ export interface NormalizedSet {
   name: string;
   slug?: string;
   releaseDate?: string;
+  providerSetKey?: string;
+  cardCount?: number;
+  hasPriceGuide?: boolean;
 }
 
 export interface NormalizedAsset {
@@ -39,17 +42,36 @@ export interface AssetPriceRef {
   assetType: NormalizedAssetType;
 }
 
+export interface ProviderPage {
+  assets: NormalizedAsset[];
+  prices: NormalizedPrice[];
+  total: number;
+  creditsConsumed: number;
+  dailyRemaining: number | null;
+}
+
 export interface MarketDataProvider {
   readonly id: MarketProviderId;
   fetchSets(): Promise<NormalizedSet[]>;
   fetchSealedPage(query: {
-    search: string;
+    search?: string;
+    minPrice?: number;
     limit?: number;
     offset?: number;
-  }): Promise<{ assets: NormalizedAsset[]; prices: NormalizedPrice[]; total: number }>;
+    fetchAllInSet?: boolean;
+    set?: string;
+  }): Promise<ProviderPage>;
   fetchGradedPage(query: {
     limit?: number;
     offset?: number;
-  }): Promise<{ assets: NormalizedAsset[]; prices: NormalizedPrice[]; total: number }>;
+  }): Promise<ProviderPage>;
+  fetchCardsPage(query: {
+    limit?: number;
+    offset?: number;
+    includeEbay?: boolean;
+    set?: string;
+    setId?: string;
+    fetchAllInSet?: boolean;
+  }): Promise<ProviderPage>;
   fetchPrices(refs: AssetPriceRef[]): Promise<NormalizedPrice[]>;
 }

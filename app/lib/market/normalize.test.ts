@@ -4,7 +4,9 @@ import {
   gradedPriceAmount,
   normalizeGradedCard,
   normalizeSealedProduct,
+  normalizeSingleCard,
   sealedPriceAmount,
+  singlePriceAmount,
 } from './normalize';
 import type { Card, SealedProduct } from '../pricing/client';
 
@@ -94,3 +96,32 @@ describe('classifySealedSubtype', () => {
     expect(classifySealedSubtype('Ultra Premium Collection')).toBe('upc');
   });
 });
+
+describe('normalizeSingleCard', () => {
+  it('uses TCGPlayer market as the ungraded price', () => {
+    const card: Card = {
+      tcgPlayerId: 11,
+      name: 'Pikachu',
+      cardNumber: '25',
+      setName: 'Base',
+      prices: { market: 3.5 },
+    };
+    expect(singlePriceAmount(card)).toEqual({ price: 3.5, priceType: 'market' });
+    const result = normalizeSingleCard(card, 'pokemonpricetracker', '2026-09-01T00:00:00.000Z');
+    expect(result?.asset.assetType).toBe('single');
+    expect(result?.asset.name).toBe('Pikachu 25');
+    expect(result?.price?.price).toBe(3.5);
+    expect(result?.price?.condition).toBe('ungraded');
+  });
+
+  it('creates the asset without a snapshot when market is missing', () => {
+    const result = normalizeSingleCard(
+      { tcgPlayerId: 12, name: 'Missingno' },
+      'pokemonpricetracker',
+      '2026-09-01T00:00:00.000Z'
+    );
+    expect(result?.asset.assetType).toBe('single');
+    expect(result?.price).toBeNull();
+  });
+});
+

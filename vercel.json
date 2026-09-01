@@ -1,16 +1,16 @@
 {
   "crons": [
     {
-      "path": "/api/cron/sync-prices",
-      "schedule": "0 6 * * *"
+      "path": "/api/admin/import-assets",
+      "schedule": "0 8 * * *"
     },
     {
       "path": "/api/cron/tick-tournaments",
       "schedule": "0 7 * * *"
     },
     {
-      "path": "/api/admin/import-assets",
-      "schedule": "0 0 * * 0"
+      "path": "/api/cron/sync-prices",
+      "schedule": "0 9 * * *"
     }
   ]
 }

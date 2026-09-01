@@ -3,12 +3,14 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import type { Tournament } from '@/types';
+import type { MarketJobState } from '@/lib/market/job-state';
 import StatusBadge from '@/components/tournament/StatusBadge';
 import { formatTimestamp } from '@/lib/utils';
 
 interface AdminStats {
   totalAssets: number;
   sealedCount: number;
+  singlesCount: number;
   gradedCount: number;
   snapshotCount: number;
   lastSync: string | null;
@@ -24,9 +26,11 @@ interface ActionResult {
 export default function AdminPanel({
   stats,
   tournaments,
+  importJob,
 }: {
   stats: AdminStats;
   tournaments: Tournament[];
+  importJob: MarketJobState | null;
 }) {
   const [results, setResults] = useState<Record<string, ActionResult | null>>({});
   const [loading, setLoading] = useState<Record<string, boolean>>({});
@@ -58,10 +62,12 @@ export default function AdminPanel({
     { id: 'sync-prices', label: 'SYNC PRICES', description: 'Insert latest Packdraft snapshots for active assets' },
     {
       id: 'import-assets',
-      label: 'IMPORT ASSETS',
-      description: 'Normalize PokemonPriceTracker catalog into assets + snapshots',
+      label: 'IMPORT CATALOG CHUNK',
+      description: 'Resume full PPT ingest. Stops at ~4 minutes, PPT credits, or daily remaining.',
       warn: true,
     },
+    { id: 'pause-import', label: 'PAUSE IMPORT', description: 'Stop cron/admin from continuing the catalog job' },
+    { id: 'resume-import', label: 'RESUME IMPORT', description: 'Allow the next chunk to run from the saved cursor' },
     { id: 'tick-tournaments', label: 'TICK TOURNAMENTS', description: 'Advance lifecycle and settle locked books' },
   ];
 
@@ -92,6 +98,7 @@ export default function AdminPanel({
           {[
             { label: 'ACTIVE ASSETS', value: stats.totalAssets },
             { label: 'SEALED', value: stats.sealedCount },
+            { label: 'SINGLES', value: stats.singlesCount },
             { label: 'GRADED', value: stats.gradedCount },
             { label: 'SNAPSHOTS', value: stats.snapshotCount },
             {
@@ -106,6 +113,40 @@ export default function AdminPanel({
             </div>
           ))}
         </div>
+
+        {importJob ? (
+          <div className="bg-white/[0.02] border border-white/[0.06] rounded-lg p-4 space-y-2">
+            <div className="text-xs text-slate-600 tracking-widest">CATALOG IMPORT</div>
+            <div className="text-sm text-white">
+              {importJob.status.toUpperCase()} · stage {importJob.stage}
+              {importJob.stop_reason ? ` · last stop: ${importJob.stop_reason}` : ''}
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs text-slate-400">
+              <div>Sealed {importJob.sealed_imported}</div>
+              <div>Singles {importJob.singles_imported}</div>
+              <div>Graded {importJob.graded_imported}</div>
+              <div>Snapshots {importJob.snapshots_written}</div>
+              <div>Credits used {importJob.credits_used}</div>
+              <div>Daily remaining {importJob.daily_remaining ?? '—'}</div>
+              <div>Set index {importJob.set_index}</div>
+              <div>Graded offset {importJob.graded_offset}</div>
+            </div>
+            {importJob.last_run_at ? (
+              <div className="text-xs text-slate-600">Last run {formatTimestamp(importJob.last_run_at)}</div>
+            ) : null}
+            {importJob.last_error ? (
+              <div className="text-xs text-red-400 break-all">{importJob.last_error}</div>
+            ) : null}
+            <p className="text-xs text-slate-600">
+              Full catalog is chunked: one Vercel run is ~4 minutes. Daily cron continues automatically after PPT
+              regenerates at 06:00 UTC.
+            </p>
+          </div>
+        ) : (
+          <p className="text-sm text-slate-500">
+            Apply the market_job_state migration to track resumable catalog import.
+          </p>
+        )}
 
         <div className="space-y-3">
           <div className="text-xs text-slate-600 tracking-widest mb-2">MARKET DATA</div>

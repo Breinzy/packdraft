@@ -67,6 +67,10 @@ Immutable historical market prices. “Current price” is the latest row for an
 
 Writes use the service role. Clients may `SELECT`.
 
+### `market_job_state`
+
+Singleton rows `catalog_import` and `price_sync`. Each cron/admin chunk claims a row, writes a cursor (`sealed_offset`, `set_index`, `graded_offset`, or `last_asset_id`), and releases it. Clients may `SELECT`. Writes are service-role only.
+
 ## Tournament data (Phases 5–10)
 
 Tournament money is isolated from Career Mode and from the unused legacy `portfolios` table.
