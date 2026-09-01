@@ -19,6 +19,28 @@ export function sealedImageUrl(product: SealedProduct): string | undefined {
   return product.imageUrl ?? product.imageCdnUrl;
 }
 
+/** Online TCG Live codes are not tournament assets. */
+export function isExcludedCatalogName(name: string): boolean {
+  return name.trim().toLowerCase().startsWith('code card');
+}
+
+/**
+ * PPT staff/custom listings often come through as `______'s Pikachu (DUPLICATE)`.
+ * Keep the card identity; drop the redacted owner prefix and duplicate marker.
+ */
+export function cleanCatalogName(raw: string): string {
+  let name = raw.trim();
+  name = name.replace(/^[_-]{2,}'s\s+/i, '');
+  name = name.replace(/\s*\(duplicate\)/gi, '');
+  return name.replace(/\s{2,}/g, ' ').trim();
+}
+
+function catalogNameOrSkip(raw: string): string | null {
+  const name = cleanCatalogName(raw);
+  if (!name || isExcludedCatalogName(name) || isExcludedCatalogName(raw)) return null;
+  return name;
+}
+
 export function singlePriceAmount(card: Card): {
   price: number;
   priceType: NormalizedPrice['priceType'];
@@ -84,12 +106,14 @@ export function normalizeSealedProduct(
   recordedAt: string
 ): { asset: NormalizedAsset; price: NormalizedPrice | null } | null {
   if (!product.tcgPlayerId) return null;
+  const name = catalogNameOrSkip(product.name);
+  if (!name) return null;
 
   const amount = sealedPriceAmount(product);
   const asset: NormalizedAsset = {
     tcgSlug: 'pokemon',
     setName: product.setName ?? 'Unknown',
-    name: product.name,
+    name,
     assetType: 'sealed',
     externalId: String(product.tcgPlayerId),
     imageUrl: sealedImageUrl(product),
@@ -128,12 +152,14 @@ export function normalizeGradedCard(
   recordedAt: string
 ): { asset: NormalizedAsset; price: NormalizedPrice | null } | null {
   if (!card.tcgPlayerId) return null;
+  const baseName = catalogNameOrSkip(card.name);
+  if (!baseName) return null;
 
   const amount = gradedPriceAmount(card, grade);
   const asset: NormalizedAsset = {
     tcgSlug: 'pokemon',
     setName: card.setName ?? 'Unknown',
-    name: `${card.name}${cardDisplayNumber(card) ? ` ${cardDisplayNumber(card)}` : ''} PSA ${grade}`,
+    name: `${baseName}${cardDisplayNumber(card) ? ` ${cardDisplayNumber(card)}` : ''} PSA ${grade}`,
     assetType: 'graded',
     externalId: String(card.tcgPlayerId),
     imageUrl: cardImageUrl(card),
@@ -170,13 +196,15 @@ export function normalizeSingleCard(
   recordedAt: string
 ): { asset: NormalizedAsset; price: NormalizedPrice | null } | null {
   if (!card.tcgPlayerId) return null;
+  const baseName = catalogNameOrSkip(card.name);
+  if (!baseName) return null;
 
   const amount = singlePriceAmount(card);
   const number = cardDisplayNumber(card);
   const asset: NormalizedAsset = {
     tcgSlug: 'pokemon',
     setName: card.setName ?? 'Unknown',
-    name: `${card.name}${number ? ` ${number}` : ''}`,
+    name: `${baseName}${number ? ` ${number}` : ''}`,
     assetType: 'single',
     externalId: String(card.tcgPlayerId),
     imageUrl: cardImageUrl(card),

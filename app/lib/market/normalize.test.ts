@@ -114,6 +114,33 @@ describe('normalizeSingleCard', () => {
     expect(result?.price?.condition).toBe('ungraded');
   });
 
+  it('skips online code cards', () => {
+    const result = normalizeSingleCard(
+      {
+        tcgPlayerId: 99,
+        name: 'Code Card - Iron Valiant ex Box',
+        prices: { market: 0.01 },
+      },
+      'pokemonpricetracker',
+      '2026-09-01T00:00:00.000Z'
+    );
+    expect(result).toBeNull();
+  });
+
+  it('strips redacted owner prefixes and duplicate markers', () => {
+    const result = normalizeSingleCard(
+      {
+        tcgPlayerId: 100,
+        name: "______'s Chansey (DUPLICATE)",
+        number: '113',
+        prices: { market: 44.49 },
+      },
+      'pokemonpricetracker',
+      '2026-09-01T00:00:00.000Z'
+    );
+    expect(result?.asset.name).toBe('Chansey 113');
+  });
+
   it('creates the asset without a snapshot when market is missing', () => {
     const result = normalizeSingleCard(
       { tcgPlayerId: 12, name: 'Missingno' },

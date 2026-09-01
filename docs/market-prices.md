@@ -28,7 +28,7 @@ It keys products by TCGPlayer id. Auth is `POKEMON_PRICE_TRACKER_API_KEY` (serve
 
 `price_type` records which field was used (`unopened`, `market`, `ebay_smart`, `ebay_average`).
 
-English cards only. Assets without a usable price are not inserted (the catalog should be tradable, not full of **NO PRICE** rows).
+English cards only. Assets without a usable price are not inserted. Online **code cards** are skipped — they are TCG Live redeem codes, not tournament holdings.
 
 `recorded_at` is **when Packdraft stored the observation**, not PPT’s `lastUpdated`. PPT regenerates dumps at **06:00 UTC**.
 

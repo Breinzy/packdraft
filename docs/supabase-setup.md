@@ -101,7 +101,7 @@ python3 script/cloud/apply-hosted-schema.py
 python3 script/cloud/copy-catalog-to-hosted.py
 ```
 
-Or `bash script/cloud/upload-to-hosted.sh` to apply (if needed) and copy in one shot.
+Or `python3 script/cloud/print-hosted-migrations.py` to dump all three files as one SQL script for a single paste.
 
 `SUPABASE_SERVICE_ROLE_KEY` can write catalog rows after the tables exist. It cannot run migrations.
 
