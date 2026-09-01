@@ -91,6 +91,27 @@ def local_rows(sql: str) -> list[dict]:
     return out
 
 
+def hosted_external_ids() -> set[str]:
+    found: set[str] = set()
+    start = 0
+    page = 1000
+    while True:
+        status, body = hosted_request(
+            f"/rest/v1/assets?select=external_id&order=id&limit={page}&offset={start}",
+            prefer="return=representation",
+        )
+        if status not in (200, 206) or not isinstance(body, list):
+            raise RuntimeError(f"hosted external_id page failed http={status} {str(body)[:200]}")
+        for row in body:
+            ext = row.get("external_id")
+            if ext:
+                found.add(str(ext))
+        if len(body) < page:
+            break
+        start += page
+    return found
+
+
 def copy_one(row: dict) -> tuple[bool, bool, str | None]:
     try:
         return _copy_one(row)
@@ -163,6 +184,9 @@ def main() -> int:
         print(f"Hosted assets probe failed http={status} {str(body)[:200]}", file=sys.stderr)
         return 3
 
+    existing = hosted_external_ids()
+    print(f"==> Hosted already has {len(existing)} assets with external_id", flush=True)
+
     rows = local_rows(
         """
         select json_build_object(
@@ -193,7 +217,11 @@ def main() -> int:
         order by a.asset_type, a.name;
         """
     )
-    print(f"==> Copying {len(rows)} local active assets to hosted ({WORKERS} workers)", flush=True)
+    rows = [row for row in rows if str(row.get("external_id") or "") not in existing]
+    print(f"==> Copying {len(rows)} remaining local active assets to hosted ({WORKERS} workers)", flush=True)
+    if not rows:
+        print("==> Done copied=0 snapped=0 errors=0 (nothing remaining)", flush=True)
+        return 0
     copied = 0
     snapped = 0
     errors = 0
