@@ -112,6 +112,12 @@ function getTotal(res: { pagination?: ApiPagination; metadata?: ApiPagination })
 
 const MAX_RETRIES = 1;
 const INITIAL_BACKOFF_MS = 5000;
+/** Abort hung PPT HTTP calls so a chunk cannot sit past Vercel maxDuration. */
+export const PPT_REQUEST_TIMEOUT_MS = 45_000;
+
+function isAbortError(err: unknown): boolean {
+  return err instanceof Error && (err.name === 'AbortError' || err.name === 'TimeoutError');
+}
 
 export interface ProviderResponseMeta {
   creditsConsumed: number;
@@ -198,10 +204,22 @@ async function apiFetch<T>(path: string, params: Record<string, string> = {}): P
   }
 
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-    const res = await fetch(url.toString(), {
-      headers: { Authorization: `Bearer ${apiKey}` },
-      next: { revalidate: 0 },
-    });
+    let res: Response;
+    try {
+      res = await fetch(url.toString(), {
+        headers: { Authorization: `Bearer ${apiKey}` },
+        next: { revalidate: 0 },
+        signal: AbortSignal.timeout(PPT_REQUEST_TIMEOUT_MS),
+      });
+    } catch (err) {
+      if (attempt < MAX_RETRIES && isAbortError(err)) {
+        continue;
+      }
+      if (isAbortError(err)) {
+        throw new Error(`PokemonPriceTracker request timed out after ${PPT_REQUEST_TIMEOUT_MS}ms`);
+      }
+      throw err;
+    }
 
     if (res.status === 429) {
       const body = await res.text().catch(() => '');
@@ -488,6 +506,7 @@ export async function tryDownloadExport(type: PptExportType): Promise<ExportResu
     headers: { Authorization: `Bearer ${apiKey}` },
     redirect: 'manual',
     next: { revalidate: 0 },
+    signal: AbortSignal.timeout(PPT_REQUEST_TIMEOUT_MS),
   });
 
   const downloadsRemaining = headerNumber(res, 'X-Export-Downloads-Remaining');
@@ -529,7 +548,10 @@ export async function tryDownloadExport(type: PptExportType): Promise<ExportResu
     return { ok: false, status: res.status, retryAfterSeconds, message: 'Export redirect missing Location' };
   }
 
-  const file = await fetch(gzipUrl, { next: { revalidate: 0 } });
+  const file = await fetch(gzipUrl, {
+    next: { revalidate: 0 },
+    signal: AbortSignal.timeout(PPT_REQUEST_TIMEOUT_MS),
+  });
   if (!file.ok) {
     return {
       ok: false,

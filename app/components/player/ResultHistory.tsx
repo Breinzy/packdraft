@@ -6,7 +6,7 @@ export default function ResultHistory({ results }: { results: HistoryResult[] })
   if (results.length === 0) {
     return (
       <p className="text-sm text-slate-500 tracking-wider">
-        No settled tournaments yet. Join a tournament to start a record.
+        No settled tournaments yet. Active books do not count until the event completes.
       </p>
     );
   }

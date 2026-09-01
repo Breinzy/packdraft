@@ -49,7 +49,7 @@ Each chunk stops at the first of:
 * PPT `X-RateLimit-Daily-Remaining` at or below 25
 * HTTP 429 daily limit
 
-Request spacing defaults to 1.1s (~60/min). Daily cron `GET /api/admin/import-assets` at **08:00 UTC** continues the cursor. Admin **IMPORT CATALOG CHUNK** starts one chunk without resetting progress.
+Request spacing defaults to 1.1s (~60/min). Each PPT HTTP call times out after 45s so a hung provider cannot pin a Vercel invocation. Daily cron `GET /api/admin/import-assets` at **08:00 UTC** continues the cursor. Admin **IMPORT CATALOG CHUNK** starts one chunk without resetting progress.
 
 The small **sample** importer (`importMarketCatalog`, `mode=sample`) still exists for smoke tests. It is not the full catalog.
 

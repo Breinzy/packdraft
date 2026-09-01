@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { STALE_RUNNING_MS } from './chunk-limits';
 
 export type MarketJob = 'catalog_import' | 'price_sync';
 export type MarketJobStatus = 'pending' | 'running' | 'paused' | 'completed' | 'failed';
@@ -28,9 +29,6 @@ export interface MarketJobState {
   completed_at: string | null;
   updated_at: string;
 }
-
-const STALE_RUNNING_MS = 6 * 60 * 1000;
-
 export async function getJobState(
   supabase: SupabaseClient,
   job: MarketJob
