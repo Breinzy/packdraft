@@ -125,29 +125,38 @@ def main() -> int:
         print("    SUPABASE_SERVICE_ROLE_KEY unset")
         return 2
 
-    mvp = ["assets", "tcgs", "sets", "tournaments", "market_job_state"]
+    required = ["assets", "tcgs", "sets", "tournaments"]
+    optional = ["market_job_state"]
     legacy = ["products", "contests", "price_snapshots"]
-    missing_mvp = False
-    for table in mvp + legacy:
+    missing_required = False
+    missing_optional = False
+    for table in required + optional + legacy:
         status, cr, body = rest(hosted_url, hosted_service, f"/rest/v1/{table}?select=id")
         count = count_from_range(cr)
         if status in (200, 206):
             print(f"    {table}: ok count={count}")
         else:
             print(f"    {table}: http={status} count={count}")
-            if table in mvp:
-                missing_mvp = True
+            if table in required:
+                missing_required = True
+                if body:
+                    print(f"      {body[:120].replace(chr(10), ' ')}")
+            elif table in optional:
+                missing_optional = True
                 if body:
                     print(f"      {body[:120].replace(chr(10), ' ')}")
 
     print("\n==> Upload readiness")
-    if missing_mvp:
+    if missing_required:
         print("    BLOCKED: hosted is still on the beta schema. Apply the three pending migrations.")
         print("    SQL editor: https://supabase.com/dashboard/project/" + PROJECT_REF + "/sql/new")
         print("    Or set SUPABASE_ACCESS_TOKEN or SUPABASE_DB_PASSWORD and run:")
         print("      python3 script/cloud/apply-hosted-schema.py")
         print("      python3 script/cloud/copy-catalog-to-hosted.py")
         return 3
+    if missing_optional:
+        print("    Catalog copy is unblocked. Paste SQL editor chunk G for market_job_state")
+        print("    before running hosted admin catalog import (local copy does not need it).")
     print("    Hosted MVP tables exist. Run python3 script/cloud/copy-catalog-to-hosted.py")
     return 0
 
