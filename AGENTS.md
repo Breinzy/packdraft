@@ -487,6 +487,7 @@ Commit messages should describe the actual change.
 Do NOT prematurely implement:
 
 * Career Mode
+* Career progression
 * Market Events
 * native mobile apps
 * creator tournaments
@@ -498,7 +499,9 @@ Do NOT prematurely implement:
 
 unless the user explicitly asks for that phase.
 
-Build foundations that support them, but do not build the features themselves.
+The tournament loop (Phases 0–10) is the MVP. Phase 11 is polish of that loop. Career Mode is post-MVP even though it is numbered Phase 12.
+
+Build foundations that support later modes, but do not build the features themselves.
 
 ---
 

@@ -95,7 +95,7 @@ Career Mode should eventually feel more like an NBA 2K MyCareer/Madden-style pro
 
 ---
 
-## 1.3 Market Events — POST-MVP / EARLY FEATURE
+## 1.3 Market Events — POST-MVP
 
 Market Events are temporary prediction competitions tied to real TCG events.
 
@@ -148,6 +148,20 @@ The MVP should contain ONLY the functionality required to prove this.
 13. Tournament is archived.
 
 If this loop is not fun, additional features will not save the product.
+
+### What is NOT in the MVP
+
+Do not treat later numbered phases as work that must happen before a playable game.
+
+Out of MVP:
+
+* Career Mode and career progression
+* Market Events
+* Richer player identity / achievements than a basic history page
+* Social features, creator tournaments, monetization
+* Native apps, multi-TCG, advanced rankings, analytics
+
+The tournament loop above is the product until it is fun.
 
 ---
 
@@ -776,33 +790,39 @@ At the completion of Phase 10, Packdraft should be a playable web MVP on both de
 
 ---
 
-# 16. PHASE 11 — HISTORY AND PLAYER PROFILE
+# 16. PHASE 11 — MVP POLISH (CURRENT)
 
 ## Objective
 
-Give players persistent identity even though tournament portfolios reset.
+Make the tournament MVP actually playable.
 
-A player profile should eventually show:
+Phases 0–10 already cover the product: account, catalog, join, buy/sell, rank, settlement. This phase is bugfix and playability, not new modes.
 
-* tournaments played
-* tournaments won
-* podium finishes
-* average return
-* best return
-* worst return
-* total trades
-* best trade
-* worst trade
-* historical tournament results
-* achievements
+A basic `/players/[id]` history page already exists from earlier work. Leave it. Do not expand achievements, career-like stats, or social identity here.
 
-The player does NOT keep the tournament portfolio.
+### Build
 
-They keep the history.
+* Honest price labels: **STALE** only when a stored quote is old; **NO PRICE** when Packdraft has no snapshot
+* Honest empty states: an empty catalog is not “database disconnected”
+* Deterministic, readable timestamps on trades
+* Fonts that load without runtime Google Fonts 404s
+* Join / browse / buy / sell / rank remain usable on ~375px and desktop
+* Keep the local import/sample-tournament path working
+
+### Do not build
+
+* Career Mode
+* Market Events
+* Richer profile/achievement systems
+* Social, creator tournaments, monetization, native apps, multi-TCG
+
+### Definition of done
+
+The MVP loop works without misleading UI. Typecheck, lint, tests, and production build pass.
 
 ---
 
-# 17. PHASE 12 — CAREER MODE
+# 17. PHASE 12 — CAREER MODE (POST-MVP)
 
 ## Objective
 
@@ -1290,55 +1310,27 @@ A phase is complete when:
 
 # 36. CURRENT BUILD TARGET
 
-When beginning development, implement only:
+## Done — tournament MVP (Phases 0–10)
 
-### Phase 0
+Account, catalog, join, buy/sell, leaderboard, and settlement exist. That **is** the MVP.
 
-Repository audit/reset
+A basic player history page also exists. Do not expand it.
 
-### Phase 1
+## Now — Phase 11 MVP polish
 
-Foundation + responsive design system
+Fix bugs and playability in the tournament loop. Stop when the loop is honest and usable.
 
-### Phase 2
+## Not now
 
-Database foundation
+Do **not** start:
 
-### Phase 3
+* Career Mode (Phase 12)
+* Career progression
+* Market Events
+* Social features, creator tournaments, monetization
+* Native apps, multi-TCG, advanced rankings
 
-Market data foundation
-
-### Phase 4
-
-Asset browser
-
-### Phase 5
-
-Portfolio engine
-
-### Phase 6
-
-Tournament engine
-
-### Phase 7
-
-Tournament participation
-
-### Phase 8
-
-Trading UI
-
-### Phase 9
-
-Leaderboard
-
-### Phase 10
-
-Settlement
-
-At the completion of Phase 10, Packdraft should be a playable MVP on desktop and mobile browsers.
-
-Do not implement Career Mode, Market Events, monetization, social features, native mobile functionality, or multi-TCG functionality until the Tournament MVP is functional and tested.
+Career Mode is post-MVP even though it is the next numbered phase. Do not implement it because it appears next on this list.
 
 ---
 

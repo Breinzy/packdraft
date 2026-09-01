@@ -106,9 +106,9 @@ Frozen at close. See `docs/settlement.md`.
 
 Writes go through security-definer RPCs executed by the service role after the Next.js API authenticates the user: `join_tournament`, `execute_tournament_trade`, `settle_tournament`, `tick_tournaments`. `get_tournament_standings` is readable by anon/authenticated.
 
-## Player history (Phase 11)
+## Player history
 
-There is no Career wallet here. A player's public record is derived from `tournament_results` (and, for the owner, `tournament_transactions` replayed with the same average-cost rules as live trading). Tournament cash and positions still do not carry over.
+A basic `/players/[id]` page already exists. Public record is derived from `tournament_results` (and, for the owner, `tournament_transactions` replayed with the same average-cost rules as live trading). Tournament cash and positions still do not carry over. Do not expand this into Career Mode.
 
 ## Reserved domains (not implemented)
 
