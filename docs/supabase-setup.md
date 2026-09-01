@@ -84,7 +84,10 @@ Fallback if MCP is not connected: CLI `db push` has previously failed on this pr
 2. Run, in order (skip a file if it was already applied):
    - `supabase/migrations/20260831120000_phase2_market_and_user_foundation.sql`
    - `supabase/migrations/20260831180000_phase5_10_tournament_engine.sql`
-3. In Table Editor, confirm `assets`, `tcgs`, and `tournaments` exist.
+   - `supabase/migrations/20260901120000_market_job_state.sql`
+3. In Table Editor, confirm `assets`, `tcgs`, `tournaments`, and `market_job_state` exist.
+
+If `SUPABASE_ACCESS_TOKEN` is set, `python3 script/cloud/apply-hosted-schema.py` applies those three files via the Management API. After that, `python3 script/cloud/copy-catalog-to-hosted.py` copies the local catalog into hosted `assets` + latest snapshots.
 
 ## 4. After keys + schema
 
