@@ -1,0 +1,12 @@
+{
+  "name": "Packdraft (Next.js + local Supabase)",
+  "install": "bash script/cloud/setup.sh",
+  "start": "bash script/cloud/start.sh",
+  "terminals": [
+    {
+      "name": "next-dev",
+      "command": "cd app && npm run dev"
+    }
+  ],
+  "ports": [3000, 54321, 54323]
+}
