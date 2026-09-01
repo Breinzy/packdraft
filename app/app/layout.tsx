@@ -1,10 +1,26 @@
 import type { Metadata } from 'next';
-import { DM_Mono } from 'next/font/google';
+import { IBM_Plex_Mono, IBM_Plex_Sans, Newsreader } from 'next/font/google';
 import './globals.css';
 
-const dmMono = DM_Mono({
+const plex = IBM_Plex_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+  variable: '--font-plex',
+  display: 'swap',
+});
+
+const newsreader = Newsreader({
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+  style: ['normal', 'italic'],
+  variable: '--font-newsreader',
+  display: 'swap',
+});
+
+const plexMono = IBM_Plex_Mono({
   subsets: ['latin'],
   weight: ['400', '500'],
+  variable: '--font-plex-mono',
   display: 'swap',
 });
 
@@ -20,15 +36,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={dmMono.className}>
-      <body className="min-h-dvh relative overflow-x-hidden">
+    <html lang="en" className={`${plex.variable} ${newsreader.variable} ${plexMono.variable}`}>
+      <body className="min-h-dvh relative overflow-x-hidden bg-background font-sans text-foreground">
         <div
           className="fixed inset-0 pointer-events-none z-0"
           style={{
             background:
-              'radial-gradient(ellipse 80% 50% at 20% 0%, rgba(110,155,207,0.06) 0%, transparent 60%), radial-gradient(ellipse 60% 40% at 80% 100%, rgba(110,155,207,0.03) 0%, transparent 60%)',
+              'radial-gradient(1200px 500px at 8% -10%, rgba(228,87,46,0.07), transparent 55%), radial-gradient(900px 420px at 100% 110%, rgba(201,178,122,0.04), transparent 50%)',
           }}
         />
+        <div className="grain" aria-hidden />
         <div className="relative z-10 min-h-dvh flex flex-col">{children}</div>
       </body>
     </html>

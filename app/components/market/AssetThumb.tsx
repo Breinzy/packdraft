@@ -15,10 +15,10 @@ export default function AssetThumb({ src, alt, size = 'sm' }: AssetThumbProps) {
   if (!src || failed) {
     return (
       <div
-        className={`${box} shrink-0 rounded-xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center text-2xl`}
+        className={`${box} shrink-0 rounded-md bg-surface-2 border border-border flex items-center justify-center text-faint font-display italic text-lg`}
         aria-hidden
       >
-        ⚡
+        P
       </div>
     );
   }
@@ -30,7 +30,7 @@ export default function AssetThumb({ src, alt, size = 'sm' }: AssetThumbProps) {
       src={src}
       alt={alt}
       onError={() => setFailed(true)}
-      className={`${box} shrink-0 rounded-xl object-cover bg-white/[0.04] border border-white/[0.06]`}
+      className={`${box} shrink-0 rounded-md object-cover bg-surface-2 border border-border`}
     />
   );
 }

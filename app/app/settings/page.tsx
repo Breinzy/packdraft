@@ -81,7 +81,7 @@ export default function SettingsPage() {
   if (checking) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-slate-600 tracking-widest text-sm">LOADING...</div>
+        <div className="text-muted text-sm">Loading…</div>
       </div>
     );
   }
@@ -90,55 +90,43 @@ export default function SettingsPage() {
     <AppShell nav="settings">
       <main className="flex-1 overflow-y-auto px-4 md:px-6 py-8 md:py-12 max-w-lg mx-auto w-full">
         <div className="mb-10">
-          <h1 className="text-2xl font-bold tracking-widest text-white mb-1">SETTINGS</h1>
-          <p className="text-sm text-slate-600 tracking-wider">Manage your account preferences</p>
+          <h1 className="page-title text-3xl mb-2">Settings</h1>
+          <p className="text-sm text-muted">Manage how you appear in tournaments.</p>
         </div>
 
-        <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-6 md:p-8">
-          <h2 className="text-sm font-bold tracking-widest text-white mb-6">DISPLAY NAME</h2>
+        <div className="panel p-6 md:p-8">
+          <h2 className="kicker mb-6">Display name</h2>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-xs text-slate-500 tracking-widest mb-3">
-                NAME
-              </label>
+              <label className="kicker mb-2 block">Name</label>
               <input
                 type="text"
                 value={displayName}
                 onChange={(e) => { setDisplayName(e.target.value); setSaved(false); }}
                 maxLength={24}
                 placeholder="TrainerRed"
-                className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-5 py-4 text-base text-slate-200 placeholder:text-slate-600 outline-none transition-colors font-mono"
-                onFocus={(e) => (e.target.style.borderColor = 'rgba(110,155,207,0.4)')}
-                onBlur={(e) => (e.target.style.borderColor = 'rgba(255,255,255,0.08)')}
+                className="field"
               />
-              <div className="text-xs text-slate-700 tracking-wider mt-2">
+              <div className="text-xs text-faint mt-2">
                 {displayName.length}/24 characters
               </div>
             </div>
 
             {error && (
-              <div className="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-xl px-5 py-4">
+              <div className="text-sm text-red border border-red/25 bg-red/10 rounded-md px-4 py-3">
                 {error}
               </div>
             )}
 
             {saved && (
-              <div className="text-sm text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 rounded-xl px-5 py-4 tracking-wider">
-                SAVED
+              <div className="text-sm text-green border border-green/25 bg-green/10 rounded-md px-4 py-3">
+                Saved
               </div>
             )}
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-4 rounded-xl text-sm font-bold tracking-widest text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{
-                background: 'linear-gradient(135deg, #5b89bf, #4a78ae)',
-                border: '2px solid rgba(110,155,207,0.4)',
-              }}
-            >
-              {loading ? 'SAVING...' : 'SAVE CHANGES'}
+            <button type="submit" disabled={loading} className="btn btn-primary w-full">
+              {loading ? 'Saving…' : 'Save changes'}
             </button>
           </form>
         </div>

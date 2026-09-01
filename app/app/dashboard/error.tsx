@@ -8,24 +8,14 @@ export default function DashboardError({
   reset: () => void;
 }) {
   return (
-    <div className="min-h-screen flex items-center justify-center px-6">
-      <div className="text-center max-w-md">
-        <div className="text-4xl mb-6">&#x26A0;&#xFE0F;</div>
-        <h2 className="text-xl font-bold tracking-widest text-white mb-3">
-          SOMETHING WENT WRONG
-        </h2>
-        <p className="text-sm text-slate-500 tracking-wider mb-8">
+    <div className="min-h-dvh flex items-center justify-center px-6">
+      <div className="max-w-md">
+        <h2 className="page-title text-3xl mb-3">Something went wrong</h2>
+        <p className="text-sm text-muted mb-8">
           {error.message || 'Failed to load dashboard. Please try again.'}
         </p>
-        <button
-          onClick={reset}
-          className="px-8 py-3 rounded-xl text-sm font-bold tracking-widest text-white"
-          style={{
-            background: 'linear-gradient(135deg, #5b89bf, #4a78ae)',
-            border: '2px solid rgba(110,155,207,0.3)',
-          }}
-        >
-          TRY AGAIN
+        <button onClick={reset} className="btn btn-primary">
+          Try again
         </button>
       </div>
     </div>

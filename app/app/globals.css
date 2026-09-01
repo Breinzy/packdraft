@@ -1,19 +1,27 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-background: #080c14;
-  --color-foreground: #e2e8f0;
-  --color-surface: rgba(255, 255, 255, 0.03);
-  --color-border: rgba(255, 255, 255, 0.06);
-  --color-border-strong: rgba(255, 255, 255, 0.12);
-  --color-accent: #6e9bcf;
-  --color-accent-light: #9fc0e6;
-  --color-accent-dim: rgba(110, 155, 207, 0.12);
-  --color-accent-glow: rgba(110, 155, 207, 0.18);
-  --color-gold: #fbbf24;
-  --color-green: #34d399;
-  --color-red: #f87171;
-  --font-mono: ui-monospace, 'SFMono-Regular', Menlo, Monaco, Consolas, monospace;
+  --color-background: #0a0a0b;
+  --color-foreground: #eceae6;
+  --color-muted: #8a8680;
+  --color-faint: #5c5954;
+  --color-surface: #131314;
+  --color-surface-2: #1a1a1c;
+  --color-border: #2c2c2e;
+  --color-border-strong: #47474b;
+  --color-accent: #e4572e;
+  --color-accent-light: #f3a489;
+  --color-accent-dim: rgba(228, 87, 46, 0.14);
+  --color-gold: #c9b27a;
+  --color-green: #62b58a;
+  --color-red: #d96b5e;
+  --font-sans: var(--font-plex), "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-newsreader), Newsreader, ui-serif, Georgia, serif;
+  --font-mono: var(--font-plex-mono), "IBM Plex Mono", ui-monospace, monospace;
+}
+
+@view-transition {
+  navigation: auto;
 }
 
 * {
@@ -30,22 +38,19 @@ html {
 body {
   background: var(--color-background);
   color: var(--color-foreground);
-  font-family: inherit;
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-button, a {
-  transition: all 0.15s ease;
-}
-
-button:active:not(:disabled) {
-  transform: scale(0.97);
+::selection {
+  background: rgba(228, 87, 46, 0.35);
+  color: #fff8f5;
 }
 
 ::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -53,23 +58,223 @@ button:active:not(:disabled) {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 2px;
+  background: #2c2c2e;
+  border-radius: 0;
 }
 
-::selection {
-  background: rgba(110, 155, 207, 0.3);
-  color: #f8fafc;
+a,
+button {
+  transition:
+    color 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease,
+    opacity 160ms ease;
+}
+
+button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.grain {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.page-title {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  color: var(--color-foreground);
+}
+
+.kicker {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-faint);
+}
+
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.panel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  transition: border-color 160ms ease, background-color 160ms ease;
+}
+
+.panel-hover:hover {
+  border-color: var(--color-border-strong);
+}
+
+.field {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0 0.95rem;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  color: var(--color-foreground);
+  outline: none;
+  transition: border-color 160ms ease;
+}
+
+.field:focus {
+  border-color: var(--color-accent);
+}
+
+textarea.field {
+  min-height: 5rem;
+  padding: 0.75rem 0.95rem;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0 1.15rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--color-accent);
+  color: #1c0c08;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #ef6640;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--color-foreground);
+  border-color: var(--color-border);
+}
+
+.btn-ghost:hover:not(:disabled) {
+  border-color: var(--color-border-strong);
+  background: var(--color-surface-2);
+}
+
+.btn-buy {
+  background: #2f6a52;
+  color: #e8f6ee;
+}
+
+.btn-buy:hover:not(:disabled) {
+  background: #387a5e;
+}
+
+.btn-sell {
+  background: #9e3a34;
+  color: #fdeceb;
+}
+
+.btn-sell:hover:not(:disabled) {
+  background: #b3443d;
+}
+
+.logo-mark {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.85rem;
+  height: 1.85rem;
+  background: #161617;
+  border: 1px solid var(--color-border);
+  color: var(--color-foreground);
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+.logo-mark::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--color-accent);
+}
+
+.flash {
+  animation: flash-in 280ms ease;
+}
+
+@keyframes flash-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 .skeleton {
-  background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.03) 75%);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.03) 25%,
+    rgba(255, 255, 255, 0.07) 50%,
+    rgba(255, 255, 255, 0.03) 75%
+  );
   background-size: 200% 100%;
-  animation: shimmer 1.5s ease-in-out infinite;
-  border-radius: 0.5rem;
+  animation: shimmer 1.6s ease-in-out infinite;
+  border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @view-transition {
+    navigation: none;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  button:active:not(:disabled) {
+    transform: none;
+  }
 }

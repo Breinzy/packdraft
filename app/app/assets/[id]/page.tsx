@@ -30,7 +30,7 @@ export default async function AssetDetailPage({
     return (
       <AppShell nav="market">
         <main className="px-4 md:px-8 py-6 md:py-10 max-w-5xl mx-auto space-y-6">
-          <h1 className="text-xl font-bold tracking-widest text-white">ASSET</h1>
+          <h1 className="page-title text-2xl">Asset</h1>
           <NeedsDatabase feature="Asset detail" />
         </main>
       </AppShell>
@@ -43,7 +43,7 @@ export default async function AssetDetailPage({
     return (
       <AppShell nav="market">
         <main className="px-4 md:px-8 py-6 md:py-10 max-w-5xl mx-auto space-y-6">
-          <h1 className="text-xl font-bold tracking-widest text-white">ASSET</h1>
+          <h1 className="page-title text-2xl">Asset</h1>
           <QueryFailed feature="this asset" />
         </main>
       </AppShell>
@@ -77,44 +77,44 @@ export default async function AssetDetailPage({
   }
 
   const changeColor =
-    (asset.change_7d ?? 0) > 0 ? 'text-green' : (asset.change_7d ?? 0) < 0 ? 'text-red' : 'text-slate-500';
+    (asset.change_7d ?? 0) > 0 ? 'text-green' : (asset.change_7d ?? 0) < 0 ? 'text-red' : 'text-muted';
 
   return (
     <AppShell nav="market">
       <main className="px-4 md:px-8 py-6 md:py-10 max-w-5xl mx-auto space-y-6">
-        <Link href="/assets" className="text-sm text-slate-500 tracking-wider min-h-11 inline-flex items-center">
-          ← MARKET
+        <Link href="/assets" className="text-sm text-muted min-h-11 inline-flex items-center">
+          ← Market
         </Link>
 
         <div className="flex flex-col md:flex-row gap-6">
           <AssetThumb src={assetImageSrc(asAsset(asset))} alt={asset.name} size="lg" />
           <div className="min-w-0 flex-1 space-y-3">
-            <div className="text-[10px] text-slate-600 tracking-widest">
+            <div className="kicker">
               {asset.tcg_name ?? 'Pokémon'} · {ASSET_TYPE_LABELS[asset.asset_type]}
               {asset.set_name ? ` · ${asset.set_name}` : ''}
             </div>
-            <h1 className="text-2xl md:text-4xl font-bold tracking-wide text-white">{asset.name}</h1>
+            <h1 className="page-title text-3xl md:text-5xl">{asset.name}</h1>
             <div className="flex items-baseline gap-3">
-              <span className="text-2xl text-accent-light">
+              <span className="num text-2xl text-foreground">
                 {asset.price == null ? '—' : formatCurrency(asset.price)}
               </span>
               {asset.change_7d != null ? (
                 <span className={`text-sm ${changeColor}`}>{formatPct(asset.change_7d)} 7D</span>
               ) : null}
               {asset.price == null ? (
-                <span className="text-xs text-slate-600 tracking-wider">NO PRICE</span>
+                <span className="kicker">No price</span>
               ) : asset.stale ? (
-                <span className="text-xs text-gold tracking-wider">STALE</span>
+                <span className="kicker text-gold">Stale</span>
               ) : null}
             </div>
             {asset.condition ? (
-              <div className="text-xs text-slate-500 tracking-wider">{asset.condition}</div>
+              <div className="text-xs text-muted">{asset.condition}</div>
             ) : null}
           </div>
         </div>
 
-        <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-4 md:p-6">
-          <div className="text-[10px] text-slate-600 tracking-widest mb-2">PRICE HISTORY</div>
+        <div className="panel p-4 md:p-6">
+          <div className="kicker mb-2">Price history</div>
           <Sparkline points={history.map((p) => p.price)} />
         </div>
 
@@ -131,11 +131,11 @@ export default async function AssetDetailPage({
             tradingOpen={canTradeStatus(selected.tournament.status)}
           />
         ) : selected && asset.price == null ? (
-          <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-5 text-sm text-slate-400">
+          <div className="panel p-5 text-sm text-muted">
             No Packdraft price for this asset yet. Trading needs a stored snapshot.
           </div>
         ) : user && tradeable.length === 0 ? (
-          <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-5 text-sm text-slate-400">
+          <div className="panel p-5 text-sm text-muted">
             Join an active tournament to trade this asset.{' '}
             <Link href="/tournaments" className="text-accent-light">
               View tournaments
@@ -144,24 +144,24 @@ export default async function AssetDetailPage({
         ) : !user ? (
           <Link
             href={`/auth/login?next=/assets/${asset.id}`}
-            className="inline-flex min-h-12 items-center text-sm tracking-widest text-accent-light"
+            className="inline-flex min-h-12 items-center text-sm text-accent-light"
           >
-            SIGN IN TO TRADE
+            Sign in to trade
           </Link>
         ) : null}
 
         {tradeable.length > 1 ? (
-          <div className="text-xs text-slate-500 space-y-2">
-            <div className="tracking-widest">TRADE IN</div>
+          <div className="text-xs text-muted space-y-2">
+            <div className="kicker">Trade in</div>
             <div className="flex flex-wrap gap-2">
               {tradeable.map((b) => (
                 <Link
                   key={b.tournament.id}
                   href={`/assets/${asset.id}?tournament=${b.tournament.id}`}
-                  className={`min-h-11 inline-flex items-center px-3 rounded-xl border text-xs tracking-wider ${
+                  className={`min-h-11 inline-flex items-center px-3 rounded-xl border text-xs ${
                     selected?.tournament.id === b.tournament.id
-                      ? 'border-accent/50 text-white'
-                      : 'border-white/10 text-slate-400'
+                      ? 'border-accent/50 text-foreground'
+                      : 'border-white/10 text-muted'
                   }`}
                 >
                   {b.tournament.name}

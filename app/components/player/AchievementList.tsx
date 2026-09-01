@@ -6,10 +6,10 @@ export default function AchievementList({ achievements }: { achievements: Achiev
       {achievements.map((item) => (
         <li
           key={item.id}
-          className={`rounded-2xl border px-4 py-3 text-sm tracking-wider ${
+          className={`px-4 py-3 text-sm rounded-[10px] border ${
             item.earned
-              ? 'border-accent/40 bg-accent-dim text-white'
-              : 'border-white/[0.06] bg-white/[0.02] text-slate-600'
+              ? 'border-accent/40 bg-accent-dim text-foreground'
+              : 'border-border bg-surface text-faint'
           }`}
         >
           {item.earned ? '● ' : '○ '}

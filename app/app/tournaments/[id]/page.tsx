@@ -36,7 +36,7 @@ export default async function TournamentDetailPage({
     return (
       <AppShell nav="play">
         <main className="px-4 md:px-8 py-6 md:py-10 max-w-5xl mx-auto space-y-6">
-          <h1 className="text-xl font-bold tracking-widest text-white">TOURNAMENT</h1>
+          <h1 className="page-title text-2xl">Tournament</h1>
           <NeedsDatabase feature="This tournament" />
         </main>
       </AppShell>
@@ -58,7 +58,7 @@ export default async function TournamentDetailPage({
     return (
       <AppShell nav="play">
         <main className="px-4 md:px-8 py-6 md:py-10 max-w-5xl mx-auto space-y-6">
-          <h1 className="text-xl font-bold tracking-widest text-white">TOURNAMENT</h1>
+          <h1 className="page-title text-2xl">Tournament</h1>
           <QueryFailed feature="this tournament" />
         </main>
       </AppShell>
@@ -126,38 +126,38 @@ export default async function TournamentDetailPage({
   return (
     <AppShell nav="play">
       <main className="px-4 md:px-8 py-6 md:py-10 max-w-5xl mx-auto space-y-8">
-        <Link href="/tournaments" className="text-sm text-slate-500 tracking-wider min-h-11 inline-flex items-center">
-          ← PLAY
+        <Link href="/tournaments" className="text-sm text-muted min-h-11 inline-flex items-center">
+          ← Play
         </Link>
 
         <div className="space-y-3">
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl md:text-4xl font-bold tracking-wide text-white">{tournament.name}</h1>
+            <h1 className="page-title text-3xl md:text-5xl">{tournament.name}</h1>
             <StatusBadge status={tournament.status} />
           </div>
           {tournament.description ? (
-            <p className="text-sm text-slate-400">{tournament.description}</p>
+            <p className="text-sm text-muted">{tournament.description}</p>
           ) : null}
-          <p className="text-sm text-slate-500">{TOURNAMENT_STATUS_HELP[tournament.status]}</p>
-          <div className="text-xs text-slate-500 tracking-wider">
-            {tournament.status === 'upcoming' && `STARTS ${formatCountdown(tournament.starts_at)}`}
-            {tournament.status === 'active' && `TRADING CLOSES ${formatCountdown(tournament.trading_closes_at)}`}
-            {isSettledStatus(tournament.status) && 'RESULTS LOCKED'}
+          <p className="text-sm text-muted">{TOURNAMENT_STATUS_HELP[tournament.status]}</p>
+          <div className="text-xs text-muted">
+            {tournament.status === 'upcoming' && `Starts ${formatCountdown(tournament.starts_at)}`}
+            {tournament.status === 'active' && `Trading closes ${formatCountdown(tournament.trading_closes_at)}`}
+            {isSettledStatus(tournament.status) && 'Results locked'}
           </div>
         </div>
 
         {portfolio ? (
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
             {[
-              { label: 'VALUE', value: formatCurrency(portfolioValue), color: '#e2e8f0' },
-              { label: 'CASH', value: formatCurrency(portfolio.cash), color: '#9fc0e6' },
-              { label: 'HOLDINGS', value: formatCurrency(holdingsValue), color: '#9fc0e6' },
-              { label: 'RETURN', value: formatReturn(ret), color: ret >= 0 ? '#34d399' : '#f87171' },
-              { label: 'RANK', value: myStanding ? `#${myStanding.rank}` : '—', color: '#fbbf24' },
+              { label: 'Value', value: formatCurrency(portfolioValue), color: 'var(--color-foreground)' },
+              { label: 'Cash', value: formatCurrency(portfolio.cash), color: 'var(--color-muted)' },
+              { label: 'Holdings', value: formatCurrency(holdingsValue), color: 'var(--color-muted)' },
+              { label: 'Return', value: formatReturn(ret), color: ret >= 0 ? 'var(--color-green)' : 'var(--color-red)' },
+              { label: 'Rank', value: myStanding ? `#${myStanding.rank}` : '—', color: 'var(--color-gold)' },
             ].map((stat) => (
-              <div key={stat.label} className="bg-white/[0.03] border border-white/[0.06] rounded-2xl px-4 py-3">
-                <div className="text-[10px] text-slate-600 tracking-widest mb-1">{stat.label}</div>
-                <div className="text-base md:text-lg font-bold" style={{ color: stat.color }}>
+              <div key={stat.label} className="panel px-4 py-3">
+                <div className="kicker mb-1">{stat.label}</div>
+                <div className="num text-base md:text-lg font-medium" style={{ color: stat.color }}>
                   {stat.value}
                 </div>
               </div>
@@ -166,27 +166,26 @@ export default async function TournamentDetailPage({
         ) : canJoinStatus(tournament.status) ? (
           <JoinButton tournamentId={tournament.id} />
         ) : (
-          <p className="text-sm text-slate-500">This tournament is no longer open to join.</p>
+          <p className="text-sm text-muted">This tournament is no longer open to join.</p>
         )}
 
         {canTradeStatus(tournament.status) && portfolio ? (
           <Link
             href={`/assets?tournament=${tournament.id}`}
-            className="inline-flex items-center justify-center w-full md:w-auto min-h-12 px-6 rounded-2xl text-sm font-bold tracking-widest text-white"
-            style={{ background: 'linear-gradient(135deg, #5b89bf, #4a78ae)' }}
+            className="btn btn-primary w-full md:w-auto min-h-12"
           >
-            BROWSE MARKET
+            Browse market
           </Link>
         ) : null}
 
         <section className="space-y-3">
-          <h2 className="text-xs tracking-widest text-slate-600">LEADERBOARD</h2>
+          <h2 className="kicker">Leaderboard</h2>
           {standings[0]?.frozen ? (
-            <p className="text-xs text-gold tracking-wider">FINAL — will not change</p>
+            <p className="text-xs text-gold">Final — will not change</p>
           ) : tournament.status === 'locked' || tournament.status === 'settling' ? (
-            <p className="text-xs text-gold tracking-wider">Trading closed — values use prices as of close</p>
+            <p className="text-xs text-gold">Trading closed — values use prices as of close</p>
           ) : (
-            <p className="text-xs text-slate-600 tracking-wider">Live during the tournament</p>
+            <p className="text-xs text-faint">Live during the tournament</p>
           )}
           <LeaderboardList standings={standings} userId={user?.id} />
         </section>
@@ -194,11 +193,11 @@ export default async function TournamentDetailPage({
         {portfolio ? (
           <>
             <section className="space-y-3">
-              <h2 className="text-xs tracking-widest text-slate-600">HOLDINGS</h2>
+              <h2 className="kicker">Holdings</h2>
               <HoldingsList holdings={holdings} tournamentId={tournament.id} />
             </section>
             <section className="space-y-3">
-              <h2 className="text-xs tracking-widest text-slate-600">TRADE HISTORY</h2>
+              <h2 className="kicker">Trade history</h2>
               <TradeHistory trades={trades} />
             </section>
           </>

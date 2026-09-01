@@ -10,7 +10,7 @@ export default function LeaderboardList({
   userId?: string | null;
 }) {
   if (standings.length === 0) {
-    return <p className="text-sm text-slate-500 tracking-wider">No players yet.</p>;
+    return <p className="text-sm text-muted">No players yet.</p>;
   }
 
   return (
@@ -21,25 +21,25 @@ export default function LeaderboardList({
           <li
             key={row.user_id}
             className={cn(
-              'rounded-2xl border px-4 py-3',
-              mine ? 'border-accent/50 bg-accent-dim' : 'border-white/[0.06] bg-white/[0.03]'
+              'panel px-4 py-3',
+              mine ? 'border-accent/50 bg-accent-dim' : ''
             )}
           >
             <div className="flex items-baseline justify-between gap-3">
               <div className="min-w-0 flex items-baseline gap-3">
-                <span className="text-sm text-gold font-bold w-8 shrink-0">#{row.rank}</span>
-                <Link href={`/players/${row.user_id}`} className="text-sm text-white font-bold truncate hover:text-accent-light">
+                <span className="num text-sm text-gold font-medium w-8 shrink-0">#{row.rank}</span>
+                <Link href={`/players/${row.user_id}`} className="text-sm text-foreground font-medium truncate hover:text-accent-light">
                   {row.display_name}
                 </Link>
               </div>
-              <span className="text-sm text-white shrink-0">{formatCurrency(row.portfolio_value)}</span>
+              <span className="num text-sm text-foreground shrink-0">{formatCurrency(row.portfolio_value)}</span>
             </div>
-            <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-slate-500 tracking-wider">
+            <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted">
               <span className={row.return_pct >= 0 ? 'text-green' : 'text-red'}>
                 {formatReturn(row.return_pct)}
               </span>
-              <span>CASH {formatCurrency(row.cash)}</span>
-              <span>HELD {formatCurrency(row.holdings_value)}</span>
+              <span>Cash {formatCurrency(row.cash)}</span>
+              <span>Held {formatCurrency(row.holdings_value)}</span>
             </div>
           </li>
         );

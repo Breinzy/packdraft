@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Logo from '@/components/brand/Logo';
 import type { Tournament } from '@/types';
 import type { MarketJobState } from '@/lib/market/job-state';
 import StatusBadge from '@/components/tournament/StatusBadge';
@@ -73,23 +74,13 @@ export default function AdminPanel({
 
   return (
     <div className="min-h-dvh">
-      <header className="border-b border-border py-3 px-4 md:py-4 md:px-16 flex items-center justify-between bg-background/90 backdrop-blur-xl">
-        <div className="flex items-center gap-4">
-          <Link href="/" className="flex items-center gap-2 min-h-11">
-            <div
-              className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
-              style={{ background: 'linear-gradient(135deg, #6e9bcf, #b0c4de)' }}
-            >
-              ⚡
-            </div>
-            <span className="text-base font-bold tracking-[0.15em] text-white">PACKDRAFT</span>
-          </Link>
-          <span className="text-xs tracking-wider text-yellow-400 border border-yellow-400/40 rounded px-2 py-0.5">
-            ADMIN
-          </span>
+      <header className="border-b border-border py-3 px-4 md:px-12 flex items-center justify-between bg-background/80 backdrop-blur-md">
+        <div className="flex items-center gap-3">
+          <Logo href="/" />
+          <span className="kicker border border-gold/40 text-gold px-1.5 py-0.5">Admin</span>
         </div>
-        <Link href="/dashboard" className="text-sm text-slate-500 hover:text-white tracking-wider min-h-11 inline-flex items-center">
-          ← DASHBOARD
+        <Link href="/dashboard" className="text-sm text-muted hover:text-foreground min-h-11 inline-flex items-center">
+          ← Dashboard
         </Link>
       </header>
 
@@ -107,21 +98,21 @@ export default function AdminPanel({
             },
             { label: 'TOURNAMENTS', value: tournaments.length },
           ].map((stat) => (
-            <div key={stat.label} className="bg-white/[0.02] border border-white/[0.06] rounded-lg px-4 py-3">
-              <div className="text-[10px] text-slate-600 tracking-widest mb-1">{stat.label}</div>
-              <div className="text-base font-bold text-white">{stat.value}</div>
+            <div key={stat.label} className="panel px-4 py-3">
+              <div className="kicker mb-1">{stat.label}</div>
+              <div className="text-base font-bold text-foreground">{stat.value}</div>
             </div>
           ))}
         </div>
 
         {importJob ? (
-          <div className="bg-white/[0.02] border border-white/[0.06] rounded-lg p-4 space-y-2">
-            <div className="text-xs text-slate-600 tracking-widest">CATALOG IMPORT</div>
-            <div className="text-sm text-white">
+          <div className="panel p-4 space-y-2">
+            <div className="kicker">Catalog import</div>
+            <div className="text-sm text-foreground">
               {importJob.status.toUpperCase()} · stage {importJob.stage}
               {importJob.stop_reason ? ` · last stop: ${importJob.stop_reason}` : ''}
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs text-slate-400">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs text-muted">
               <div>Sealed {importJob.sealed_imported}</div>
               <div>Singles {importJob.singles_imported}</div>
               <div>Graded {importJob.graded_imported}</div>
@@ -132,7 +123,7 @@ export default function AdminPanel({
               <div>Graded offset {importJob.graded_offset}</div>
             </div>
             {importJob.last_run_at ? (
-              <div className="text-xs text-slate-600">Last run {formatTimestamp(importJob.last_run_at)}</div>
+              <div className="text-xs text-faint">Last run {formatTimestamp(importJob.last_run_at)}</div>
             ) : null}
             {importJob.last_error ? (
               <div className="text-xs text-red-400 break-all">{importJob.last_error}</div>
@@ -147,33 +138,33 @@ export default function AdminPanel({
                 before cron/admin starts a fresh PokemonPriceTracker ingest from sealed offset 0.
               </p>
             ) : null}
-            <p className="text-xs text-slate-600">
+            <p className="text-xs text-faint">
               Full catalog is chunked: one Vercel run is ~4 minutes. Daily cron continues automatically after PPT
               regenerates at 06:00 UTC.
             </p>
           </div>
         ) : (
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-muted">
             Apply the market_job_state migration to track resumable catalog import.
           </p>
         )}
 
         <div className="space-y-3">
-          <div className="text-xs text-slate-600 tracking-widest mb-2">MARKET DATA</div>
+          <div className="kicker mb-2">Market data</div>
           {actions.map((action) => (
             <div
               key={action.id}
-              className="bg-white/[0.02] border border-white/[0.06] rounded-lg p-4 flex flex-col md:flex-row md:items-center gap-3"
+              className="panel p-4 flex flex-col md:flex-row md:items-center gap-3"
             >
               <div className="flex-1">
-                <div className="text-sm font-bold tracking-wider text-white">{action.label}</div>
-                <div className="text-xs text-slate-600 mt-0.5">{action.description}</div>
+                <div className="text-sm font-bold text-foreground">{action.label}</div>
+                <div className="text-xs text-faint mt-0.5">{action.description}</div>
               </div>
 
               <button
                 onClick={() => runAction(action.id)}
                 disabled={loading[action.id]}
-                className="px-5 py-2.5 min-h-11 rounded-lg text-sm font-bold tracking-widest disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                className="btn btn-ghost"
                 style={
                   action.warn
                     ? { background: 'rgba(251,191,36,0.1)', border: '1px solid rgba(251,191,36,0.3)', color: '#fbbf24' }
@@ -200,35 +191,35 @@ export default function AdminPanel({
         </div>
 
         <div className="space-y-3">
-          <div className="text-xs text-slate-600 tracking-widest">CREATE TOURNAMENT</div>
-          <div className="bg-white/[0.02] border border-white/[0.06] rounded-lg p-4 space-y-3">
+          <div className="kicker">Create tournament</div>
+          <div className="panel p-4 space-y-3">
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Name"
-              className="w-full min-h-11 rounded-xl bg-white/[0.04] border border-white/[0.08] px-4 text-white"
+              className="field"
             />
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Description"
-              className="w-full min-h-20 rounded-xl bg-white/[0.04] border border-white/[0.08] px-4 py-3 text-white"
+              className="field"
             />
             <div className="grid grid-cols-2 gap-3">
-              <label className="text-xs text-slate-500 tracking-wider">
+              <label className="text-xs text-muted">
                 BUDGET
                 <input
                   value={budget}
                   onChange={(e) => setBudget(e.target.value)}
-                  className="mt-1 w-full min-h-11 rounded-xl bg-white/[0.04] border border-white/[0.08] px-4 text-white"
+                  className="field mt-1"
                 />
               </label>
-              <label className="text-xs text-slate-500 tracking-wider">
+              <label className="text-xs text-muted">
                 DAYS
                 <input
                   value={days}
                   onChange={(e) => setDays(e.target.value)}
-                  className="mt-1 w-full min-h-11 rounded-xl bg-white/[0.04] border border-white/[0.08] px-4 text-white"
+                  className="field mt-1"
                 />
               </label>
             </div>
@@ -243,7 +234,7 @@ export default function AdminPanel({
                 })
               }
               disabled={loading['create-tournament']}
-              className="px-5 py-2.5 min-h-11 rounded-lg text-sm font-bold tracking-widest text-white disabled:opacity-50"
+              className="btn btn-primary"
               style={{ background: 'rgba(110,155,207,0.2)', border: '1px solid rgba(110,155,207,0.4)' }}
             >
               {loading['create-tournament'] ? 'CREATING…' : 'CREATE'}
@@ -257,12 +248,12 @@ export default function AdminPanel({
         </div>
 
         <div className="space-y-3">
-          <div className="text-xs text-slate-600 tracking-widest">SETTLE ONE</div>
+          <div className="kicker">Settle one</div>
           <div className="flex flex-col md:flex-row gap-2">
             <select
               value={settleId}
               onChange={(e) => setSettleId(e.target.value)}
-              className="flex-1 min-h-11 rounded-xl bg-white/[0.04] border border-white/[0.08] px-3 text-sm text-slate-300"
+              className="field flex-1"
             >
               <option value="">Select tournament</option>
               {tournaments.map((t) => (
@@ -275,31 +266,31 @@ export default function AdminPanel({
               type="button"
               disabled={!settleId || loading['settle-tournament']}
               onClick={() => runAction('settle-tournament', { tournamentId: settleId })}
-              className="px-5 min-h-11 rounded-lg text-sm font-bold tracking-widest text-gold disabled:opacity-40"
+              className="btn btn-ghost text-gold"
               style={{ border: '1px solid rgba(251,191,36,0.3)' }}
             >
               SETTLE
             </button>
           </div>
           {results['settle-tournament'] ? (
-            <div className="text-xs font-mono break-all text-slate-400">
+            <div className="text-xs font-mono break-all text-muted">
               {JSON.stringify(results['settle-tournament'])}
             </div>
           ) : null}
         </div>
 
         <div className="space-y-2">
-          <div className="text-xs text-slate-600 tracking-widest">TOURNAMENTS</div>
+          <div className="kicker">Tournaments</div>
           {tournaments.length === 0 ? (
-            <p className="text-sm text-slate-500">None yet. Apply the Phase 5–10 migration, then create one.</p>
+            <p className="text-sm text-muted">None yet. Apply the Phase 5–10 migration, then create one.</p>
           ) : (
             tournaments.map((t) => (
               <Link
                 key={t.id}
                 href={`/tournaments/${t.id}`}
-                className="flex items-center justify-between gap-3 bg-white/[0.02] border border-white/[0.06] rounded-lg px-4 py-3"
+                className="flex items-center justify-between gap-3 panel px-4 py-3"
               >
-                <span className="text-sm text-white truncate">{t.name}</span>
+                <span className="text-sm text-foreground truncate">{t.name}</span>
                 <StatusBadge status={t.status} />
               </Link>
             ))

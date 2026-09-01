@@ -36,17 +36,8 @@ export default function JoinButton({ tournamentId }: { tournamentId: string }) {
 
   return (
     <div className="space-y-2">
-      <button
-        type="button"
-        onClick={join}
-        disabled={loading}
-        className="w-full md:w-auto inline-flex items-center justify-center px-8 py-4 min-h-14 rounded-2xl text-base font-bold tracking-widest text-white disabled:opacity-50"
-        style={{
-          background: 'linear-gradient(135deg, #5b89bf, #4a78ae)',
-          border: '2px solid rgba(110,155,207,0.4)',
-        }}
-      >
-        {loading ? 'JOINING…' : 'JOIN TOURNAMENT'}
+      <button type="button" onClick={join} disabled={loading} className="btn btn-primary min-h-12 px-8 w-full md:w-auto">
+        {loading ? 'Joining…' : 'Join tournament'}
       </button>
       {error ? <p className="text-sm text-red">{error}</p> : null}
     </div>

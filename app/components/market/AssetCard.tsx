@@ -12,31 +12,29 @@ interface AssetCardProps {
 export default function AssetCard({ asset, href }: AssetCardProps) {
   const src = assetImageSrc(asset);
   const change = asset.change_7d ?? 0;
-  const changeColor = change > 0 ? 'text-green' : change < 0 ? 'text-red' : 'text-slate-500';
+  const changeColor = change > 0 ? 'text-green' : change < 0 ? 'text-red' : 'text-faint';
 
   return (
     <Link
       href={href ?? `/assets/${asset.id}`}
-      className="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-3 md:p-4 flex gap-3 min-h-[5.5rem] hover:border-white/20 transition-colors"
+      className="panel panel-hover p-3 md:p-4 flex gap-3 min-h-[5.5rem]"
     >
       <AssetThumb src={src} alt={asset.name} />
       <div className="min-w-0 flex-1">
-        <div className="text-[10px] text-slate-600 tracking-widest mb-1">
+        <div className="kicker mb-1 truncate">
           {ASSET_TYPE_LABELS[asset.asset_type]}
           {asset.set_name ? ` · ${asset.set_name}` : ''}
         </div>
-        <div className="text-sm md:text-base text-white font-bold tracking-wide truncate">{asset.name}</div>
+        <div className="text-sm md:text-[0.95rem] text-foreground font-medium truncate">{asset.name}</div>
         <div className="mt-1 flex items-baseline gap-2">
-          <span className="text-sm text-accent-light">
+          <span className="num text-sm text-foreground">
             {asset.price == null ? '—' : formatCurrency(asset.price)}
           </span>
-          {asset.price != null && (
-            <span className={`text-xs ${changeColor}`}>{formatPct(change)}</span>
-          )}
+          {asset.price != null ? <span className={`text-xs num ${changeColor}`}>{formatPct(change)}</span> : null}
           {asset.price == null ? (
-            <span className="text-[10px] text-slate-600 tracking-wider">NO PRICE</span>
+            <span className="kicker">No price</span>
           ) : asset.stale ? (
-            <span className="text-[10px] text-gold tracking-wider">STALE</span>
+            <span className="kicker text-gold">Stale</span>
           ) : null}
         </div>
       </div>

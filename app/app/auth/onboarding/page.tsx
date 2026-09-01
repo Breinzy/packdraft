@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createClient, tryCreateBrowserClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
+import AuthShell from '@/components/layout/AuthShell';
 
 export default function OnboardingPage() {
   const [displayName, setDisplayName] = useState('');
@@ -106,79 +107,42 @@ export default function OnboardingPage() {
 
   if (checking) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-slate-600 tracking-widest text-sm">LOADING...</div>
+      <div className="min-h-dvh flex items-center justify-center">
+        <div className="text-muted text-sm">Loading…</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-12">
-          <div
-            className="inline-flex items-center justify-center w-20 h-20 rounded-full text-3xl mb-8"
-            style={{ background: 'linear-gradient(135deg, #6e9bcf, #b0c4de)' }}
-          >
-            ⚡
-          </div>
-          <h1 className="text-3xl font-bold tracking-widest text-white mb-4">
-            CHOOSE YOUR NAME
-          </h1>
-          <p className="text-base text-slate-500 tracking-wide">
-            THIS IS HOW YOU&apos;LL APPEAR ON LEADERBOARDS
-          </p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-8">
-          <div>
-            <label className="block text-xs text-slate-500 tracking-widest mb-3">
-              DISPLAY NAME
-            </label>
-            <input
-              type="text"
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              maxLength={24}
-              placeholder="TrainerRed"
-              autoFocus
-              className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-5 py-4 text-base text-slate-200 placeholder:text-slate-600 outline-none transition-colors font-mono"
-              onFocus={(e) => (e.target.style.borderColor = 'rgba(110,155,207,0.4)')}
-              onBlur={(e) => (e.target.style.borderColor = 'rgba(255,255,255,0.08)')}
-            />
-            <div className="text-xs text-slate-700 tracking-wider mt-2">
-              {displayName.length}/24 characters
-            </div>
-          </div>
-
-          {error && (
-            <div className="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-xl px-5 py-4">
-              {error}
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-5 rounded-xl text-base font-bold tracking-widest text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{
-              background: 'linear-gradient(135deg, #5b89bf, #4a78ae)',
-              border: '2px solid rgba(110,155,207,0.4)',
-              boxShadow: '0 0 24px rgba(110,155,207,0.18)',
-            }}
-          >
-            {loading ? 'SAVING...' : 'CONTINUE'}
-          </button>
-        </form>
-
-        <button
-          onClick={handleSkip}
-          disabled={loading}
-          className="w-full text-center text-sm text-slate-600 hover:text-slate-400 tracking-widest mt-6 transition-colors disabled:opacity-50"
-        >
-          SKIP FOR NOW
+    <AuthShell title="Choose your name" subtitle="This is how you appear on leaderboards.">
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <label className="block">
+          <span className="kicker mb-2 block">Display name</span>
+          <input
+            type="text"
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+            maxLength={24}
+            placeholder="TrainerRed"
+            autoFocus
+            className="field"
+          />
+          <div className="text-xs text-faint mt-2">{displayName.length}/24</div>
+        </label>
+        {error ? (
+          <div className="text-sm text-red border border-red/25 bg-red/10 rounded-md px-4 py-3">{error}</div>
+        ) : null}
+        <button type="submit" disabled={loading} className="btn btn-primary w-full min-h-12">
+          {loading ? 'Saving…' : 'Continue'}
         </button>
-      </div>
-    </div>
+      </form>
+      <button
+        onClick={handleSkip}
+        disabled={loading}
+        className="w-full text-center text-sm text-faint hover:text-muted mt-5 disabled:opacity-50"
+      >
+        Skip for now
+      </button>
+    </AuthShell>
   );
 }

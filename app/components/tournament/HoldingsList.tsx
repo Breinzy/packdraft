@@ -22,7 +22,7 @@ export default function HoldingsList({
 }) {
   if (holdings.length === 0) {
     return (
-      <p className="text-sm text-slate-500 tracking-wider">
+      <p className="text-sm text-muted">
         No holdings yet. Browse the market and buy with your tournament cash.
       </p>
     );
@@ -40,12 +40,12 @@ export default function HoldingsList({
           <li key={row.assetId}>
             <Link
               href={`/assets/${row.assetId}?tournament=${tournamentId}`}
-              className="flex gap-3 bg-white/[0.03] border border-white/[0.06] rounded-2xl p-3 hover:border-white/20"
+              className="flex gap-3 panel panel-hover p-3"
             >
               <AssetThumb src={row.asset ? assetImageSrc(row.asset) : null} alt={name} />
               <div className="min-w-0 flex-1">
-                <div className="text-sm text-white font-bold truncate">{name}</div>
-                <div className="text-xs text-slate-500 mt-1">
+                <div className="text-sm text-foreground font-bold truncate">{name}</div>
+                <div className="text-xs text-muted mt-1">
                   {row.quantity} @ {formatCurrency(row.averageCost)}
                 </div>
                 <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs">
