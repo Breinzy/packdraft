@@ -33,6 +33,7 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  color-scheme: dark;
 }
 
 body {
@@ -133,6 +134,19 @@ button:active:not(:disabled) {
   border-color: var(--color-accent);
 }
 
+select.field {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%238a8680' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.9rem center;
+  padding-right: 2.25rem;
+}
+
+option {
+  background: #131314;
+  color: #eceae6;
+}
+
 textarea.field {
   min-height: 5rem;
   padding: 0.75rem 0.95rem;
@@ -149,6 +163,7 @@ textarea.field {
   font-size: 0.875rem;
   border: 1px solid transparent;
   white-space: nowrap;
+  cursor: pointer;
 }
 
 .btn:disabled {

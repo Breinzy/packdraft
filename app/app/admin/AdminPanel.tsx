@@ -60,16 +60,16 @@ export default function AdminPanel({
   }
 
   const actions: { id: string; label: string; description: string; warn?: boolean }[] = [
-    { id: 'sync-prices', label: 'SYNC PRICES', description: 'Insert latest Packdraft snapshots for active assets' },
+    { id: 'sync-prices', label: 'Sync prices', description: 'Insert latest Packdraft snapshots for active assets' },
     {
       id: 'import-assets',
-      label: 'IMPORT CATALOG CHUNK',
+      label: 'Import catalog chunk',
       description: 'Resume full PPT ingest. Stops at ~4 minutes, PPT credits, or daily remaining.',
       warn: true,
     },
-    { id: 'pause-import', label: 'PAUSE IMPORT', description: 'Stop cron/admin from continuing the catalog job' },
-    { id: 'resume-import', label: 'RESUME IMPORT', description: 'Allow the next chunk to run from the saved cursor' },
-    { id: 'tick-tournaments', label: 'TICK TOURNAMENTS', description: 'Advance lifecycle and settle locked books' },
+    { id: 'pause-import', label: 'Pause import', description: 'Stop cron/admin from continuing the catalog job' },
+    { id: 'resume-import', label: 'Resume import', description: 'Allow the next chunk to run from the saved cursor' },
+    { id: 'tick-tournaments', label: 'Tick tournaments', description: 'Advance lifecycle and settle locked books' },
   ];
 
   return (
@@ -87,16 +87,16 @@ export default function AdminPanel({
       <main className="px-4 md:px-6 py-6 md:py-8 max-w-4xl mx-auto space-y-8">
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {[
-            { label: 'ACTIVE ASSETS', value: stats.totalAssets },
-            { label: 'SEALED', value: stats.sealedCount },
-            { label: 'SINGLES', value: stats.singlesCount },
-            { label: 'GRADED', value: stats.gradedCount },
-            { label: 'SNAPSHOTS', value: stats.snapshotCount },
+            { label: 'Active assets', value: stats.totalAssets },
+            { label: 'Sealed', value: stats.sealedCount },
+            { label: 'Singles', value: stats.singlesCount },
+            { label: 'Graded', value: stats.gradedCount },
+            { label: 'Snapshots', value: stats.snapshotCount },
             {
-              label: 'LAST SYNC',
+              label: 'Last sync',
               value: stats.lastSync ? formatTimestamp(stats.lastSync) : 'Never',
             },
-            { label: 'TOURNAMENTS', value: tournaments.length },
+            { label: 'Tournaments', value: tournaments.length },
           ].map((stat) => (
             <div key={stat.label} className="panel px-4 py-3">
               <div className="kicker mb-1">{stat.label}</div>
@@ -164,24 +164,18 @@ export default function AdminPanel({
               <button
                 onClick={() => runAction(action.id)}
                 disabled={loading[action.id]}
-                className="btn btn-ghost"
-                style={
-                  action.warn
-                    ? { background: 'rgba(251,191,36,0.1)', border: '1px solid rgba(251,191,36,0.3)', color: '#fbbf24' }
-                    : { background: 'rgba(110,155,207,0.1)', border: '1px solid rgba(110,155,207,0.3)', color: '#9fc0e6' }
-                }
+                className={`btn ${action.warn ? 'btn-ghost text-gold border-gold/40' : 'btn-primary'}`}
               >
-                {loading[action.id] ? 'RUNNING...' : 'RUN'}
+                {loading[action.id] ? 'Running…' : 'Run'}
               </button>
 
               {results[action.id] && (
                 <div
-                  className="w-full mt-1 text-xs rounded-lg px-4 py-3 font-mono break-all"
-                  style={
+                  className={`w-full mt-1 text-xs rounded-md px-4 py-3 font-mono break-all border ${
                     results[action.id]?.error
-                      ? { background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171' }
-                      : { background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.2)', color: '#34d399' }
-                  }
+                      ? 'bg-red/10 border-red/25 text-red'
+                      : 'bg-green/10 border-green/25 text-green'
+                  }`}
                 >
                   {JSON.stringify(results[action.id], null, 2)}
                 </div>
@@ -235,9 +229,8 @@ export default function AdminPanel({
               }
               disabled={loading['create-tournament']}
               className="btn btn-primary"
-              style={{ background: 'rgba(110,155,207,0.2)', border: '1px solid rgba(110,155,207,0.4)' }}
             >
-              {loading['create-tournament'] ? 'CREATING…' : 'CREATE'}
+              {loading['create-tournament'] ? 'Creating…' : 'Create'}
             </button>
             {results['create-tournament'] ? (
               <div className="text-xs font-mono text-green break-all">
@@ -266,10 +259,9 @@ export default function AdminPanel({
               type="button"
               disabled={!settleId || loading['settle-tournament']}
               onClick={() => runAction('settle-tournament', { tournamentId: settleId })}
-              className="btn btn-ghost text-gold"
-              style={{ border: '1px solid rgba(251,191,36,0.3)' }}
+              className="btn btn-ghost text-gold border-gold/40"
             >
-              SETTLE
+              Settle
             </button>
           </div>
           {results['settle-tournament'] ? (

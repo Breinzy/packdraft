@@ -158,10 +158,10 @@ export default async function AssetDetailPage({
                 <Link
                   key={b.tournament.id}
                   href={`/assets/${asset.id}?tournament=${b.tournament.id}`}
-                  className={`min-h-11 inline-flex items-center px-3 rounded-xl border text-xs ${
+                  className={`min-h-11 inline-flex items-center px-3 rounded-md border text-xs ${
                     selected?.tournament.id === b.tournament.id
-                      ? 'border-accent/50 text-foreground'
-                      : 'border-white/10 text-muted'
+                      ? 'border-accent/50 text-foreground bg-accent-dim'
+                      : 'border-border text-muted'
                   }`}
                 >
                   {b.tournament.name}

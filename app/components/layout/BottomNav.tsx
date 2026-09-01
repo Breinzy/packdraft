@@ -21,8 +21,10 @@ export default function BottomNav({ active }: { active: BottomNavKey }) {
             <Link
               key={item.key}
               href={item.href}
-              className={`flex items-center justify-center min-h-14 text-xs font-medium ${
-                isActive ? 'text-foreground' : 'text-faint'
+              className={`flex items-center justify-center min-h-14 text-xs font-medium border-t-2 ${
+                isActive
+                  ? 'text-foreground border-accent'
+                  : 'text-faint border-transparent'
               }`}
             >
               {item.label}

@@ -38,13 +38,6 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${plex.variable} ${newsreader.variable} ${plexMono.variable}`}>
       <body className="min-h-dvh relative overflow-x-hidden bg-background font-sans text-foreground">
-        <div
-          className="fixed inset-0 pointer-events-none z-0"
-          style={{
-            background:
-              'radial-gradient(1200px 500px at 8% -10%, rgba(228,87,46,0.07), transparent 55%), radial-gradient(900px 420px at 100% 110%, rgba(201,178,122,0.04), transparent 50%)',
-          }}
-        />
         <div className="grain" aria-hidden />
         <div className="relative z-10 min-h-dvh flex flex-col">{children}</div>
       </body>
