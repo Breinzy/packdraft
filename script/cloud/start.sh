@@ -32,16 +32,16 @@ echo "==> Applying database migrations"
 
 echo "==> Writing app/.env.local (local Supabase keys are fixed by the CLI)"
 ENV_FILE="$REPO_ROOT/app/.env.local"
-if [ ! -f "$ENV_FILE" ]; then
-  STATUS_ENV="$("$SUPABASE_BIN" status -o env 2>/dev/null || true)"
-  PUBLISHABLE_KEY="$(printf '%s\n' "$STATUS_ENV" | sed -n 's/^PUBLISHABLE_KEY="\{0,1\}\([^"]*\)"\{0,1\}$/\1/p')"
-  SECRET_KEY="$(printf '%s\n' "$STATUS_ENV" | sed -n 's/^SECRET_KEY="\{0,1\}\([^"]*\)"\{0,1\}$/\1/p')"
-  # Fall back to the documented fixed local dev keys if the env output format differs.
-  PUBLISHABLE_KEY="${PUBLISHABLE_KEY:-sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH}"
-  SECRET_KEY="${SECRET_KEY:-sb_secret_N7UND0UgjKTVK-Uodkm0Hg_xSvEMPvz}"
-  # Server-only secrets pass through from the Cloud Agent environment when present.
-  # This is how the real PokemonPriceTracker import gets its key without committing it.
-  cat > "$ENV_FILE" <<EOF
+STATUS_ENV="$("$SUPABASE_BIN" status -o env 2>/dev/null || true)"
+PUBLISHABLE_KEY="$(printf '%s\n' "$STATUS_ENV" | sed -n 's/^PUBLISHABLE_KEY="\{0,1\}\([^"]*\)"\{0,1\}$/\1/p')"
+SECRET_KEY="$(printf '%s\n' "$STATUS_ENV" | sed -n 's/^SECRET_KEY="\{0,1\}\([^"]*\)"\{0,1\}$/\1/p')"
+# Fall back to the documented fixed local dev keys if the env output format differs.
+PUBLISHABLE_KEY="${PUBLISHABLE_KEY:-sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH}"
+SECRET_KEY="${SECRET_KEY:-sb_secret_N7UND0UgjKTVK-Uodkm0Hg_xSvEMPvz}"
+# Always rewrite so Cloud Agent secrets injected on this boot reach Next.js.
+# Server-only secrets pass through from the environment when present.
+# This is how the real PokemonPriceTracker import gets its key without committing keys.
+cat > "$ENV_FILE" <<EOF
 # Auto-generated for local development by script/cloud/start.sh. Gitignored.
 # Supabase points at the LOCAL stack. Server secrets come from injected env vars.
 NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
@@ -51,6 +51,10 @@ CRON_SECRET=${CRON_SECRET:-local-dev-cron-secret}
 POKEMON_PRICE_TRACKER_API_KEY=${POKEMON_PRICE_TRACKER_API_KEY:-}
 ADMIN_EMAILS=${ADMIN_EMAILS:-}
 EOF
+
+if [ -z "${POKEMON_PRICE_TRACKER_API_KEY:-}" ]; then
+  echo "WARNING: POKEMON_PRICE_TRACKER_API_KEY is not set."
+  echo "         Real catalog import will fail until it is added as a Cloud Agent secret."
 fi
 
 echo "==> start.sh complete. Supabase Studio: http://127.0.0.1:54323"
