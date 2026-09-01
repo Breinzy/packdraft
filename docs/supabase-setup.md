@@ -50,11 +50,12 @@ Also required for jobs and admin:
 | `CRON_SECRET` | Any long random string you generate |
 | `ADMIN_EMAILS` | Comma-separated emails allowed to use `/admin` |
 
-Optional, for CLI migrate from an agent:
+Optional, for CLI migrate / catalog copy from an agent:
 
 | Variable | Where it comes from |
 |---|---|
 | `SUPABASE_ACCESS_TOKEN` | [Account access tokens](https://supabase.com/dashboard/account/tokens) |
+| `SUPABASE_DB_PASSWORD` | [Database settings](https://supabase.com/dashboard/project/lximcqaunrovzonsbjkb/settings/database) password |
 
 Never commit values. Never paste secrets into chat or docs.
 
