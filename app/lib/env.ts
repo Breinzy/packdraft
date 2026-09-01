@@ -3,11 +3,20 @@
  *
  * Throws only when a value is *read* and missing, so Next.js can still
  * compile pages that import these helpers. Never log values.
+ *
+ * NEXT_PUBLIC_* values MUST be read with static `process.env.NEXT_PUBLIC_…`
+ * member access. Next.js only inlines those into the browser bundle when the
+ * identifier is a compile-time string. `process.env[name]` is always undefined
+ * in client components, which previously broke signup/login/trade.
  */
+
+function nonempty(value: string | undefined): string | undefined {
+  return value && value.length > 0 ? value : undefined;
+}
 
 function read(name: string): string | undefined {
   const value = process.env[name];
-  return value && value.length > 0 ? value : undefined;
+  return nonempty(value);
 }
 
 function requireValue(name: string): string {
@@ -18,18 +27,26 @@ function requireValue(name: string): string {
   return value;
 }
 
-export function getPublicEnv() {
+function readPublicEnv() {
   return {
-    supabaseUrl: requireValue('NEXT_PUBLIC_SUPABASE_URL'),
-    supabasePublishableKey: requireValue('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY'),
+    supabaseUrl: nonempty(process.env.NEXT_PUBLIC_SUPABASE_URL),
+    supabasePublishableKey: nonempty(process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY),
   };
 }
 
+export function getPublicEnv() {
+  const { supabaseUrl, supabasePublishableKey } = readPublicEnv();
+  if (!supabaseUrl) {
+    throw new Error('Missing required environment variable: NEXT_PUBLIC_SUPABASE_URL');
+  }
+  if (!supabasePublishableKey) {
+    throw new Error('Missing required environment variable: NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY');
+  }
+  return { supabaseUrl, supabasePublishableKey };
+}
+
 export function getOptionalPublicEnv() {
-  return {
-    supabaseUrl: read('NEXT_PUBLIC_SUPABASE_URL'),
-    supabasePublishableKey: read('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY'),
-  };
+  return readPublicEnv();
 }
 
 export function getServerEnv() {
