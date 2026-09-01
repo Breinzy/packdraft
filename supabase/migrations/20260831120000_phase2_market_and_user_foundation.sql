@@ -248,6 +248,10 @@ $$;
 -- PROFILES: strip league assignment
 -- -------------------------------------------
 
+-- The legacy weekly-league player-count trigger/function reference current_league_id,
+-- so they must be removed before the column can be dropped.
+drop trigger if exists trg_update_league_count on profiles;
+drop function if exists update_league_player_count();
 alter table profiles drop constraint if exists profiles_current_league_id_fkey;
 drop index if exists idx_profiles_league;
 alter table profiles drop column if exists current_league_id;
@@ -269,7 +273,7 @@ begin
   on conflict (id) do nothing;
   return NEW;
 end;
-$$ language plpgsql security definer;
+$$ language plpgsql security definer set search_path = public, pg_temp;
 
 -- -------------------------------------------
 -- RLS
