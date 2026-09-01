@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""Live MVP functionality test against the running local stack.
+"""Live MVP functionality test against the running Next app.
 
-Reads app/.env.local (local Supabase). Does not print secret values.
-Covers: pages, signup/login, join, buy, sell, insufficient cash, tournament
-isolation, settlement, and catalog sanity.
+Default: app/.env.local (local Docker Supabase). Aborts if that file points
+at hosted, so local runs cannot write to production.
+
+PACKDRAFT_E2E_HOSTED=1: use process-env hosted keys (project lximcqaunrovzonsbjkb)
+and create users via the Auth admin API so email confirmation cannot block the run.
 """
 from __future__ import annotations
 
@@ -18,6 +20,8 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
 APP_URL = os.environ.get("APP_URL", "http://127.0.0.1:3000")
+HOSTED_REF = "lximcqaunrovzonsbjkb"
+HOSTED = os.environ.get("PACKDRAFT_E2E_HOSTED") == "1"
 RESULTS: list[tuple[str, bool, str]] = []
 
 
@@ -57,14 +61,58 @@ def rest(base: str, key: str, path: str, method: str = "GET", payload=None, extr
         return err.code, body
 
 
+def load_target() -> tuple[str, str, str]:
+    if HOSTED:
+        base = os.environ.get("NEXT_PUBLIC_SUPABASE_URL", "").rstrip("/")
+        anon = os.environ.get("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "")
+        service = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
+        if HOSTED_REF not in base:
+            print("PACKDRAFT_E2E_HOSTED=1 but process env is not the hosted project.", file=sys.stderr)
+            raise SystemExit(2)
+        if not anon or not service:
+            print("Hosted anon/service keys missing from process env.", file=sys.stderr)
+            raise SystemExit(2)
+        return base, anon, service
+
+    env = load_env_local()
+    base = env.get("NEXT_PUBLIC_SUPABASE_URL", "").rstrip("/")
+    anon = env.get("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "")
+    service = env.get("SUPABASE_SERVICE_ROLE_KEY", "")
+    if "127.0.0.1" not in base and "localhost" not in base:
+        print("app/.env.local is not pointing at local Supabase; aborting to avoid hosted writes.", file=sys.stderr)
+        raise SystemExit(2)
+    return base, anon, service
+
+
+def create_user(base: str, service: str, email: str, password: str, display_name: str) -> tuple[int, str | None]:
+    status, body = rest(
+        base,
+        service,
+        "/auth/v1/admin/users",
+        method="POST",
+        payload={
+            "email": email,
+            "password": password,
+            "email_confirm": True,
+            "user_metadata": {"display_name": display_name},
+        },
+    )
+    user_id = None
+    if isinstance(body, dict):
+        user_id = (body.get("user") or {}).get("id") or body.get("id")
+    return status, user_id
+
+
 def http_app(path: str):
     req = urllib.request.Request(APP_URL + path, headers={"Accept": "text/html"})
     try:
-        with urllib.request.urlopen(req, timeout=30) as res:
+        with urllib.request.urlopen(req, timeout=90) as res:
             html = res.read().decode("utf-8", "replace")
             return res.status, html
     except urllib.error.HTTPError as err:
         return err.code, err.read().decode("utf-8", "replace")
+    except TimeoutError:
+        return 0, "timeout"
 
 
 def check(name: str, ok: bool, detail: str = "") -> None:
@@ -78,13 +126,8 @@ def rpc(base: str, service: str, name: str, payload: dict):
 
 
 def main() -> int:
-    env = load_env_local()
-    base = env.get("NEXT_PUBLIC_SUPABASE_URL", "").rstrip("/")
-    anon = env.get("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "")
-    service = env.get("SUPABASE_SERVICE_ROLE_KEY", "")
-    if "127.0.0.1" not in base and "localhost" not in base:
-        print("app/.env.local is not pointing at local Supabase; aborting to avoid hosted writes.", file=sys.stderr)
-        return 2
+    base, anon, service = load_target()
+    print(f"==> Target {'hosted ' + HOSTED_REF if HOSTED else 'local Docker'}")
 
     stamp = str(int(time.time()))
     email = f"e2e.{stamp}@example.com"
@@ -152,29 +195,35 @@ def main() -> int:
     check("expensive asset exists", bool(pricey_id), str(status))
 
     print("==> Auth")
-    status, signup = rest(
-        base,
-        anon,
-        "/auth/v1/signup",
-        method="POST",
-        payload={"email": email, "password": password, "data": {"display_name": "E2E Player"}},
-    )
-    user_id = None
-    if isinstance(signup, dict):
-        user_id = (signup.get("user") or {}).get("id") or signup.get("id")
-    check("signup", status in (200, 201) and bool(user_id), f"http {status}")
+    if HOSTED:
+        status, user_id = create_user(base, service, email, password, "E2E Player")
+        check("signup", status in (200, 201) and bool(user_id), f"http {status}")
+        status, user2 = create_user(base, service, other_email, password, "E2E Rival")
+        check("second signup", status in (200, 201) and bool(user2), f"http {status}")
+    else:
+        status, signup = rest(
+            base,
+            anon,
+            "/auth/v1/signup",
+            method="POST",
+            payload={"email": email, "password": password, "data": {"display_name": "E2E Player"}},
+        )
+        user_id = None
+        if isinstance(signup, dict):
+            user_id = (signup.get("user") or {}).get("id") or signup.get("id")
+        check("signup", status in (200, 201) and bool(user_id), f"http {status}")
 
-    status, signup2 = rest(
-        base,
-        anon,
-        "/auth/v1/signup",
-        method="POST",
-        payload={"email": other_email, "password": password, "data": {"display_name": "E2E Rival"}},
-    )
-    user2 = None
-    if isinstance(signup2, dict):
-        user2 = (signup2.get("user") or {}).get("id") or signup2.get("id")
-    check("second signup", status in (200, 201) and bool(user2), f"http {status}")
+        status, signup2 = rest(
+            base,
+            anon,
+            "/auth/v1/signup",
+            method="POST",
+            payload={"email": other_email, "password": password, "data": {"display_name": "E2E Rival"}},
+        )
+        user2 = None
+        if isinstance(signup2, dict):
+            user2 = (signup2.get("user") or {}).get("id") or signup2.get("id")
+        check("second signup", status in (200, 201) and bool(user2), f"http {status}")
 
     status, login = rest(
         base,
