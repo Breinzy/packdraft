@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import AppShell from '@/components/layout/AppShell';
-import NeedsDatabase from '@/components/ui/NeedsDatabase';
+import NeedsDatabase, { QueryFailed } from '@/components/ui/NeedsDatabase';
 import PlayerStatGrid, { TradeHighlights } from '@/components/player/PlayerStatGrid';
 import ResultHistory from '@/components/player/ResultHistory';
 import AchievementList from '@/components/player/AchievementList';
@@ -45,7 +45,7 @@ export default async function PlayerProfilePage({
       <AppShell nav="dashboard">
         <main className="px-4 md:px-8 py-6 md:py-10 max-w-4xl mx-auto space-y-6">
           <h1 className="text-xl font-bold tracking-widest text-white">PLAYER</h1>
-          <NeedsDatabase feature="player history" />
+          <QueryFailed feature="player history" />
         </main>
       </AppShell>
     );

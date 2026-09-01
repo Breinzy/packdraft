@@ -3,7 +3,7 @@ import AppShell from '@/components/layout/AppShell';
 import AssetCard from '@/components/market/AssetCard';
 import { listSets, searchCatalog } from '@/lib/market/catalog';
 import { tryCreateServerClient } from '@/lib/supabase/server';
-import NeedsDatabase from '@/components/ui/NeedsDatabase';
+import NeedsDatabase, { QueryFailed } from '@/components/ui/NeedsDatabase';
 import type { AssetType } from '@/types';
 
 export const dynamic = 'force-dynamic';
@@ -56,7 +56,7 @@ export default async function AssetsPage({
       <AppShell nav="market">
         <main className="px-4 md:px-8 py-6 md:py-10 max-w-5xl mx-auto space-y-6">
           <h1 className="text-xl md:text-3xl font-bold tracking-widest text-white">MARKET</h1>
-          <NeedsDatabase feature="The asset catalog" />
+          <QueryFailed feature="the asset catalog" />
         </main>
       </AppShell>
     );
@@ -125,7 +125,9 @@ export default async function AssetsPage({
 
         {catalog.assets.length === 0 ? (
           <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-6 text-sm text-slate-500 tracking-wider">
-            No assets match. Import the catalog from Admin after connecting Supabase.
+            {q || assetType !== 'all' || setId
+              ? 'No assets match these filters.'
+              : 'No assets in the catalog yet. An admin can import them from /admin.'}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

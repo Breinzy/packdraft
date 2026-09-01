@@ -1,5 +1,12 @@
 import type { Metadata } from 'next';
+import { DM_Mono } from 'next/font/google';
 import './globals.css';
+
+const dmMono = DM_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: 'Packdraft — Competitive TCG Market Game',
@@ -13,7 +20,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={dmMono.className}>
       <body className="min-h-dvh relative overflow-x-hidden">
         <div
           className="fixed inset-0 pointer-events-none z-0"

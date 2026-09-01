@@ -1,4 +1,4 @@
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, formatTimestamp } from '@/lib/utils';
 import type { TransactionRow } from '@/lib/tournament/queries';
 
 export default function TradeHistory({ trades }: { trades: TransactionRow[] }) {
@@ -22,7 +22,7 @@ export default function TradeHistory({ trades }: { trades: TransactionRow[] }) {
           <div className="text-sm text-slate-300 truncate mt-1">{tx.asset_name ?? 'Asset'}</div>
           <div className="text-[11px] text-slate-600 mt-1 tracking-wider">
             {tx.quantity} @ {formatCurrency(tx.execution_price)} ·{' '}
-            {new Date(tx.executed_at).toLocaleString()}
+            {formatTimestamp(tx.executed_at)}
           </div>
         </li>
       ))}

@@ -20,7 +20,7 @@ import { getCurrentPrices } from '@/lib/market/prices';
 import { canJoinStatus, canTradeStatus, isSettledStatus, TOURNAMENT_STATUS_HELP } from '@/lib/tournament/lifecycle';
 import { formatCountdown, formatCurrency, formatReturn } from '@/lib/utils';
 import { returnPct } from '@/lib/money';
-import NeedsDatabase from '@/components/ui/NeedsDatabase';
+import NeedsDatabase, { QueryFailed } from '@/components/ui/NeedsDatabase';
 import type { TournamentPortfolio, TournamentStanding } from '@/types';
 
 export const dynamic = 'force-dynamic';
@@ -59,7 +59,7 @@ export default async function TournamentDetailPage({
       <AppShell nav="play">
         <main className="px-4 md:px-8 py-6 md:py-10 max-w-5xl mx-auto space-y-6">
           <h1 className="text-xl font-bold tracking-widest text-white">TOURNAMENT</h1>
-          <NeedsDatabase feature="This tournament" />
+          <QueryFailed feature="this tournament" />
         </main>
       </AppShell>
     );

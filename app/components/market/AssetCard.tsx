@@ -33,7 +33,11 @@ export default function AssetCard({ asset, href }: AssetCardProps) {
           {asset.price != null && (
             <span className={`text-xs ${changeColor}`}>{formatPct(change)}</span>
           )}
-          {asset.stale && <span className="text-[10px] text-gold tracking-wider">STALE</span>}
+          {asset.price == null ? (
+            <span className="text-[10px] text-slate-600 tracking-wider">NO PRICE</span>
+          ) : asset.stale ? (
+            <span className="text-[10px] text-gold tracking-wider">STALE</span>
+          ) : null}
         </div>
       </div>
     </Link>

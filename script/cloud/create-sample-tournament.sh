@@ -29,7 +29,7 @@ INSERT INTO tournaments (
 )
 SELECT
   '$NAME_SQL',
-  'Highest virtual portfolio wins.',
+  'Local import verification. Highest virtual portfolio wins.',
   id,
   10000,
   now(),

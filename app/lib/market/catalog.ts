@@ -56,7 +56,7 @@ function toCatalogAsset(
     source: quote?.source ?? null,
     price_type: quote?.priceType ?? null,
     condition: quote?.condition ?? null,
-    stale: quote ? quote.stale : true,
+    stale: quote ? quote.stale : false,
   };
 }
 

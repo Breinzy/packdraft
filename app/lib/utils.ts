@@ -16,6 +16,20 @@ export function formatReturn(value: number): string {
   return `${sign}${value.toFixed(2)}%`;
 }
 
+export function formatTimestamp(iso: string): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return '—';
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZone: 'UTC',
+    timeZoneName: 'short',
+  }).format(date);
+}
+
 export function formatCountdown(target: string): string {
   const diff = new Date(target).getTime() - Date.now();
   if (diff <= 0) return 'ENDED';

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import type { Tournament } from '@/types';
 import StatusBadge from '@/components/tournament/StatusBadge';
+import { formatTimestamp } from '@/lib/utils';
 
 interface AdminStats {
   totalAssets: number;
@@ -95,7 +96,7 @@ export default function AdminPanel({
             { label: 'SNAPSHOTS', value: stats.snapshotCount },
             {
               label: 'LAST SYNC',
-              value: stats.lastSync ? new Date(stats.lastSync).toLocaleString() : 'Never',
+              value: stats.lastSync ? formatTimestamp(stats.lastSync) : 'Never',
             },
             { label: 'TOURNAMENTS', value: tournaments.length },
           ].map((stat) => (

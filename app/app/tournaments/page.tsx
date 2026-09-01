@@ -6,7 +6,7 @@ import { tryCreateServiceClient } from '@/lib/supabase/service';
 import { listTournaments, tickTournaments } from '@/lib/tournament/queries';
 import { formatCountdown, formatCurrency } from '@/lib/utils';
 import { TOURNAMENT_STATUS_HELP } from '@/lib/tournament/lifecycle';
-import NeedsDatabase from '@/components/ui/NeedsDatabase';
+import NeedsDatabase, { QueryFailed } from '@/components/ui/NeedsDatabase';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,7 +39,7 @@ export default async function TournamentsPage() {
       <AppShell nav="play">
         <main className="px-4 md:px-8 py-6 md:py-10 max-w-4xl mx-auto space-y-6">
           <h1 className="text-xl md:text-3xl font-bold tracking-widest text-white">PLAY</h1>
-          <NeedsDatabase feature="Tournaments" />
+          <QueryFailed feature="tournaments" />
         </main>
       </AppShell>
     );
@@ -57,7 +57,7 @@ export default async function TournamentsPage() {
 
         {tournaments.length === 0 ? (
           <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-6 text-sm text-slate-500 tracking-wider">
-            No tournaments yet. An admin can create one from the admin panel after Supabase is connected.
+            No tournaments yet. An admin can create one from /admin.
           </div>
         ) : (
           <ul className="space-y-3">

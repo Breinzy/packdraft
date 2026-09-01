@@ -8,7 +8,7 @@ import { getCatalogAsset, asAsset } from '@/lib/market/catalog';
 import { assetImageSrc } from '@/lib/market/images';
 import { getPriceHistory } from '@/lib/market/prices';
 import { tryCreateServerClient } from '@/lib/supabase/server';
-import NeedsDatabase from '@/components/ui/NeedsDatabase';
+import NeedsDatabase, { QueryFailed } from '@/components/ui/NeedsDatabase';
 import { getUserActiveBooks, getUserPortfolio, getHoldings } from '@/lib/tournament/queries';
 import { canTradeStatus } from '@/lib/tournament/lifecycle';
 import { formatCurrency, formatPct } from '@/lib/utils';
@@ -44,7 +44,7 @@ export default async function AssetDetailPage({
       <AppShell nav="market">
         <main className="px-4 md:px-8 py-6 md:py-10 max-w-5xl mx-auto space-y-6">
           <h1 className="text-xl font-bold tracking-widest text-white">ASSET</h1>
-          <NeedsDatabase feature="Asset detail" />
+          <QueryFailed feature="this asset" />
         </main>
       </AppShell>
     );
@@ -101,7 +101,11 @@ export default async function AssetDetailPage({
               {asset.change_7d != null ? (
                 <span className={`text-sm ${changeColor}`}>{formatPct(asset.change_7d)} 7D</span>
               ) : null}
-              {asset.stale ? <span className="text-xs text-gold tracking-wider">STALE</span> : null}
+              {asset.price == null ? (
+                <span className="text-xs text-slate-600 tracking-wider">NO PRICE</span>
+              ) : asset.stale ? (
+                <span className="text-xs text-gold tracking-wider">STALE</span>
+              ) : null}
             </div>
             {asset.condition ? (
               <div className="text-xs text-slate-500 tracking-wider">{asset.condition}</div>
@@ -126,6 +130,10 @@ export default async function AssetDetailPage({
             ownedQty={ownedQty}
             tradingOpen={canTradeStatus(selected.tournament.status)}
           />
+        ) : selected && asset.price == null ? (
+          <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-5 text-sm text-slate-400">
+            No Packdraft price for this asset yet. Trading needs a stored snapshot.
+          </div>
         ) : user && tradeable.length === 0 ? (
           <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-5 text-sm text-slate-400">
             Join an active tournament to trade this asset.{' '}
