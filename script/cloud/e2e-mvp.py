@@ -94,7 +94,7 @@ def main() -> int:
     print("==> Pages")
     for path in ["/", "/tournaments", "/assets", "/auth/login", "/auth/signup"]:
         status, html = http_app(path)
-        check(f"GET {path}", status == 200 and "PACKDRAFT" in html.upper() or status == 200, f"http {status}")
+        check(f"GET {path}", status == 200, f"http {status}")
 
     status, html = http_app("/assets")
     check("market lists assets", status == 200 and ("NO PRICE" in html or "$" in html or "PAGE" in html), f"http {status} len={len(html)}")

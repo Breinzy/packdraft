@@ -3,6 +3,9 @@
 
 Uses local Docker Postgres as the source and the hosted service role as the destination.
 Does not copy tournament books. Safe to re-run (upsert_asset + new snapshot rows).
+
+Aborts if NEXT_PUBLIC_SUPABASE_URL is the local stack, so a copy cannot wipe
+or confuse the Docker catalog with itself.
 """
 from __future__ import annotations
 
@@ -12,14 +15,18 @@ import subprocess
 import sys
 import urllib.error
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 HOSTED_URL = os.environ.get("NEXT_PUBLIC_SUPABASE_URL", "").rstrip("/")
 HOSTED_SERVICE = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
 DB_CONTAINER = os.environ.get("SUPABASE_DB_CONTAINER", "supabase_db_packdraft")
+WORKERS = int(os.environ.get("PACKDRAFT_COPY_WORKERS", "6"))
 
 
-def hosted_request(path: str, method: str = "GET", payload: dict | None = None):
-    data = None if payload is None else json.dumps(payload).encode()
+def hosted_request(path: str, method: str = "GET", payload=None, prefer: str = "return=minimal"):
+    data = None
+    if payload is not None:
+        data = json.dumps(payload).encode()
     req = urllib.request.Request(
         HOSTED_URL + path,
         data=data,
@@ -28,13 +35,18 @@ def hosted_request(path: str, method: str = "GET", payload: dict | None = None):
             "apikey": HOSTED_SERVICE,
             "Authorization": f"Bearer {HOSTED_SERVICE}",
             "Content-Type": "application/json",
-            "Prefer": "return=minimal",
+            "Prefer": prefer,
         },
     )
     try:
         with urllib.request.urlopen(req, timeout=60) as res:
             raw = res.read()
-            return res.status, json.loads(raw.decode()) if raw else None
+            if not raw:
+                return res.status, None
+            try:
+                return res.status, json.loads(raw.decode())
+            except json.JSONDecodeError:
+                return res.status, raw.decode()
     except urllib.error.HTTPError as err:
         return err.code, err.read().decode()
 
@@ -66,9 +78,57 @@ def local_rows(sql: str) -> list[dict]:
     return out
 
 
+def copy_one(row: dict) -> tuple[bool, bool, str | None]:
+    status, body = hosted_request(
+        "/rest/v1/rpc/upsert_asset",
+        method="POST",
+        payload={
+            "p_tcg_slug": "pokemon",
+            "p_set_name": row.get("set_name") or "Unknown",
+            "p_name": row["name"],
+            "p_asset_type": row["asset_type"],
+            "p_external_id": row["external_id"],
+            "p_image_url": row.get("image_url"),
+            "p_metadata": row.get("metadata") or {},
+            "p_active": True,
+        },
+        prefer="return=representation",
+    )
+    asset_id = body if isinstance(body, str) else None
+    if status >= 400 or not asset_id:
+        return False, False, f"upsert {status}: {str(body)[:200]}"
+    if row.get("price") is None:
+        return True, False, None
+    snap_status, snap_body = hosted_request(
+        "/rest/v1/price_snapshots",
+        method="POST",
+        payload={
+            "asset_id": asset_id,
+            "product_id": None,
+            "price": row["price"],
+            "change_7d": row.get("change_7d") or 0,
+            "volume": row.get("volume") or 0,
+            "source": row.get("source") or "pokemonpricetracker",
+            "condition": row.get("condition"),
+            "price_type": row.get("price_type") or "market",
+            "metadata": row.get("snap_metadata") or {},
+            "recorded_at": row.get("recorded_at"),
+        },
+    )
+    if snap_status >= 400:
+        return True, False, f"snapshot {snap_status}: {str(snap_body)[:200]}"
+    return True, True, None
+
+
 def main() -> int:
     if not HOSTED_URL or not HOSTED_SERVICE:
         print("Hosted NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY missing", file=sys.stderr)
+        return 2
+    if "127.0.0.1" in HOSTED_URL or "localhost" in HOSTED_URL:
+        print(
+            "NEXT_PUBLIC_SUPABASE_URL points at local Supabase. Unset it or export the hosted URL.",
+            file=sys.stderr,
+        )
         return 2
 
     status, body = hosted_request("/rest/v1/assets?select=id&limit=1")
@@ -78,6 +138,9 @@ def main() -> int:
             "market_job_state migrations first (script/cloud/apply-hosted-schema.py).",
             file=sys.stderr,
         )
+        return 3
+    if status not in (200, 206):
+        print(f"Hosted assets probe failed http={status} {str(body)[:200]}", file=sys.stderr)
         return 3
 
     rows = local_rows(
@@ -110,57 +173,24 @@ def main() -> int:
         order by a.asset_type, a.name;
         """
     )
-    print(f"==> Copying {len(rows)} local active assets to hosted")
+    print(f"==> Copying {len(rows)} local active assets to hosted ({WORKERS} workers)")
     copied = 0
     snapped = 0
     errors = 0
-    for row in rows:
-        status, body = hosted_request(
-            "/rest/v1/rpc/upsert_asset",
-            method="POST",
-            payload={
-                "p_tcg_slug": "pokemon",
-                "p_set_name": row.get("set_name") or "Unknown",
-                "p_name": row["name"],
-                "p_asset_type": row["asset_type"],
-                "p_external_id": row["external_id"],
-                "p_image_url": row.get("image_url"),
-                "p_metadata": row.get("metadata") or {},
-                "p_active": True,
-            },
-        )
-        if status >= 400 or not body:
-            errors += 1
-            if errors <= 5:
-                print(f"    upsert failed {status}: {str(body)[:200]}", file=sys.stderr)
-            continue
-        copied += 1
-        if row.get("price") is None:
-            continue
-        snap_status, snap_body = hosted_request(
-            "/rest/v1/price_snapshots",
-            method="POST",
-            payload={
-                "asset_id": body,
-                "product_id": None,
-                "price": row["price"],
-                "change_7d": row.get("change_7d") or 0,
-                "volume": row.get("volume") or 0,
-                "source": row.get("source") or "pokemonpricetracker",
-                "condition": row.get("condition"),
-                "price_type": row.get("price_type") or "market",
-                "metadata": row.get("snap_metadata") or {},
-                "recorded_at": row.get("recorded_at"),
-            },
-        )
-        if snap_status >= 400:
-            errors += 1
-            if errors <= 5:
-                print(f"    snapshot failed {snap_status}: {str(snap_body)[:200]}", file=sys.stderr)
-        else:
-            snapped += 1
-        if copied % 200 == 0:
-            print(f"    copied={copied} snapped={snapped} errors={errors}")
+    with ThreadPoolExecutor(max_workers=max(1, WORKERS)) as pool:
+        futures = [pool.submit(copy_one, row) for row in rows]
+        for i, fut in enumerate(as_completed(futures), start=1):
+            ok, did_snap, err = fut.result()
+            if not ok:
+                errors += 1
+                if errors <= 5 and err:
+                    print(f"    {err}", file=sys.stderr)
+            else:
+                copied += 1
+                if did_snap:
+                    snapped += 1
+            if i % 200 == 0:
+                print(f"    progress={i}/{len(rows)} copied={copied} snapped={snapped} errors={errors}")
 
     print(f"==> Done copied={copied} snapped={snapped} errors={errors}")
     return 0 if errors == 0 else 1

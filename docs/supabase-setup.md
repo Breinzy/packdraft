@@ -87,7 +87,22 @@ Fallback if MCP is not connected: CLI `db push` has previously failed on this pr
    - `supabase/migrations/20260901120000_market_job_state.sql`
 3. In Table Editor, confirm `assets`, `tcgs`, `tournaments`, and `market_job_state` exist.
 
-If `SUPABASE_ACCESS_TOKEN` is set, `python3 script/cloud/apply-hosted-schema.py` applies those three files via the Management API. After that, `python3 script/cloud/copy-catalog-to-hosted.py` copies the local catalog into hosted `assets` + latest snapshots.
+To apply from this repo instead of the SQL editor, set one of:
+
+* `SUPABASE_DB_PASSWORD` — database password from [Database settings](https://supabase.com/dashboard/project/lximcqaunrovzonsbjkb/settings/database). The VM can reach the IPv4 pooler; direct `db.<ref>.supabase.co` is IPv6-only and fails here.
+* `SUPABASE_ACCESS_TOKEN` — [Account access tokens](https://supabase.com/dashboard/account/tokens)
+
+Then:
+
+```
+python3 script/cloud/hosted-status.py
+python3 script/cloud/apply-hosted-schema.py
+python3 script/cloud/copy-catalog-to-hosted.py
+```
+
+Or `bash script/cloud/upload-to-hosted.sh` to apply (if needed) and copy in one shot.
+
+`SUPABASE_SERVICE_ROLE_KEY` can write catalog rows after the tables exist. It cannot run migrations.
 
 ## 4. After keys + schema
 
