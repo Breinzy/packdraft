@@ -128,10 +128,12 @@ def main() -> int:
     required = ["assets", "tcgs", "sets", "tournaments"]
     optional = ["market_job_state"]
     legacy = ["products", "contests", "price_snapshots"]
+    select_col = {"market_job_state": "job"}
     missing_required = False
     missing_optional = False
     for table in required + optional + legacy:
-        status, cr, body = rest(hosted_url, hosted_service, f"/rest/v1/{table}?select=id")
+        col = select_col.get(table, "id")
+        status, cr, body = rest(hosted_url, hosted_service, f"/rest/v1/{table}?select={col}")
         count = count_from_range(cr)
         if status in (200, 206):
             print(f"    {table}: ok count={count}")

@@ -13,6 +13,7 @@ import json
 import os
 import subprocess
 import sys
+import time
 import urllib.error
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -20,35 +21,47 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 HOSTED_URL = os.environ.get("NEXT_PUBLIC_SUPABASE_URL", "").rstrip("/")
 HOSTED_SERVICE = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
 DB_CONTAINER = os.environ.get("SUPABASE_DB_CONTAINER", "supabase_db_packdraft")
-WORKERS = int(os.environ.get("PACKDRAFT_COPY_WORKERS", "6"))
+WORKERS = int(os.environ.get("PACKDRAFT_COPY_WORKERS", "4"))
+RETRYABLE_HTTP = {408, 429, 500, 502, 503, 504}
 
 
 def hosted_request(path: str, method: str = "GET", payload=None, prefer: str = "return=minimal"):
     data = None
     if payload is not None:
         data = json.dumps(payload).encode()
-    req = urllib.request.Request(
-        HOSTED_URL + path,
-        data=data,
-        method=method,
-        headers={
-            "apikey": HOSTED_SERVICE,
-            "Authorization": f"Bearer {HOSTED_SERVICE}",
-            "Content-Type": "application/json",
-            "Prefer": prefer,
-        },
-    )
-    try:
-        with urllib.request.urlopen(req, timeout=60) as res:
-            raw = res.read()
-            if not raw:
-                return res.status, None
-            try:
-                return res.status, json.loads(raw.decode())
-            except json.JSONDecodeError:
-                return res.status, raw.decode()
-    except urllib.error.HTTPError as err:
-        return err.code, err.read().decode()
+    last_error = "unknown"
+    for attempt in range(8):
+        req = urllib.request.Request(
+            HOSTED_URL + path,
+            data=data,
+            method=method,
+            headers={
+                "apikey": HOSTED_SERVICE,
+                "Authorization": f"Bearer {HOSTED_SERVICE}",
+                "Content-Type": "application/json",
+                "Prefer": prefer,
+            },
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=60) as res:
+                raw = res.read()
+                if not raw:
+                    return res.status, None
+                try:
+                    return res.status, json.loads(raw.decode())
+                except json.JSONDecodeError:
+                    return res.status, raw.decode()
+        except urllib.error.HTTPError as err:
+            body = err.read().decode()
+            if err.code in RETRYABLE_HTTP and attempt < 7:
+                time.sleep(min(32, 2 ** attempt))
+                last_error = f"{err.code}: {body[:120]}"
+                continue
+            return err.code, body
+        except (urllib.error.URLError, TimeoutError, OSError) as err:
+            last_error = str(err)
+            time.sleep(min(32, 2 ** attempt))
+    return 599, f"network after retries: {last_error}"
 
 
 def local_rows(sql: str) -> list[dict]:
@@ -79,6 +92,13 @@ def local_rows(sql: str) -> list[dict]:
 
 
 def copy_one(row: dict) -> tuple[bool, bool, str | None]:
+    try:
+        return _copy_one(row)
+    except Exception as err:
+        return False, False, f"unexpected {type(err).__name__}: {err}"[:200]
+
+
+def _copy_one(row: dict) -> tuple[bool, bool, str | None]:
     status, body = hosted_request(
         "/rest/v1/rpc/upsert_asset",
         method="POST",
@@ -173,7 +193,7 @@ def main() -> int:
         order by a.asset_type, a.name;
         """
     )
-    print(f"==> Copying {len(rows)} local active assets to hosted ({WORKERS} workers)")
+    print(f"==> Copying {len(rows)} local active assets to hosted ({WORKERS} workers)", flush=True)
     copied = 0
     snapped = 0
     errors = 0
@@ -184,15 +204,18 @@ def main() -> int:
             if not ok:
                 errors += 1
                 if errors <= 5 and err:
-                    print(f"    {err}", file=sys.stderr)
+                    print(f"    {err}", file=sys.stderr, flush=True)
             else:
                 copied += 1
                 if did_snap:
                     snapped += 1
             if i % 200 == 0:
-                print(f"    progress={i}/{len(rows)} copied={copied} snapped={snapped} errors={errors}")
+                print(
+                    f"    progress={i}/{len(rows)} copied={copied} snapped={snapped} errors={errors}",
+                    flush=True,
+                )
 
-    print(f"==> Done copied={copied} snapped={snapped} errors={errors}")
+    print(f"==> Done copied={copied} snapped={snapped} errors={errors}", flush=True)
     return 0 if errors == 0 else 1
 
 
