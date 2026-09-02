@@ -107,16 +107,19 @@ export async function getPriceHistory(
     .select('id, price, recorded_at')
     .eq('asset_id', assetId)
     .lte('recorded_at', before.toISOString())
-    .order('recorded_at', { ascending: true })
+    .order('recorded_at', { ascending: false })
     .limit(limit);
 
   if (error) {
     throw new Error(`Failed to load price history for asset ${assetId}: ${error.message}`);
   }
 
-  return (data ?? []).map((row) => ({
-    snapshotId: row.id as string,
-    price: Number(row.price),
-    recordedAt: row.recorded_at as string,
-  }));
+  return (data ?? [])
+    .slice()
+    .reverse()
+    .map((row) => ({
+      snapshotId: row.id as string,
+      price: Number(row.price),
+      recordedAt: row.recorded_at as string,
+    }));
 }

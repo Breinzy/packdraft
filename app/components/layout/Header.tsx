@@ -14,6 +14,7 @@ const NAV = [
   { href: '/tournaments', label: 'Play' },
   { href: '/events', label: 'Events' },
   { href: '/career', label: 'Career' },
+  { href: '/social', label: 'Social' },
   { href: '/settings', label: 'Settings' },
 ];
 
@@ -66,10 +67,10 @@ export default function Header() {
             </span>
           </div>
 
-          <div className="hidden md:flex gap-8 items-center">
-            <nav className="flex gap-6 items-center text-sm">
+          <div className="hidden md:flex gap-4 items-center">
+            <nav className="flex flex-wrap gap-x-4 gap-y-0 items-center text-sm">
               {NAV.map((item) => {
-                if (!isSignedIn && (item.href === '/settings' || item.href === '/career')) return null;
+                if (!isSignedIn && (item.href === '/settings' || item.href === '/career' || item.href === '/social')) return null;
                 const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
                 return (
                   <Link
@@ -134,7 +135,7 @@ export default function Header() {
 
           <nav className="page flex flex-col py-2">
             {NAV.map((item) => {
-              if (!isSignedIn && (item.href === '/settings' || item.href === '/career')) return null;
+              if (!isSignedIn && (item.href === '/settings' || item.href === '/career' || item.href === '/social')) return null;
               const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
               return (
                 <Link

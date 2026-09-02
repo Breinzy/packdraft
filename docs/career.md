@@ -36,3 +36,6 @@ Derived on read from the Career ledger and snapshots. Nothing here writes tourna
 - **Historical ranking** is `get_career_standings()` — live marked Career value, public rank + handle only. Positions and cash stay RLS-private. `/players/[id]` remains tournament history.
 
 Market Events are a separate product (`docs/events.md`). Do not mix Career cash into an event.
+
+Release weekends (`docs/releases.md`) can attach Career-independent prediction events next to a tournament. Still no cash transfer.
+

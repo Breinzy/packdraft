@@ -6,6 +6,10 @@ export interface Profile {
   display_name: string | null;
   display_name_set: boolean;
   created_at: string;
+  creator_slug: string | null;
+  creator_bio: string;
+  is_creator: boolean;
+  pro_until: string | null;
 }
 
 export interface Tcg {
@@ -76,6 +80,9 @@ export type TournamentStatus =
 
 export type TradeSide = 'buy' | 'sell';
 
+export type TournamentVisibility = 'public' | 'private';
+export type TournamentHostKind = 'admin' | 'creator';
+
 export interface Tournament {
   id: string;
   name: string;
@@ -92,6 +99,14 @@ export interface Tournament {
   created_by: string | null;
   created_at: string;
   settled_at: string | null;
+  visibility: TournamentVisibility;
+  invite_code: string | null;
+  host_kind: TournamentHostKind;
+  sponsor_name: string;
+  sponsor_url: string;
+  entry_mode: 'free';
+  qualifier_tournament_id: string | null;
+  qualifier_max_rank: number;
 }
 
 export interface TournamentPortfolio {
@@ -242,6 +257,26 @@ export const MARKET_EVENT_STATUS_LABELS: Record<MarketEventStatus, string> = {
   completed: 'Completed',
   cancelled: 'Cancelled',
 };
+
+export interface PlayerRanking {
+  user_id: string;
+  display_name: string;
+  played: number;
+  wins: number;
+  average_return: number;
+  rank: number;
+}
+
+export interface ReleaseCampaign {
+  id: string;
+  name: string;
+  description: string;
+  set_id: string | null;
+  starts_at: string;
+  ends_at: string;
+  created_by: string | null;
+  created_at: string;
+}
 
 export const CAREER_STARTING_CASH = 1000;
 

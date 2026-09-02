@@ -23,6 +23,7 @@ import { buildCareerProgression, formatMilestone } from '@/lib/career/progressio
 import { formatCurrency, formatReturn } from '@/lib/utils';
 import { returnPct } from '@/lib/money';
 import type { HistoryTrade } from '@/lib/player/history';
+import { careerChartLimit, isPro } from '@/lib/auth/pro';
 
 export const dynamic = 'force-dynamic';
 
@@ -84,7 +85,13 @@ export default async function CareerPage() {
 
   const holdingsRaw = await getCareerHoldings(supabase, portfolio.id);
   const trades = await getCareerTransactions(supabase, portfolio.id, 500);
-  const history = await getCareerValueHistory(supabase, portfolio.id);
+  const { data: careerProfile } = await supabase
+    .from('profiles')
+    .select('pro_until')
+    .eq('id', user.id)
+    .maybeSingle();
+  const pro = isPro(careerProfile?.pro_until as string | null | undefined);
+  const history = await getCareerValueHistory(supabase, portfolio.id, careerChartLimit(pro));
   const peakStored = await getCareerPeakValue(supabase, portfolio.id);
   const standings = await getCareerStandings(supabase).catch(() => []);
   const myRank = standings.find((row) => row.user_id === user.id)?.rank ?? null;
@@ -174,6 +181,11 @@ export default async function CareerPage() {
         <div className="panel p-4 md:p-5">
           <div className="section-title mb-3">Portfolio</div>
           <Sparkline points={chart} className="w-full h-24" />
+          <p className="text-[11px] text-faint mt-2">
+            {pro
+              ? 'Pro chart window. Pro does not change Career cash, trades, or ranks.'
+              : 'Free chart window. Pro extends history only.'}
+          </p>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3">

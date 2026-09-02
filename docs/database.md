@@ -158,6 +158,30 @@ Writes: `submit_market_event_entry`, `freeze_market_event_prices` (service role)
 
 `packdraft_settlement_price(asset_id, as_of)` is the competition quote. `settle_tournament` uses it instead of last snapshot before close. See `docs/settlement.md`.
 
+## Social (Phase 16)
+
+### `friendships` / `follows` / `activity_events`
+
+Friend requests are pairwise and unique. Follows are public. The feed is visible to the actor, accepted friends, and followers. Writes go through service-role RPCs (`request_friendship`, `respond_friendship`, `follow_user`, `unfollow_user`, `record_activity`).
+
+Private tournaments use `tournaments.visibility` + `invite_code`. RLS hides private rows unless the viewer is the host or a participant. Invite visitors are loaded in the app via the service role **only when the invite matches**. `join_tournament(user, tournament, invite)` enforces the code.
+
+`get_player_rankings()` is tournament-results only (wins, average return). Career value is not mixed in.
+
+## Creator tournaments (Phase 17)
+
+`profiles.creator_slug`, `creator_bio`, `is_creator`. `tournaments.host_kind` is `admin` or `creator`. `claim_creator_profile` is a service-role RPC. Creator budget/duration caps are application rules (`app/lib/creators/rules.ts`); books still use the same isolated tournament engine.
+
+## Monetization / free-to-play (Phases 18–19)
+
+`profiles.pro_until` is a flag. Pro must not change tournament cash, prices, ranks, or settlement. Ads are a placeholder. Affiliate links use optional `PACKDRAFT_TCGPLAYER_AFFILIATE`.
+
+`tournaments.entry_mode` is constrained to `'free'`. Optional `qualifier_tournament_id` + `qualifier_max_rank` gate join on a prior `tournament_results.rank`.
+
+## Release campaigns (Phase 20)
+
+`release_campaigns` + `release_campaign_items` group a tournament and prediction events around a set drop. Child competitions stay isolated. No cash moves between them.
+
 ## Legacy tables (unused by the app)
 
 `contests`, `leagues`, `portfolios`, `portfolio_items`, `products` — weekly-league beta. Catalog rows were copied into `tcgs` / `sets` / `assets` / `price_snapshots.asset_id`. Do not `db reset` the linked project.

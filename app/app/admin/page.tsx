@@ -67,6 +67,9 @@ export default async function AdminPage() {
     importJob = null;
   }
 
+  const { data: setRows } = await supabase.from('sets').select('id, name').order('name').limit(80);
+  const sets = (setRows ?? []).map((row) => ({ id: row.id as string, name: row.name as string }));
+
   return (
     <AdminPanel
       stats={{
@@ -80,6 +83,7 @@ export default async function AdminPage() {
       importJob={importJob}
       tournaments={tournaments}
       events={events}
+      sets={sets}
     />
   );
 }

@@ -61,6 +61,9 @@ export default async function EventsPage() {
           <p className="text-sm text-muted mt-1.5">
             Temporary predictions. Independent of Career cash and tournament books.
           </p>
+          <Link href="/releases" className="inline-flex min-h-11 items-center text-sm text-accent-light">
+            Release weekends
+          </Link>
         </div>
 
         {events.length === 0 ? (

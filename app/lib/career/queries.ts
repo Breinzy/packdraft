@@ -114,11 +114,11 @@ export async function getCareerValueHistory(
     .from('career_value_snapshots')
     .select('*')
     .eq('portfolio_id', portfolioId)
-    .order('recorded_at', { ascending: true })
+    .order('recorded_at', { ascending: false })
     .limit(limit);
   if (error) throw new Error(`Failed to load career chart: ${error.message}`);
 
-  return (data ?? []).map((row) => ({
+  return (data ?? []).slice().reverse().map((row) => ({
     id: row.id as string,
     portfolio_id: row.portfolio_id as string,
     cash: asNumber(row.cash),

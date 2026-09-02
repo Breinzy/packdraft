@@ -1,5 +1,5 @@
 export function rpcErrorStatus(message: string): number {
-  const closed = /closed|not open|not found|not tradable|not eligible|not in this tournament/i;
+  const closed = /closed|not open|not found|not tradable|not eligible|not in this tournament|invite|qualifier|only free/i;
   if (/not authenticated|profile required/i.test(message)) return 401;
   if (/insufficient/i.test(message)) return 400;
   if (/quantity/i.test(message)) return 400;

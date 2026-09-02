@@ -7,6 +7,8 @@ import type { Profile } from '@/types';
 import { getUserActiveBooks } from '@/lib/tournament/queries';
 import { formatCurrency } from '@/lib/utils';
 import { canTradeStatus } from '@/lib/tournament/lifecycle';
+import AdSlot from '@/components/ads/AdSlot';
+import { isPro } from '@/lib/auth/pro';
 
 export const dynamic = 'force-dynamic';
 
@@ -53,6 +55,7 @@ export default async function DashboardPage() {
   const books = await getUserActiveBooks(supabase, user.id);
   const live = books.filter((b) => canTradeStatus(b.tournament.status) || b.tournament.status === 'upcoming');
   const past = books.filter((b) => !live.includes(b));
+  const pro = isPro(typed.pro_until);
 
   return (
     <AppShell nav="dashboard">
@@ -60,10 +63,17 @@ export default async function DashboardPage() {
         <div>
           <h1 className="page-title text-2xl">Hey, {name}</h1>
           <p className="text-sm text-muted mt-1.5">{typed.email}</p>
-          <Link href={`/players/${user.id}`} className="inline-flex min-h-11 items-center text-sm text-accent-light">
-            View record
-          </Link>
+          <div className="flex flex-wrap gap-x-4">
+            <Link href={`/players/${user.id}`} className="inline-flex min-h-11 items-center text-sm text-accent-light">
+              View record
+            </Link>
+            <Link href="/social" className="inline-flex min-h-11 items-center text-sm text-accent-light">
+              Social
+            </Link>
+          </div>
         </div>
+
+        <AdSlot hidden={pro} />
 
         <section className="space-y-3">
           <div className="flex items-center justify-between gap-3">
@@ -112,6 +122,22 @@ export default async function DashboardPage() {
           <Link href="/career" className="panel panel-hover px-4 py-4">
             <div className="section-title mb-1">Career</div>
             <div className="text-sm text-muted">Grow a $1,000 book</div>
+          </Link>
+          <Link href="/social" className="panel panel-hover px-4 py-4">
+            <div className="section-title mb-1">Social</div>
+            <div className="text-sm text-muted">Friends, follows, feed</div>
+          </Link>
+          <Link href="/create" className="panel panel-hover px-4 py-4">
+            <div className="section-title mb-1">Host</div>
+            <div className="text-sm text-muted">Creator tournament</div>
+          </Link>
+          <Link href="/releases" className="panel panel-hover px-4 py-4">
+            <div className="section-title mb-1">Releases</div>
+            <div className="text-sm text-muted">Set-drop weekends</div>
+          </Link>
+          <Link href="/players" className="panel panel-hover px-4 py-4">
+            <div className="section-title mb-1">Rankings</div>
+            <div className="text-sm text-muted">Tournament records</div>
           </Link>
         </div>
       </main>

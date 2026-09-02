@@ -67,6 +67,12 @@ export async function POST(request: Request) {
         startingBudget: Number.isFinite(startingBudget) ? startingBudget : 10000,
         durationDays: Number.isFinite(durationDays) && durationDays > 0 ? durationDays : 7,
         createdBy: user.id,
+        visibility: body.visibility === 'private' ? 'private' : 'public',
+        sponsorName: typeof body.sponsorName === 'string' ? body.sponsorName : '',
+        qualifierTournamentId:
+          typeof body.qualifierTournamentId === 'string' && body.qualifierTournamentId
+            ? body.qualifierTournamentId
+            : null,
       });
       return NextResponse.json({ ok: true, ...result });
     }
@@ -118,6 +124,29 @@ export async function POST(request: Request) {
       const { settleMarketEvent } = await import('@/lib/events/tick');
       const result = await settleMarketEvent(supabase, eventId);
       return NextResponse.json({ ok: true, result });
+    }
+
+    if (action === 'grant-pro') {
+      const userId = typeof body.userId === 'string' ? body.userId : '';
+      const days = Number(body.days ?? 30);
+      if (!userId) {
+        return NextResponse.json({ error: 'userId is required' }, { status: 400 });
+      }
+      const until = new Date(Date.now() + Math.max(1, days) * 24 * 60 * 60 * 1000).toISOString();
+      const { error } = await supabase.from('profiles').update({ pro_until: until }).eq('id', userId);
+      if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+      return NextResponse.json({ ok: true, pro_until: until });
+    }
+
+    if (action === 'create-release') {
+      const { createReleaseWeekend } = await import('@/lib/releases/queries');
+      const result = await createReleaseWeekend(supabase, {
+        name: typeof body.name === 'string' ? body.name : '',
+        description: typeof body.description === 'string' ? body.description : '',
+        setId: typeof body.setId === 'string' ? body.setId : '',
+        createdBy: user.id,
+      });
+      return NextResponse.json({ ok: true, ...result });
     }
 
     if (action === 'settle-tournament') {

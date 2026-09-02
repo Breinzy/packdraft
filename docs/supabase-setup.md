@@ -90,7 +90,12 @@ Fallback if MCP is not connected: CLI `db push` has previously failed on this pr
    - `supabase/migrations/20260902130000_phase15_settlement_integrity.sql`
    - `supabase/migrations/20260902140000_phase13_career_progression.sql`
    - `supabase/migrations/20260902150000_phase14_market_events.sql`
-3. In Table Editor, confirm `assets`, `tcgs`, `tournaments`, `market_job_state`, and `career_portfolios` exist.
+   - `supabase/migrations/20260902160000_phase16_social.sql`
+   - `supabase/migrations/20260902170000_phase17_creator_tournaments.sql`
+   - `supabase/migrations/20260902180000_phase18_monetization.sql`
+   - `supabase/migrations/20260902190000_phase19_freetoplay.sql`
+   - `supabase/migrations/20260902200000_phase20_release_events.sql`
+3. In Table Editor, confirm `assets`, `tcgs`, `tournaments`, `market_job_state`, `career_portfolios`, `friendships`, and `release_campaigns` exist.
 
 To apply from this repo instead of the SQL editor, set one of:
 
@@ -114,4 +119,17 @@ Or `python3 script/cloud/print-hosted-migrations.py` to dump the pending migrati
 1. Sign in on the app.
 2. Open `/admin` with an email listed in `ADMIN_EMAILS`.
 3. Import assets, sync prices, create a tournament.
-4. Join from `/tournaments` and trade from `/assets`. Career Mode is `/career` (separate $1,000 book). Market Events are `/events`.
+4. Join from `/tournaments` and trade from `/assets`. Career Mode is `/career` (separate $1,000 book). Market Events are `/events`. Social is `/social`. Creator hosting is `/create`. Release weekends are `/releases`.
+
+## 5. Let a Cloud Agent apply hosted migrations
+
+Pasting SQL in the dashboard still works. To let an agent apply the same files:
+
+1. Add **Cloud Agent secrets** on environment [d1326d73-a560-11f1-a7d1-d6b4613131ce](https://cursor.com/dashboard/cloud-agents/environments/e/d1326d73-a560-11f1-a7d1-d6b4613131ce):
+   - `SUPABASE_DB_PASSWORD` — database password (preferred)
+   - and/or `SUPABASE_ACCESS_TOKEN` — account access token
+2. **Or** connect **Supabase MCP** in Cursor desktop (Settings → Tools & MCP → supabase). This repo pins `.cursor/mcp.json` to `project_ref=lximcqaunrovzonsbjkb`.
+3. Start a **new** Cloud Agent after saving secrets or connecting MCP. A running agent does not pick up new secrets or a newly authenticated MCP server.
+4. Ask that agent to apply pending migrations (`python3 script/cloud/apply-hosted-schema.py`, or MCP `apply_migration`). Do **not** `supabase db reset`.
+
+`SUPABASE_SERVICE_ROLE_KEY` cannot run DDL. Never paste secret values into chat.

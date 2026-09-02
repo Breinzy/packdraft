@@ -1316,16 +1316,15 @@ Account, catalog, join, buy/sell, leaderboard, and settlement exist. That **is**
 
 A basic player history page also exists. Do not expand it into Career stats.
 
-## Now — Phases 13–15
+## Now — Phases 16–20
 
-Career progression (levels, milestones, archetypes, streaks, Career ranks), Market Events, and settlement integrity (windowed median, not last sale).
+Social (friends, follows, private invite tournaments, player rankings), creator-hosted tournaments, Pro as a non-pay-to-win flag, free-to-play with optional qualifier gates, and release-weekend campaigns.
 
 ## Not now
 
 Do **not** start:
 
-* Social features, creator tournaments, monetization
-* Native apps, multi-TCG, advanced rankings
+* Native apps, multi-TCG, advanced rankings, real-money payments or prize promises
 
 
 ---

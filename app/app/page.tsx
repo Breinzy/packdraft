@@ -61,6 +61,9 @@ export default async function HomePage() {
             <Link href="/events" className="btn btn-ghost min-h-12 px-5">
               Predict an event
             </Link>
+            <Link href="/releases" className="btn btn-ghost min-h-12 px-5">
+              Release weekends
+            </Link>
           </div>
         </div>
 

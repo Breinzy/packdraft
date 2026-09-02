@@ -25,6 +25,8 @@ Ranks: higher score first, then earlier `submitted_at`, then `user_id`.
 
 Daily cron `GET /api/cron/tick-tournaments` also ticks events. Admins can tick or settle from `/admin`.
 
+Release weekends (`docs/releases.md`) can attach several events to a set-drop campaign. Scoring and cash isolation do not change.
+
 ## Writes
 
 Authenticated `POST /api/events/enter` validates the payload, then calls `submit_market_event_entry` (service role). Clients cannot set scores or ranks.

@@ -3,7 +3,13 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-export default function JoinButton({ tournamentId }: { tournamentId: string }) {
+export default function JoinButton({
+  tournamentId,
+  inviteCode,
+}: {
+  tournamentId: string;
+  inviteCode?: string | null;
+}) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -15,12 +21,15 @@ export default function JoinButton({ tournamentId }: { tournamentId: string }) {
       const res = await fetch('/api/tournaments/join', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tournamentId }),
+        body: JSON.stringify({ tournamentId, inviteCode: inviteCode || undefined }),
       });
       const data = (await res.json()) as { error?: string };
       if (!res.ok) {
         if (res.status === 401) {
-          router.push(`/auth/login?next=/tournaments/${tournamentId}`);
+          const next = inviteCode
+            ? `/tournaments/${tournamentId}?invite=${encodeURIComponent(inviteCode)}`
+            : `/tournaments/${tournamentId}`;
+          router.push(`/auth/login?next=${encodeURIComponent(next)}`);
           return;
         }
         setError(data.error ?? 'Could not join');

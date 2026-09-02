@@ -3,10 +3,15 @@
 import { useState, useEffect } from 'react';
 import { createClient, tryCreateBrowserClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import AppShell from '@/components/layout/AppShell';
+import { isPro } from '@/lib/auth/pro';
 
 export default function SettingsPage() {
   const [displayName, setDisplayName] = useState('');
+  const [proUntil, setProUntil] = useState<string | null>(null);
+  const [creatorSlug, setCreatorSlug] = useState<string | null>(null);
+  const [isCreator, setIsCreator] = useState(false);
   const [loading, setLoading] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
@@ -29,11 +34,14 @@ export default function SettingsPage() {
 
       const { data: profile } = await db
         .from('profiles')
-        .select('display_name')
+        .select('display_name, pro_until, creator_slug, is_creator')
         .eq('id', user.id)
         .single();
 
       setDisplayName(profile?.display_name ?? '');
+      setProUntil((profile?.pro_until as string | null | undefined) ?? null);
+      setCreatorSlug((profile?.creator_slug as string | null | undefined) ?? null);
+      setIsCreator(Boolean(profile?.is_creator));
       setChecking(false);
     }
     init(client);
@@ -130,6 +138,24 @@ export default function SettingsPage() {
                 {loading ? 'Saving…' : 'Save changes'}
               </button>
             </form>
+          </div>
+
+          <div className="panel p-5 mt-4 space-y-2">
+            <h2 className="section-title">Account</h2>
+            <p className="text-sm text-muted">
+              {isPro(proUntil)
+                ? 'Pro is active. It does not change tournament cash, prices, or ranks.'
+                : 'Free account. Core play stays free.'}
+            </p>
+            {isCreator && creatorSlug ? (
+              <Link href={`/creators/${creatorSlug}`} className="text-sm text-accent-light min-h-11 inline-flex items-center">
+                Creator page
+              </Link>
+            ) : (
+              <Link href="/create" className="text-sm text-accent-light min-h-11 inline-flex items-center">
+                Become a creator host
+              </Link>
+            )}
           </div>
         </div>
       </main>

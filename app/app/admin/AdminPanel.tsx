@@ -30,11 +30,13 @@ export default function AdminPanel({
   tournaments,
   events,
   importJob,
+  sets,
 }: {
   stats: AdminStats;
   tournaments: Tournament[];
   events: MarketEvent[];
   importJob: MarketJobState | null;
+  sets: { id: string; name: string }[];
 }) {
   const [results, setResults] = useState<Record<string, ActionResult | null>>({});
   const [loading, setLoading] = useState<Record<string, boolean>>({});
@@ -51,6 +53,13 @@ export default function AdminPanel({
   const [eventAssetCount, setEventAssetCount] = useState('4');
   const [eventAssetIds, setEventAssetIds] = useState('');
   const [settleEventId, setSettleEventId] = useState(events[0]?.id ?? '');
+  const [visibility, setVisibility] = useState('public');
+  const [sponsorName, setSponsorName] = useState('');
+  const [qualifierId, setQualifierId] = useState('');
+  const [grantUserId, setGrantUserId] = useState('');
+  const [grantDays, setGrantDays] = useState('30');
+  const [releaseName, setReleaseName] = useState('Release weekend');
+  const [releaseSetId, setReleaseSetId] = useState('');
 
   async function runAction(action: string, extra?: Record<string, unknown>) {
     setLoading((l) => ({ ...l, [action]: true }));
@@ -232,6 +241,33 @@ export default function AdminPanel({
                 />
               </label>
             </div>
+            <label className="kicker">
+              Visibility
+              <select value={visibility} onChange={(e) => setVisibility(e.target.value)} className="field mt-1">
+                <option value="public">Public</option>
+                <option value="private">Private (invite)</option>
+              </select>
+            </label>
+            <label className="kicker">
+              Sponsor label (optional)
+              <input
+                value={sponsorName}
+                onChange={(e) => setSponsorName(e.target.value)}
+                className="field mt-1"
+                placeholder="Does not promise prizes"
+              />
+            </label>
+            <label className="kicker">
+              Qualifier tournament (optional)
+              <select value={qualifierId} onChange={(e) => setQualifierId(e.target.value)} className="field mt-1">
+                <option value="">None — open to everyone</option>
+                {tournaments.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name} ({t.status})
+                  </option>
+                ))}
+              </select>
+            </label>
             <button
               type="button"
               onClick={() =>
@@ -240,6 +276,9 @@ export default function AdminPanel({
                   description,
                   startingBudget: Number(budget),
                   durationDays: Number(days),
+                  visibility,
+                  sponsorName,
+                  qualifierTournamentId: qualifierId || null,
                 })
               }
               disabled={loading['create-tournament']}
@@ -400,6 +439,77 @@ export default function AdminPanel({
               {JSON.stringify(results['settle-event'])}
             </div>
           ) : null}
+        </div>
+
+        <div className="space-y-3">
+          <div className="section-title">Grant Pro</div>
+          <p className="text-xs text-muted">
+            Flag only. No Stripe. Pro must not change tournament cash, prices, or ranks.
+          </p>
+          <div className="panel p-4 space-y-3">
+            <input
+              value={grantUserId}
+              onChange={(e) => setGrantUserId(e.target.value)}
+              placeholder="User id"
+              className="field"
+            />
+            <label className="kicker">
+              Days
+              <input value={grantDays} onChange={(e) => setGrantDays(e.target.value)} className="field mt-1" />
+            </label>
+            <button
+              type="button"
+              disabled={!grantUserId || loading['grant-pro']}
+              onClick={() => runAction('grant-pro', { userId: grantUserId, days: Number(grantDays) })}
+              className="btn btn-primary"
+            >
+              {loading['grant-pro'] ? 'Saving…' : 'Grant Pro'}
+            </button>
+            {results['grant-pro'] ? (
+              <div className="text-xs font-mono text-green break-all">{JSON.stringify(results['grant-pro'])}</div>
+            ) : null}
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <div className="section-title">Create release weekend</div>
+          <div className="panel p-4 space-y-3">
+            <input
+              value={releaseName}
+              onChange={(e) => setReleaseName(e.target.value)}
+              placeholder="Name"
+              className="field"
+            />
+            <label className="kicker">
+              Set
+              <select value={releaseSetId} onChange={(e) => setReleaseSetId(e.target.value)} className="field mt-1">
+                <option value="">Select a set</option>
+                {sets.map((set) => (
+                  <option key={set.id} value={set.id}>
+                    {set.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <button
+              type="button"
+              disabled={!releaseSetId || loading['create-release']}
+              onClick={() =>
+                runAction('create-release', {
+                  name: releaseName,
+                  setId: releaseSetId,
+                })
+              }
+              className="btn btn-primary"
+            >
+              {loading['create-release'] ? 'Creating…' : 'Create release weekend'}
+            </button>
+            {results['create-release'] ? (
+              <div className="text-xs font-mono text-green break-all">
+                {JSON.stringify(results['create-release'])}
+              </div>
+            ) : null}
+          </div>
         </div>
 
         <div className="space-y-2">

@@ -75,11 +75,6 @@ function parseAdminEmails(raw: string | undefined): string[] {
     .filter(Boolean);
 }
 
-export const ENV_NAMES = [
-  'NEXT_PUBLIC_SUPABASE_URL',
-  'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY',
-  'SUPABASE_SERVICE_ROLE_KEY',
-  'POKEMON_PRICE_TRACKER_API_KEY',
-  'CRON_SECRET',
-  'ADMIN_EMAILS',
-] as const;
+export function getTcgplayerAffiliate(): string | undefined {
+  return read('PACKDRAFT_TCGPLAYER_AFFILIATE');
+}

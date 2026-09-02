@@ -15,6 +15,10 @@ import { ensureCareerPortfolio, getCareerHoldings, getCareerPortfolio } from '@/
 import { canTradeStatus } from '@/lib/tournament/lifecycle';
 import { formatCurrency, formatPct } from '@/lib/utils';
 import { ASSET_TYPE_LABELS } from '@/types';
+import AdSlot from '@/components/ads/AdSlot';
+import { isPro, priceHistoryLimit } from '@/lib/auth/pro';
+import { tcgplayerProductUrl } from '@/lib/market/affiliate';
+import { getTcgplayerAffiliate } from '@/lib/env';
 
 export const dynamic = 'force-dynamic';
 
@@ -53,7 +57,6 @@ export default async function AssetDetailPage({
   }
   if (!asset) notFound();
 
-  const history = await getPriceHistory(supabase, id).catch(() => []);
   let user = null;
   try {
     const auth = await supabase.auth.getUser();
@@ -61,6 +64,18 @@ export default async function AssetDetailPage({
   } catch {
     user = null;
   }
+
+  let pro = false;
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('pro_until')
+      .eq('id', user.id)
+      .maybeSingle();
+    pro = isPro(profile?.pro_until as string | null | undefined);
+  }
+
+  const history = await getPriceHistory(supabase, id, { limit: priceHistoryLimit(pro) }).catch(() => []);
 
   const books = user ? await getUserActiveBooks(supabase, user.id).catch(() => []) : [];
   const tradeable = books.filter((b) => canTradeStatus(b.tournament.status));
@@ -115,6 +130,7 @@ export default async function AssetDetailPage({
       active: !usingCareer && selectedTournament?.tournament.id === b.tournament.id,
     })),
   ];
+  const shopUrl = tcgplayerProductUrl(asset.external_id, getTcgplayerAffiliate());
 
   return (
     <AppShell nav="market">
@@ -147,13 +163,28 @@ export default async function AssetDetailPage({
             {asset.condition ? (
               <div className="text-xs text-muted">{asset.condition}</div>
             ) : null}
+            {shopUrl ? (
+              <a
+                href={shopUrl}
+                className="inline-flex min-h-11 items-center text-sm text-accent-light"
+                rel="noreferrer"
+                target="_blank"
+              >
+                View on TCGPlayer
+              </a>
+            ) : null}
           </div>
         </div>
 
         <div className="panel p-4 md:p-6">
           <div className="section-title mb-3">Price history</div>
           <Sparkline points={history.map((p) => p.price)} />
+          <p className="text-[11px] text-faint mt-2">
+            {pro ? 'Pro history window.' : 'Free history window. Pro extends this. It does not change prices or ranks.'}
+          </p>
         </div>
+
+        <AdSlot hidden={pro} />
 
         {usingCareer && career && asset.price != null ? (
           <TradeTicket

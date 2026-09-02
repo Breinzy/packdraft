@@ -38,6 +38,14 @@ export function mapTournament(row: Record<string, unknown>): Tournament {
     created_by: (row.created_by as string | null) ?? null,
     created_at: row.created_at as string,
     settled_at: (row.settled_at as string | null) ?? null,
+    visibility: (row.visibility as Tournament['visibility']) === 'private' ? 'private' : 'public',
+    invite_code: (row.invite_code as string | null) ?? null,
+    host_kind: (row.host_kind as Tournament['host_kind']) === 'creator' ? 'creator' : 'admin',
+    sponsor_name: (row.sponsor_name as string) ?? '',
+    sponsor_url: (row.sponsor_url as string) ?? '',
+    entry_mode: 'free',
+    qualifier_tournament_id: (row.qualifier_tournament_id as string | null) ?? null,
+    qualifier_max_rank: Number(row.qualifier_max_rank ?? 3) || 3,
   };
 }
 
@@ -58,6 +66,23 @@ export async function getTournament(
   if (error) throw new Error(`Failed to load tournament: ${error.message}`);
   if (!data) return null;
   return mapTournament(data as Record<string, unknown>);
+}
+
+/** RLS hides private books. Invite visitors are loaded via service role only when the code matches. */
+export async function getVisibleTournament(
+  userClient: SupabaseClient,
+  service: SupabaseClient | null,
+  id: string,
+  invite: string | null
+): Promise<Tournament | null> {
+  const viaUser = await getTournament(userClient, id);
+  if (viaUser) return viaUser;
+  if (!service || !invite) return null;
+  const viaService = await getTournament(service, id);
+  if (!viaService) return null;
+  if (viaService.visibility !== 'private') return null;
+  if (!viaService.invite_code || viaService.invite_code !== invite) return null;
+  return viaService;
 }
 
 export async function getUserPortfolio(

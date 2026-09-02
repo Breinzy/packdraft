@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { AssetType } from '@/types';
+import { randomBytes } from 'node:crypto';
 
 export interface CreateTournamentInput {
   name: string;
@@ -10,6 +11,12 @@ export interface CreateTournamentInput {
   createdBy?: string | null;
   tcgSlug?: string;
   eligibleAssetTypes?: AssetType[];
+  visibility?: 'public' | 'private';
+  hostKind?: 'admin' | 'creator';
+  sponsorName?: string;
+  sponsorUrl?: string;
+  qualifierTournamentId?: string | null;
+  qualifierMaxRank?: number;
 }
 
 export function parseCreateTournamentInput(input: CreateTournamentInput): {
@@ -21,6 +28,12 @@ export function parseCreateTournamentInput(input: CreateTournamentInput): {
   tcgSlug: string;
   eligibleAssetTypes: AssetType[];
   createdBy: string | null;
+  visibility: 'public' | 'private';
+  hostKind: 'admin' | 'creator';
+  sponsorName: string;
+  sponsorUrl: string;
+  qualifierTournamentId: string | null;
+  qualifierMaxRank: number;
 } {
   const name = input.name.trim();
   if (!name) throw new Error('Tournament name is required');
@@ -34,6 +47,9 @@ export function parseCreateTournamentInput(input: CreateTournamentInput): {
   const startsAt = input.startsAt ? new Date(input.startsAt) : new Date();
   if (Number.isNaN(startsAt.getTime())) throw new Error('Invalid start time');
 
+  const qualifierMaxRank = input.qualifierMaxRank ?? 3;
+  if (!(qualifierMaxRank >= 1)) throw new Error('Qualifier cutoff must be at least 1');
+
   return {
     name,
     description: input.description?.trim() ?? '',
@@ -43,13 +59,19 @@ export function parseCreateTournamentInput(input: CreateTournamentInput): {
     tcgSlug: input.tcgSlug ?? 'pokemon',
     eligibleAssetTypes: input.eligibleAssetTypes ?? ['sealed', 'graded', 'single'],
     createdBy: input.createdBy ?? null,
+    visibility: input.visibility === 'private' ? 'private' : 'public',
+    hostKind: input.hostKind === 'creator' ? 'creator' : 'admin',
+    sponsorName: input.sponsorName?.trim() ?? '',
+    sponsorUrl: input.sponsorUrl?.trim() ?? '',
+    qualifierTournamentId: input.qualifierTournamentId ?? null,
+    qualifierMaxRank,
   };
 }
 
 export async function createTournament(
   service: SupabaseClient,
   input: CreateTournamentInput
-): Promise<{ id: string }> {
+): Promise<{ id: string; inviteCode: string | null }> {
   const parsed = parseCreateTournamentInput(input);
 
   const { data: tcg, error: tcgError } = await service
@@ -64,6 +86,9 @@ export async function createTournament(
     parsed.startsAt.getTime() + parsed.durationDays * 24 * 60 * 60 * 1000
   );
 
+  const inviteCode =
+    parsed.visibility === 'private' ? randomBytes(6).toString('hex') : null;
+
   const { data, error } = await service
     .from('tournaments')
     .insert({
@@ -77,12 +102,20 @@ export async function createTournament(
       status: parsed.startsAt.getTime() <= Date.now() ? 'active' : 'upcoming',
       created_by: parsed.createdBy,
       eligible_asset_types: parsed.eligibleAssetTypes,
+      visibility: parsed.visibility,
+      invite_code: inviteCode,
+      host_kind: parsed.hostKind,
+      sponsor_name: parsed.sponsorName,
+      sponsor_url: parsed.sponsorUrl,
+      entry_mode: 'free',
+      qualifier_tournament_id: parsed.qualifierTournamentId,
+      qualifier_max_rank: parsed.qualifierMaxRank,
     })
-    .select('id')
+    .select('id, invite_code')
     .single();
 
   if (error || !data) {
     throw new Error(`Failed to create tournament: ${error?.message ?? 'unknown error'}`);
   }
-  return { id: data.id as string };
+  return { id: data.id as string, inviteCode: (data.invite_code as string | null) ?? null };
 }

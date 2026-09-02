@@ -13,6 +13,11 @@ FILES = [
     REPO / "supabase/migrations/20260902130000_phase15_settlement_integrity.sql",
     REPO / "supabase/migrations/20260902140000_phase13_career_progression.sql",
     REPO / "supabase/migrations/20260902150000_phase14_market_events.sql",
+    REPO / "supabase/migrations/20260902160000_phase16_social.sql",
+    REPO / "supabase/migrations/20260902170000_phase17_creator_tournaments.sql",
+    REPO / "supabase/migrations/20260902180000_phase18_monetization.sql",
+    REPO / "supabase/migrations/20260902190000_phase19_freetoplay.sql",
+    REPO / "supabase/migrations/20260902200000_phase20_release_events.sql",
 ]
 
 

@@ -7,6 +7,9 @@ import ResultHistory from '@/components/player/ResultHistory';
 import AchievementList from '@/components/player/AchievementList';
 import { tryCreateServerClient } from '@/lib/supabase/server';
 import { loadPlayerProfile } from '@/lib/player/queries';
+import { getSocialState } from '@/lib/social/queries';
+import SocialActions from '@/components/social/SocialActions';
+import ShareLink from '@/components/social/ShareLink';
 
 export const dynamic = 'force-dynamic';
 
@@ -54,17 +57,39 @@ export default async function PlayerProfilePage({
 
   const { displayName, history } = loaded;
 
+  let social: Awaited<ReturnType<typeof getSocialState>> | null = null;
+  if (viewerId && viewerId !== id) {
+    try {
+      social = await getSocialState(supabase, viewerId, id);
+    } catch {
+      social = null;
+    }
+  }
+
   return (
     <AppShell nav="dashboard">
       <main className="page py-6 md:py-8 space-y-6">
-        <Link href="/dashboard" className="text-sm text-muted min-h-11 inline-flex items-center">
-          ← Home
+        <Link href="/players" className="text-sm text-muted min-h-11 inline-flex items-center">
+          ← Players
         </Link>
         <div>
           <h1 className="page-title text-2xl">{displayName}</h1>
           <p className="text-sm text-muted mt-1.5">
             Tournament record. Books reset each event; this history stays.
           </p>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-2">
+          <ShareLink path={`/players/${id}`} label="Share profile" />
+          {social ? (
+            <SocialActions
+              userId={id}
+              following={social.following}
+              friends={social.friends}
+              outgoing={social.outgoing}
+              incomingId={social.incoming}
+            />
+          ) : null}
         </div>
 
         <PlayerStatGrid history={history} />

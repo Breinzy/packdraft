@@ -11,11 +11,13 @@ import { tryCreateServiceClient } from '@/lib/supabase/service';
 import {
   getHoldings,
   getStandings,
-  getTournament,
+  getVisibleTournament,
   getTransactions,
   getUserPortfolio,
   tickTournaments,
 } from '@/lib/tournament/queries';
+import TournamentLabels from '@/components/tournament/TournamentLabels';
+import ShareLink from '@/components/social/ShareLink';
 import { getCurrentPrices } from '@/lib/market/prices';
 import { canJoinStatus, canTradeStatus, isSettledStatus, TOURNAMENT_STATUS_HELP } from '@/lib/tournament/lifecycle';
 import { formatCountdown, formatCurrency, formatReturn } from '@/lib/utils';
@@ -27,10 +29,14 @@ export const dynamic = 'force-dynamic';
 
 export default async function TournamentDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ invite?: string }>;
 }) {
   const { id } = await params;
+  const sp = await searchParams;
+  const invite = typeof sp.invite === 'string' ? sp.invite : null;
   const supabase = await tryCreateServerClient();
   if (!supabase) {
     return (
@@ -53,7 +59,7 @@ export default async function TournamentDetailPage({
 
   let tournament;
   try {
-    tournament = await getTournament(supabase, id);
+    tournament = await getVisibleTournament(supabase, service, id, invite);
   } catch {
     return (
       <AppShell nav="play">
@@ -135,8 +141,19 @@ export default async function TournamentDetailPage({
             <h1 className="page-title text-2xl">{tournament.name}</h1>
             <StatusBadge status={tournament.status} />
           </div>
+          <TournamentLabels tournament={tournament} />
           {tournament.description ? (
             <p className="text-sm text-muted">{tournament.description}</p>
+          ) : null}
+          {tournament.sponsor_url ? (
+            <a
+              href={tournament.sponsor_url}
+              className="text-sm text-accent-light min-h-11 inline-flex items-center"
+              rel="noreferrer"
+              target="_blank"
+            >
+              Sponsor
+            </a>
           ) : null}
           <p className="text-sm text-muted">{TOURNAMENT_STATUS_HELP[tournament.status]}</p>
           <div className="text-xs text-muted">
@@ -164,19 +181,33 @@ export default async function TournamentDetailPage({
             ))}
           </div>
         ) : canJoinStatus(tournament.status) ? (
-          <JoinButton tournamentId={tournament.id} />
+          <JoinButton
+            tournamentId={tournament.id}
+            inviteCode={invite ?? (user?.id === tournament.created_by ? tournament.invite_code : null)}
+          />
         ) : (
           <p className="text-sm text-muted">This tournament is no longer open to join.</p>
         )}
 
-        {canTradeStatus(tournament.status) && portfolio ? (
-          <Link
-            href={`/assets?tournament=${tournament.id}`}
-            className="btn btn-primary w-full md:w-auto min-h-12"
-          >
-            Browse market
-          </Link>
-        ) : null}
+        <div className="flex flex-col sm:flex-row gap-2">
+          {canTradeStatus(tournament.status) && portfolio ? (
+            <Link
+              href={`/assets?tournament=${tournament.id}`}
+              className="btn btn-primary w-full md:w-auto min-h-12"
+            >
+              Browse market
+            </Link>
+          ) : null}
+          {isSettledStatus(tournament.status) ? (
+            <ShareLink path={`/tournaments/${tournament.id}`} label="Share result" />
+          ) : null}
+          {user?.id && user.id === tournament.created_by && tournament.visibility === 'private' && tournament.invite_code ? (
+            <ShareLink
+              path={`/tournaments/${tournament.id}?invite=${tournament.invite_code}`}
+              label="Copy invite"
+            />
+          ) : null}
+        </div>
 
         <section className="space-y-3">
           <h2 className="section-title">Leaderboard</h2>
