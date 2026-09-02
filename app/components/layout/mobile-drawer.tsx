@@ -38,6 +38,7 @@ export function MobileDrawer({
     >
       <button
         type="button"
+        tabIndex={open ? 0 : -1}
         className={`absolute inset-0 bg-black/55 transition-opacity duration-[var(--duration)] ${
           open ? "opacity-100" : "opacity-0"
         }`}
@@ -51,6 +52,7 @@ export function MobileDrawer({
         role="dialog"
         aria-modal="true"
         aria-label="Navigation"
+        inert={!open}
       >
         <button
           type="button"
