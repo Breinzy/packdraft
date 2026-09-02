@@ -61,7 +61,8 @@
 
 @media (min-width: 1024px) {
   :root {
-    --page-y: 2.25rem;
+    --page-pad: 2.5rem;
+    --page-y: 2.5rem;
   }
 }
 
@@ -137,6 +138,16 @@ button:active:not(:disabled) {
 
 .page-main {
   padding-block: var(--page-y);
+}
+
+.page-hero {
+  padding-block: 2.5rem;
+}
+
+@media (min-width: 768px) {
+  .page-hero {
+    padding-block: 4rem;
+  }
 }
 
 .stack {
@@ -231,6 +242,22 @@ button:active:not(:disabled) {
 .panel.panel-spacious,
 .panel-elevated.panel-spacious {
   padding: 2rem var(--panel-pad);
+}
+
+.stat-tile {
+  min-height: 6.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.mobile-drawer {
+  position: absolute;
+  top: 1.25rem;
+  right: auto;
+  bottom: 1.25rem;
+  left: 1.25rem;
+  width: min(19.75rem, calc(100vw - 2.5rem));
 }
 
 .field {

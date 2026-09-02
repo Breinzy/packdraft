@@ -46,8 +46,8 @@ export function MobileDrawer({
         onClick={onClose}
       />
       <aside
-        className={`absolute top-4 bottom-4 left-4 flex w-[min(19.5rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-[var(--radius-xl)] border border-border bg-background shadow-[var(--shadow-lg)] transition-transform duration-[var(--duration)] ${
-          open ? "translate-x-0" : "-translate-x-[calc(100%+1rem)]"
+        className={`mobile-drawer z-10 flex flex-col overflow-hidden rounded-[var(--radius-xl)] border border-border-strong bg-surface shadow-[var(--shadow-lg)] transition-transform duration-[var(--duration)] ${
+          open ? "translate-x-0" : "-translate-x-[calc(100%+1.5rem)]"
         }`}
         role="dialog"
         aria-modal="true"

@@ -53,7 +53,7 @@ export default function TournamentCard({
           </div>
         </div>
       </div>
-      <div className="mt-5 flex flex-wrap gap-x-6 gap-y-2.5 text-xs text-muted">
+      <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2.5 text-xs text-muted">
         <span className="inline-flex items-center gap-1.5">
           <Icon name="wallet" className="h-3.5 w-3.5" />
           Budget {formatCurrency(tournament.starting_budget)}

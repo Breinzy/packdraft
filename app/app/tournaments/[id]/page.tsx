@@ -172,8 +172,8 @@ export default async function TournamentDetailPage({
               { label: 'Return', value: formatReturn(ret), tone: ret >= 0 ? 'text-green' : 'text-red' },
               { label: 'Rank', value: myStanding ? `#${myStanding.rank}` : '—' },
             ].map((stat) => (
-              <div key={stat.label} className="panel panel-row">
-                <div className="label-caps mb-1">{stat.label}</div>
+              <div key={stat.label} className="panel stat-tile">
+                <div className="label-caps">{stat.label}</div>
                 <div className={`num text-base md:text-lg font-semibold ${stat.tone ?? 'text-foreground'}`}>
                   {stat.value}
                 </div>

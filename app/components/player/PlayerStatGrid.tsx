@@ -27,8 +27,8 @@ export default function PlayerStatGrid({ history }: { history: PlayerHistory }) 
   return (
     <div className="card-grid grid-cols-2 md:grid-cols-3">
       {stats.map((stat) => (
-        <div key={stat.label} className="panel">
-          <div className="kicker mb-2">{stat.label}</div>
+        <div key={stat.label} className="panel stat-tile">
+          <div className="kicker">{stat.label}</div>
           <div className="num text-base md:text-lg font-medium text-foreground">{stat.value}</div>
         </div>
       ))}

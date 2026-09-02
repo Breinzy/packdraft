@@ -122,8 +122,8 @@ export default function AdminPanel({
             { label: 'Tournaments', value: tournaments.length },
             { label: 'Events', value: events.length },
           ].map((stat) => (
-            <div key={stat.label} className="panel panel-row">
-              <div className="kicker mb-1">{stat.label}</div>
+            <div key={stat.label} className="panel stat-tile">
+              <div className="kicker">{stat.label}</div>
               <div className="text-base font-bold text-foreground">{stat.value}</div>
             </div>
           ))}

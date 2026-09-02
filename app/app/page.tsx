@@ -47,7 +47,7 @@ export default async function HomePage() {
   return (
     <>
       <Header />
-      <main className="page page-main py-10 md:py-16">
+      <main className="page page-hero">
         <div className="max-w-2xl">
           <p className="label-caps">Competitive TCG markets</p>
           <h1 className="page-title mt-3 text-4xl md:text-5xl">Highest book wins.</h1>

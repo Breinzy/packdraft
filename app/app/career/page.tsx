@@ -174,8 +174,8 @@ export default async function CareerPage() {
             { label: 'Peak', value: formatCurrency(progression.stats.peakValue) },
             { label: 'Trades', value: String(progression.stats.tradeCount) },
           ].map((stat) => (
-            <div key={stat.label} className="panel">
-              <div className="label-caps mb-1">{stat.label}</div>
+            <div key={stat.label} className="panel stat-tile">
+              <div className="label-caps">{stat.label}</div>
               <div className="num text-base md:text-lg font-semibold text-foreground">{stat.value}</div>
             </div>
           ))}
@@ -231,8 +231,8 @@ export default async function CareerPage() {
             { label: 'Realized P&L', value: formatCurrency(progression.stats.realizedPnl) },
             { label: 'Assets held', value: String(progression.stats.distinctAssets) },
           ].map((stat) => (
-            <div key={stat.label} className="panel">
-              <div className="label-caps mb-1">{stat.label}</div>
+            <div key={stat.label} className="panel stat-tile">
+              <div className="label-caps">{stat.label}</div>
               <div className="num text-base font-semibold text-foreground">{stat.value}</div>
             </div>
           ))}
