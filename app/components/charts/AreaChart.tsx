@@ -95,10 +95,10 @@ export function AreaChart({ points }: { points: number[] }) {
           <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
         </linearGradient>
       </defs>
-      {ticks.map((tick) => {
+      {ticks.map((tick, i) => {
         const y = padT + (1 - (tick - min) / span) * (h - padT - padB);
         return (
-          <g key={tick}>
+          <g key={`${tick}-${i}`}>
             <line
               x1={padL}
               x2={w - padR}
