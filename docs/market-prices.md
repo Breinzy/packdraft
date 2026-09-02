@@ -77,7 +77,7 @@ It is also time- and credit-boxed. Cron runs at **09:00 UTC** so it does not rac
 
 A current snapshot is **stale** when `now - recorded_at` exceeds **36 hours**.
 
-Sync is scheduled daily. 36 hours is a one-miss buffer. Stale flags are informational in the asset browser. Trading still uses the latest stored snapshot when one exists (the server looks up the price; the client cannot submit a price). Settlement uses the latest snapshot at or before `trading_closes_at` and fails if a held asset has no such row.
+Sync is scheduled daily. 36 hours is a one-miss buffer. Stale flags are informational in the asset browser. Trading still uses the latest stored snapshot when one exists (the server looks up the price; the client cannot submit a price). Competition settlement uses the 24-hour window + median method in `docs/settlement.md`, not an arbitrary last sale.
 
 ## History
 

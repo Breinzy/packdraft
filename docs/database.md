@@ -132,9 +132,31 @@ Point-in-time cash + marked holdings, written when the book is created and after
 
 Do not store career cash on `profiles`. Do not transfer cash or positions between Career and tournaments.
 
-## Reserved domains (not implemented)
+### Career progression (Phase 13)
 
-Market Event tables are **not** created. Career progression (levels, archetypes, milestones) is Phase 13.
+No extra Career tables. Levels, milestones, archetypes, streaks, and badges are computed in `app/lib/career/progression.ts`. Public ranks use `get_career_standings()` (security definer; value + handle only).
+
+## Market Events (Phase 14)
+
+Independent prediction competitions. No cash.
+
+### `market_events`
+
+Type: `release_price | direction | ranking | biggest_mover`. Status: `upcoming | open | locked | settling | completed | cancelled`. Clock fields: `opens_at`, `locks_at`, `settles_at`.
+
+### `market_event_assets`
+
+Event universe plus frozen start/end settlement prices (`packdraft_settlement_price`).
+
+### `market_event_entries` / `market_event_results`
+
+One payload per user while the event is `open`. Results are written at settlement and then immutable. Entries are private until lock, then public.
+
+Writes: `submit_market_event_entry`, `freeze_market_event_prices` (service role). Scoring is application code.
+
+## Settlement integrity (Phase 15)
+
+`packdraft_settlement_price(asset_id, as_of)` is the competition quote. `settle_tournament` uses it instead of last snapshot before close. See `docs/settlement.md`.
 
 ## Legacy tables (unused by the app)
 

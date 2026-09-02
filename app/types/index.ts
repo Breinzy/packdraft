@@ -184,7 +184,74 @@ export const ASSET_TYPE_LABELS: Record<AssetType, string> = {
   graded: 'Graded',
 };
 
+export type MarketEventType = 'release_price' | 'direction' | 'ranking' | 'biggest_mover';
+
+export type MarketEventStatus =
+  | 'upcoming'
+  | 'open'
+  | 'locked'
+  | 'settling'
+  | 'completed'
+  | 'cancelled';
+
+export interface MarketEvent {
+  id: string;
+  name: string;
+  description: string;
+  type: MarketEventType;
+  status: MarketEventStatus;
+  opens_at: string;
+  locks_at: string;
+  settles_at: string;
+  created_by: string | null;
+  created_at: string;
+  settled_at: string | null;
+}
+
+export interface MarketEventAsset {
+  event_id: string;
+  asset_id: string;
+  sort_order: number;
+  start_price: number | null;
+  end_price: number | null;
+  start_method: string | null;
+  end_method: string | null;
+  asset: Asset | null;
+}
+
+export interface MarketEventStanding {
+  user_id: string;
+  display_name: string;
+  score: number;
+  rank: number;
+  frozen: boolean;
+}
+
+export const MARKET_EVENT_TYPE_LABELS: Record<MarketEventType, string> = {
+  release_price: 'Release price',
+  direction: 'Direction',
+  ranking: 'Ranking',
+  biggest_mover: 'Biggest mover',
+};
+
+export const MARKET_EVENT_STATUS_LABELS: Record<MarketEventStatus, string> = {
+  upcoming: 'Upcoming',
+  open: 'Open',
+  locked: 'Locked',
+  settling: 'Settling',
+  completed: 'Completed',
+  cancelled: 'Cancelled',
+};
+
 export const CAREER_STARTING_CASH = 1000;
+
+export interface CareerStanding {
+  user_id: string;
+  display_name: string;
+  portfolio_value: number;
+  return_pct: number;
+  rank: number;
+}
 
 export interface CareerPortfolio {
   id: string;

@@ -10,6 +10,9 @@ FILES = [
     REPO / "supabase/migrations/20260831180000_phase5_10_tournament_engine.sql",
     REPO / "supabase/migrations/20260901120000_market_job_state.sql",
     REPO / "supabase/migrations/20260902120000_phase12_career_mode.sql",
+    REPO / "supabase/migrations/20260902130000_phase15_settlement_integrity.sql",
+    REPO / "supabase/migrations/20260902140000_phase13_career_progression.sql",
+    REPO / "supabase/migrations/20260902150000_phase14_market_events.sql",
 ]
 
 

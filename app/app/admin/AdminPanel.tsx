@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Logo from '@/components/brand/Logo';
-import type { Tournament } from '@/types';
+import type { MarketEvent, Tournament } from '@/types';
 import type { MarketJobState } from '@/lib/market/job-state';
+import EventStatusBadge from '@/components/events/EventStatusBadge';
 import StatusBadge from '@/components/tournament/StatusBadge';
 import { formatTimestamp } from '@/lib/utils';
 
@@ -27,10 +28,12 @@ interface ActionResult {
 export default function AdminPanel({
   stats,
   tournaments,
+  events,
   importJob,
 }: {
   stats: AdminStats;
   tournaments: Tournament[];
+  events: MarketEvent[];
   importJob: MarketJobState | null;
 }) {
   const [results, setResults] = useState<Record<string, ActionResult | null>>({});
@@ -40,6 +43,14 @@ export default function AdminPanel({
   const [budget, setBudget] = useState('10000');
   const [days, setDays] = useState('7');
   const [settleId, setSettleId] = useState(tournaments[0]?.id ?? '');
+  const [eventName, setEventName] = useState('Biggest mover');
+  const [eventDescription, setEventDescription] = useState('Pick the asset with the largest % move.');
+  const [eventType, setEventType] = useState('biggest_mover');
+  const [eventLockHours, setEventLockHours] = useState('24');
+  const [eventSettleHours, setEventSettleHours] = useState('24');
+  const [eventAssetCount, setEventAssetCount] = useState('4');
+  const [eventAssetIds, setEventAssetIds] = useState('');
+  const [settleEventId, setSettleEventId] = useState(events[0]?.id ?? '');
 
   async function runAction(action: string, extra?: Record<string, unknown>) {
     setLoading((l) => ({ ...l, [action]: true }));
@@ -70,6 +81,7 @@ export default function AdminPanel({
     { id: 'pause-import', label: 'Pause import', description: 'Stop cron/admin from continuing the catalog job' },
     { id: 'resume-import', label: 'Resume import', description: 'Allow the next chunk to run from the saved cursor' },
     { id: 'tick-tournaments', label: 'Tick tournaments', description: 'Advance lifecycle and settle locked books' },
+    { id: 'tick-events', label: 'Tick events', description: 'Open, lock, and settle market events' },
   ];
 
   return (
@@ -99,6 +111,7 @@ export default function AdminPanel({
               value: stats.lastSync ? formatTimestamp(stats.lastSync) : 'Never',
             },
             { label: 'Tournaments', value: tournaments.length },
+            { label: 'Events', value: events.length },
           ].map((stat) => (
             <div key={stat.label} className="panel px-4 py-3">
               <div className="kicker mb-1">{stat.label}</div>
@@ -273,6 +286,124 @@ export default function AdminPanel({
           ) : null}
         </div>
 
+        </div>
+
+        <div className="space-y-3">
+          <div className="section-title">Create market event</div>
+          <div className="panel p-4 space-y-3">
+            <input
+              value={eventName}
+              onChange={(e) => setEventName(e.target.value)}
+              placeholder="Name"
+              className="field"
+            />
+            <textarea
+              value={eventDescription}
+              onChange={(e) => setEventDescription(e.target.value)}
+              placeholder="Description"
+              className="field"
+            />
+            <label className="kicker">
+              Type
+              <select value={eventType} onChange={(e) => setEventType(e.target.value)} className="field mt-1">
+                <option value="biggest_mover">Biggest mover</option>
+                <option value="direction">Direction</option>
+                <option value="ranking">Ranking</option>
+                <option value="release_price">Release price</option>
+              </select>
+            </label>
+            <div className="grid grid-cols-3 gap-3">
+              <label className="kicker">
+                Lock hours
+                <input
+                  value={eventLockHours}
+                  onChange={(e) => setEventLockHours(e.target.value)}
+                  className="field mt-1"
+                />
+              </label>
+              <label className="kicker">
+                Settle hours
+                <input
+                  value={eventSettleHours}
+                  onChange={(e) => setEventSettleHours(e.target.value)}
+                  className="field mt-1"
+                />
+              </label>
+              <label className="kicker">
+                Asset count
+                <input
+                  value={eventAssetCount}
+                  onChange={(e) => setEventAssetCount(e.target.value)}
+                  className="field mt-1"
+                />
+              </label>
+            </div>
+            <label className="kicker">
+              Asset IDs (optional, comma-separated)
+              <input
+                value={eventAssetIds}
+                onChange={(e) => setEventAssetIds(e.target.value)}
+                className="field mt-1"
+                placeholder="Leave blank to auto-pick priced assets"
+              />
+            </label>
+            <button
+              type="button"
+              onClick={() =>
+                runAction('create-event', {
+                  name: eventName,
+                  description: eventDescription,
+                  type: eventType,
+                  lockHours: Number(eventLockHours),
+                  settleHoursAfterLock: Number(eventSettleHours),
+                  assetCount: Number(eventAssetCount),
+                  assetIds: eventAssetIds,
+                })
+              }
+              disabled={loading['create-event']}
+              className="btn btn-primary"
+            >
+              {loading['create-event'] ? 'Creating…' : 'Create event'}
+            </button>
+            {results['create-event'] ? (
+              <div className="text-xs font-mono text-green break-all">
+                {JSON.stringify(results['create-event'])}
+              </div>
+            ) : null}
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <div className="section-title">Settle one event</div>
+          <div className="flex flex-col md:flex-row gap-2">
+            <select
+              value={settleEventId}
+              onChange={(e) => setSettleEventId(e.target.value)}
+              className="field flex-1"
+            >
+              <option value="">Select event</option>
+              {events.map((event) => (
+                <option key={event.id} value={event.id}>
+                  {event.name} ({event.status})
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              disabled={!settleEventId || loading['settle-event']}
+              onClick={() => runAction('settle-event', { eventId: settleEventId })}
+              className="btn btn-ghost text-gold border-gold/40"
+            >
+              Settle
+            </button>
+          </div>
+          {results['settle-event'] ? (
+            <div className="text-xs font-mono break-all text-muted">
+              {JSON.stringify(results['settle-event'])}
+            </div>
+          ) : null}
+        </div>
+
         <div className="space-y-2">
           <div className="section-title">Tournaments</div>
           {tournaments.length === 0 ? (
@@ -286,6 +417,24 @@ export default function AdminPanel({
               >
                 <span className="text-sm text-foreground truncate">{t.name}</span>
                 <StatusBadge status={t.status} />
+              </Link>
+            ))
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <div className="section-title">Events</div>
+          {events.length === 0 ? (
+            <p className="text-sm text-muted">None yet. Apply the Phase 14–15 migrations, then create one.</p>
+          ) : (
+            events.map((event) => (
+              <Link
+                key={event.id}
+                href={`/events/${event.id}`}
+                className="flex items-center justify-between gap-3 panel px-4 py-3"
+              >
+                <span className="text-sm text-foreground truncate">{event.name}</span>
+                <EventStatusBadge status={event.status} />
               </Link>
             ))
           )}

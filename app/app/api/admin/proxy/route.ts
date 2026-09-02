@@ -77,6 +77,49 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: true, result });
     }
 
+    if (action === 'tick-events') {
+      const { tickMarketEvents } = await import('@/lib/events/tick');
+      const result = await tickMarketEvents(supabase);
+      return NextResponse.json({ ok: true, result });
+    }
+
+    if (action === 'create-event') {
+      const { createMarketEvent } = await import('@/lib/events/queries');
+      const lockHours = typeof body.lockHours === 'number' ? body.lockHours : Number(body.lockHours);
+      const settleHoursAfterLock =
+        typeof body.settleHoursAfterLock === 'number'
+          ? body.settleHoursAfterLock
+          : Number(body.settleHoursAfterLock);
+      const assetCount =
+        typeof body.assetCount === 'number' ? body.assetCount : Number(body.assetCount);
+      const assetIds = Array.isArray(body.assetIds)
+        ? body.assetIds.map((id) => String(id)).filter(Boolean)
+        : typeof body.assetIds === 'string'
+          ? body.assetIds.split(/[\s,]+/).filter(Boolean)
+          : [];
+      const result = await createMarketEvent(supabase, {
+        name: typeof body.name === 'string' ? body.name : '',
+        description: typeof body.description === 'string' ? body.description : '',
+        type: typeof body.type === 'string' ? body.type : 'direction',
+        lockHours: Number.isFinite(lockHours) ? lockHours : 24,
+        settleHoursAfterLock: Number.isFinite(settleHoursAfterLock) ? settleHoursAfterLock : 24,
+        assetCount: Number.isFinite(assetCount) ? assetCount : undefined,
+        assetIds,
+        createdBy: user.id,
+      });
+      return NextResponse.json({ ok: true, ...result });
+    }
+
+    if (action === 'settle-event') {
+      const eventId = typeof body.eventId === 'string' ? body.eventId : '';
+      if (!eventId) {
+        return NextResponse.json({ error: 'eventId is required' }, { status: 400 });
+      }
+      const { settleMarketEvent } = await import('@/lib/events/tick');
+      const result = await settleMarketEvent(supabase, eventId);
+      return NextResponse.json({ ok: true, result });
+    }
+
     if (action === 'settle-tournament') {
       const tournamentId = typeof body.tournamentId === 'string' ? body.tournamentId : '';
       if (!tournamentId) {

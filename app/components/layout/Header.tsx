@@ -12,6 +12,7 @@ const NAV = [
   { href: '/dashboard', label: 'Dashboard' },
   { href: '/assets', label: 'Market' },
   { href: '/tournaments', label: 'Play' },
+  { href: '/events', label: 'Events' },
   { href: '/career', label: 'Career' },
   { href: '/settings', label: 'Settings' },
 ];

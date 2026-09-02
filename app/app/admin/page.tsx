@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { isAdminEmail } from '@/lib/auth/admin';
 import AdminPanel from './AdminPanel';
 import { listTournaments } from '@/lib/tournament/queries';
+import { listMarketEvents } from '@/lib/events/queries';
 import { getJobState, type MarketJobState } from '@/lib/market/job-state';
 
 export const dynamic = 'force-dynamic';
@@ -52,6 +53,12 @@ export default async function AdminPage() {
     .not('asset_id', 'is', null);
 
   const tournaments = await listTournaments(supabase);
+  let events: import('@/types').MarketEvent[] = [];
+  try {
+    events = await listMarketEvents(supabase);
+  } catch {
+    events = [];
+  }
 
   let importJob: MarketJobState | null = null;
   try {
@@ -72,6 +79,7 @@ export default async function AdminPage() {
       }}
       importJob={importJob}
       tournaments={tournaments}
+      events={events}
     />
   );
 }

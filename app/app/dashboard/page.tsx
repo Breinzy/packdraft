@@ -96,7 +96,7 @@ export default async function DashboardPage() {
           )}
         </section>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <Link href="/assets" className="panel panel-hover px-4 py-4">
             <div className="section-title mb-1">Market</div>
             <div className="text-sm text-muted">Browse Pokémon assets</div>
@@ -104,6 +104,10 @@ export default async function DashboardPage() {
           <Link href="/tournaments" className="panel panel-hover px-4 py-4">
             <div className="section-title mb-1">Play</div>
             <div className="text-sm text-muted">Join a tournament</div>
+          </Link>
+          <Link href="/events" className="panel panel-hover px-4 py-4">
+            <div className="section-title mb-1">Events</div>
+            <div className="text-sm text-muted">Predict a market move</div>
           </Link>
           <Link href="/career" className="panel panel-hover px-4 py-4">
             <div className="section-title mb-1">Career</div>

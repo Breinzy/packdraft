@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { isCronAuthorized } from '@/lib/auth/cron';
 import { tryCreateServiceClient } from '@/lib/supabase/service';
 import { tickTournaments } from '@/lib/tournament/queries';
+import { tickMarketEvents } from '@/lib/events/tick';
 
 export async function GET(request: Request) {
   if (!isCronAuthorized(request)) {
@@ -14,8 +15,14 @@ export async function GET(request: Request) {
   }
 
   try {
-    const result = await tickTournaments(service);
-    return NextResponse.json({ ok: true, result });
+    const tournaments = await tickTournaments(service);
+    let events: unknown = null;
+    try {
+      events = await tickMarketEvents(service);
+    } catch (err) {
+      events = { error: err instanceof Error ? err.message : 'Unknown error' };
+    }
+    return NextResponse.json({ ok: true, result: { tournaments, events } });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
     return NextResponse.json({ error: message }, { status: 500 });

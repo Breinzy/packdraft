@@ -87,6 +87,9 @@ Fallback if MCP is not connected: CLI `db push` has previously failed on this pr
    - `supabase/migrations/20260831180000_phase5_10_tournament_engine.sql`
    - `supabase/migrations/20260901120000_market_job_state.sql`
    - `supabase/migrations/20260902120000_phase12_career_mode.sql`
+   - `supabase/migrations/20260902130000_phase15_settlement_integrity.sql`
+   - `supabase/migrations/20260902140000_phase13_career_progression.sql`
+   - `supabase/migrations/20260902150000_phase14_market_events.sql`
 3. In Table Editor, confirm `assets`, `tcgs`, `tournaments`, `market_job_state`, and `career_portfolios` exist.
 
 To apply from this repo instead of the SQL editor, set one of:
@@ -111,4 +114,4 @@ Or `python3 script/cloud/print-hosted-migrations.py` to dump the pending migrati
 1. Sign in on the app.
 2. Open `/admin` with an email listed in `ADMIN_EMAILS`.
 3. Import assets, sync prices, create a tournament.
-4. Join from `/tournaments` and trade from `/assets`. Career Mode is `/career` (separate $1,000 book).
+4. Join from `/tournaments` and trade from `/assets`. Career Mode is `/career` (separate $1,000 book). Market Events are `/events`.

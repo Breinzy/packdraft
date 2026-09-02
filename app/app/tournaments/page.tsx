@@ -53,6 +53,9 @@ export default async function TournamentsPage() {
           <p className="text-sm text-muted mt-1.5">
             Isolated tournaments. Virtual cash. Real Pokémon market prices.
           </p>
+          <Link href="/events" className="inline-flex min-h-11 items-center text-sm text-accent-light">
+            Predict a market event
+          </Link>
         </div>
 
         {tournaments.length === 0 ? (

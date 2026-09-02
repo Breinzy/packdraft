@@ -1,10 +1,12 @@
 import Link from 'next/link';
 import Header from '@/components/layout/Header';
 import StatusBadge from '@/components/tournament/StatusBadge';
+import EventStatusBadge from '@/components/events/EventStatusBadge';
 import { tryCreateServerClient } from '@/lib/supabase/server';
 import { listTournaments } from '@/lib/tournament/queries';
+import { listMarketEvents } from '@/lib/events/queries';
 import { formatCountdown, formatCurrency } from '@/lib/utils';
-import type { Tournament } from '@/types';
+import type { MarketEvent, Tournament } from '@/types';
 
 const STEPS = [
   {
@@ -24,15 +26,23 @@ const STEPS = [
 export default async function HomePage() {
   const supabase = await tryCreateServerClient();
   let tournaments: Tournament[] = [];
+  let events: MarketEvent[] = [];
   if (supabase) {
     try {
       tournaments = await listTournaments(supabase);
     } catch {
       tournaments = [];
     }
+    try {
+      events = await listMarketEvents(supabase);
+    } catch {
+      events = [];
+    }
   }
   const live = tournaments.filter((t) => t.status === 'upcoming' || t.status === 'active');
   const shown = (live.length > 0 ? live : tournaments).slice(0, 3);
+  const liveEvents = events.filter((e) => e.status === 'upcoming' || e.status === 'open');
+  const shownEvents = (liveEvents.length > 0 ? liveEvents : events).slice(0, 3);
 
   return (
     <>
@@ -48,8 +58,8 @@ export default async function HomePage() {
             <Link href="/tournaments" className="btn btn-primary min-h-12 px-5">
               Enter a tournament
             </Link>
-            <Link href="/assets" className="btn btn-ghost min-h-12 px-5">
-              Browse the market
+            <Link href="/events" className="btn btn-ghost min-h-12 px-5">
+              Predict an event
             </Link>
           </div>
         </div>
@@ -87,6 +97,36 @@ export default async function HomePage() {
                       <span>Budget {formatCurrency(t.starting_budget)}</span>
                       {t.status === 'upcoming' ? <span>Starts {formatCountdown(t.starts_at)}</span> : null}
                       {t.status === 'active' ? <span>Closes {formatCountdown(t.trading_closes_at)}</span> : null}
+                    </div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
+
+        {shownEvents.length > 0 ? (
+          <section className="mt-10">
+            <div className="flex items-center justify-between gap-3 mb-3">
+              <h2 className="section-title">Events</h2>
+              <Link
+                href="/events"
+                className="text-sm text-accent-light min-h-11 inline-flex items-center"
+              >
+                All
+              </Link>
+            </div>
+            <ul className="space-y-2">
+              {shownEvents.map((event) => (
+                <li key={event.id}>
+                  <Link href={`/events/${event.id}`} className="block panel panel-hover px-4 py-3.5">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="font-medium text-foreground truncate">{event.name}</span>
+                      <EventStatusBadge status={event.status} />
+                    </div>
+                    <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
+                      {event.status === 'upcoming' ? <span>Opens {formatCountdown(event.opens_at)}</span> : null}
+                      {event.status === 'open' ? <span>Locks {formatCountdown(event.locks_at)}</span> : null}
                     </div>
                   </Link>
                 </li>

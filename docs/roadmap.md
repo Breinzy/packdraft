@@ -1316,16 +1316,14 @@ Account, catalog, join, buy/sell, leaderboard, and settlement exist. That **is**
 
 A basic player history page also exists. Do not expand it into Career stats.
 
-## Now — Phase 12 Career Mode (initial)
+## Now — Phases 13–15
 
-Persistent $1,000 solo book, isolated from tournaments. Buy, sell, valuation, trade history, lifetime return, holdings, and a portfolio chart.
+Career progression (levels, milestones, archetypes, streaks, Career ranks), Market Events, and settlement integrity (windowed median, not last sale).
 
 ## Not now
 
 Do **not** start:
 
-* Career progression (Phase 13): levels, archetypes, milestones
-* Market Events
 * Social features, creator tournaments, monetization
 * Native apps, multi-TCG, advanced rankings
 

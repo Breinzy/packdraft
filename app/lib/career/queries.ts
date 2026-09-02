@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Asset, CareerPortfolio, CareerPosition, CareerTransaction, CareerValueSnapshot } from '@/types';
+import type { Asset, CareerStanding } from '@/types';
 import { CAREER_STARTING_CASH } from '@/types';
 import type { TransactionRow } from '@/lib/tournament/queries';
 
@@ -21,7 +21,7 @@ export async function ensureCareerPortfolio(
 export async function getCareerPortfolio(
   supabase: SupabaseClient,
   userId: string
-): Promise<CareerPortfolio | null> {
+): Promise<import('@/types').CareerPortfolio | null> {
   const { data, error } = await supabase
     .from('career_portfolios')
     .select('*')
@@ -38,7 +38,7 @@ export async function getCareerPortfolio(
   };
 }
 
-export interface CareerHoldingRow extends CareerPosition {
+export interface CareerHoldingRow extends import('@/types').CareerPosition {
   asset: Asset | null;
 }
 
@@ -87,7 +87,7 @@ export async function getCareerTransactions(
       id: row.id as string,
       portfolio_id: row.portfolio_id as string,
       asset_id: row.asset_id as string,
-      side: row.side as CareerTransaction['side'],
+      side: row.side as import('@/types').CareerTransaction['side'],
       quantity: Number(row.quantity),
       execution_price: asNumber(row.execution_price as number),
       total_value: asNumber(row.total_value as number),
@@ -102,7 +102,7 @@ export async function getCareerValueHistory(
   supabase: SupabaseClient,
   portfolioId: string,
   limit = 90
-): Promise<CareerValueSnapshot[]> {
+): Promise<import('@/types').CareerValueSnapshot[]> {
   const { data, error } = await supabase
     .from('career_value_snapshots')
     .select('*')
@@ -118,5 +118,34 @@ export async function getCareerValueHistory(
     holdings_value: asNumber(row.holdings_value),
     portfolio_value: asNumber(row.portfolio_value),
     recorded_at: row.recorded_at as string,
+  }));
+}
+
+export async function getCareerPeakValue(
+  supabase: SupabaseClient,
+  portfolioId: string
+): Promise<number> {
+  const { data, error } = await supabase
+    .from('career_value_snapshots')
+    .select('portfolio_value')
+    .eq('portfolio_id', portfolioId)
+    .order('portfolio_value', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) throw new Error(`Failed to load career peak: ${error.message}`);
+  return asNumber(data?.portfolio_value);
+}
+
+export async function getCareerStandings(
+  supabase: SupabaseClient
+): Promise<CareerStanding[]> {
+  const { data, error } = await supabase.rpc('get_career_standings');
+  if (error) throw new Error(`Failed to load career standings: ${error.message}`);
+  return (data ?? []).map((row: Record<string, unknown>) => ({
+    user_id: row.user_id as string,
+    display_name: (row.display_name as string) ?? 'Player',
+    portfolio_value: asNumber(row.portfolio_value),
+    return_pct: asNumber(row.return_pct),
+    rank: Number(row.rank),
   }));
 }

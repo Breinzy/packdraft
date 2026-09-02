@@ -25,6 +25,14 @@ Live value = remaining cash + Σ (quantity × latest stored snapshot).
 
 `career_value_snapshots` records that mark when the book is created and after each fill. The Career chart is those points plus the current live value. It is not a tournament settlement freeze.
 
-## Not in this phase
+## Progression (Phase 13)
 
-Levels, archetypes, milestones, career leaderboards, and Market Events. Tournament history stays on `/players/[id]`.
+Derived on read from the Career ledger and snapshots. Nothing here writes tournament tables.
+
+- **Milestones / levels** from peak marked value: $2k, $5k, $10k, $25k, $100k, $1M (Rookie → Legend).
+- **Archetype** from current cash vs holdings mix (sealed / singles / graded).
+- **Stats** include trade counts, realized P&L (same average-cost replay as player history, this book only), streak of consecutive UTC days with a career fill.
+- **Challenges / badges** are checklists on `/career`.
+- **Historical ranking** is `get_career_standings()` — live marked Career value, public rank + handle only. Positions and cash stay RLS-private. `/players/[id]` remains tournament history.
+
+Market Events are a separate product (`docs/events.md`). Do not mix Career cash into an event.
