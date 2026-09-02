@@ -1,51 +1,53 @@
 import Link from 'next/link';
 import Header from '@/components/layout/Header';
 
+const STEPS = [
+  {
+    title: 'Join a tournament',
+    body: 'Every player gets the same virtual budget. Books do not carry over.',
+  },
+  {
+    title: 'Trade the catalog',
+    body: 'Buy and sell Pokémon against Packdraft prices. Nothing here moves the real market.',
+  },
+  {
+    title: 'Finish on the board',
+    body: 'Trading closes, values lock, and rank is final.',
+  },
+];
+
 export default function HomePage() {
   return (
     <>
       <Header />
-      <main className="flex-1 min-h-0 overflow-y-auto page py-8 md:py-10 flex flex-col justify-center">
-        <div className="grid gap-12 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
-          <div className="flash max-w-xl">
-            <p className="kicker mb-5">Virtual book · Real TCG prices</p>
-            <h1 className="page-title text-5xl md:text-7xl">
-              Trade the market.
-              <span className="block italic text-muted">Beat the room.</span>
-            </h1>
-            <p className="mt-6 text-base md:text-lg text-muted leading-relaxed max-w-md">
-              Join a tournament, spend a fixed virtual budget, and finish with the highest Pokémon
-              portfolio. Nothing here moves the real market.
-            </p>
-            <div className="mt-8 flex flex-col sm:flex-row gap-3">
-              <Link href="/tournaments" className="btn btn-primary min-h-12 px-8 text-base">
-                Enter a tournament
-              </Link>
-              <Link href="/assets" className="btn btn-ghost min-h-12 px-8 text-base">
-                Browse the market
-              </Link>
-            </div>
+      <main className="page py-6 md:py-10">
+        <div className="max-w-xl">
+          <h1 className="page-title text-3xl md:text-4xl">Highest book wins.</h1>
+          <p className="mt-3 text-[15px] text-muted leading-6">
+            Join a tournament, spend a fixed virtual budget, and trade Pokémon using live Packdraft
+            prices.
+          </p>
+          <div className="mt-6 flex flex-col sm:flex-row gap-3">
+            <Link href="/tournaments" className="btn btn-primary min-h-12 px-5">
+              Enter a tournament
+            </Link>
+            <Link href="/assets" className="btn btn-ghost min-h-12 px-5">
+              Browse the market
+            </Link>
           </div>
-
-          <aside className="panel p-6 md:p-8 space-y-5 max-w-md lg:ml-auto w-full">
-            <div className="kicker">How a book works</div>
-            <ol className="space-y-4 text-sm text-muted">
-              <li className="flex gap-3">
-                <span className="num text-accent w-5">01</span>
-                Fixed cash. Isolated from every other tournament.
-              </li>
-              <li className="flex gap-3">
-                <span className="num text-accent w-5">02</span>
-                Buy and sell against live Packdraft prices.
-              </li>
-              <li className="flex gap-3">
-                <span className="num text-accent w-5">03</span>
-                Rank locks when trading closes. History stays.
-              </li>
-            </ol>
-            <p className="text-xs text-faint pt-2 border-t border-border">No real money. Simulated portfolios only.</p>
-          </aside>
         </div>
+
+        <ol className="mt-10 md:mt-12 grid gap-3 sm:grid-cols-3">
+          {STEPS.map((step, i) => (
+            <li key={step.title} className="panel p-4 md:p-5">
+              <div className="num text-xs text-accent-light mb-2">{i + 1}</div>
+              <div className="section-title mb-1.5">{step.title}</div>
+              <p className="text-sm text-muted leading-5">{step.body}</p>
+            </li>
+          ))}
+        </ol>
+
+        <p className="mt-8 text-xs text-faint">No real money. Simulated portfolios only.</p>
       </main>
     </>
   );

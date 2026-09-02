@@ -13,7 +13,7 @@ export default function Logo({
         P
       </span>
       {compact ? null : (
-        <span className="font-display italic text-[1.2rem] tracking-tight text-foreground leading-none">
+        <span className="text-[1.05rem] font-semibold text-foreground leading-none">
           Packdraft
         </span>
       )}

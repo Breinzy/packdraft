@@ -15,8 +15,8 @@ export default async function TournamentsPage() {
   if (!supabase) {
     return (
       <AppShell nav="play">
-        <main className="page py-8 md:py-12 space-y-6">
-          <h1 className="page-title text-3xl md:text-4xl">Play</h1>
+        <main className="page py-6 md:py-8 space-y-6">
+          <h1 className="page-title text-2xl">Play</h1>
           <NeedsDatabase feature="Tournaments" />
         </main>
       </AppShell>
@@ -37,8 +37,8 @@ export default async function TournamentsPage() {
   } catch {
     return (
       <AppShell nav="play">
-        <main className="page py-8 md:py-12 space-y-6">
-          <h1 className="page-title text-3xl md:text-4xl">Play</h1>
+        <main className="page py-6 md:py-8 space-y-6">
+          <h1 className="page-title text-2xl">Play</h1>
           <QueryFailed feature="tournaments" />
         </main>
       </AppShell>
@@ -47,16 +47,16 @@ export default async function TournamentsPage() {
 
   return (
     <AppShell nav="play">
-      <main className="page py-8 md:py-12 space-y-6">
+      <main className="page py-6 md:py-8 space-y-6">
         <div>
-          <h1 className="page-title text-3xl md:text-4xl">Play</h1>
-          <p className="text-sm text-muted mt-2">
+          <h1 className="page-title text-2xl">Play</h1>
+          <p className="text-sm text-muted mt-1.5">
             Isolated tournaments. Virtual cash. Real Pokémon market prices.
           </p>
         </div>
 
         {tournaments.length === 0 ? (
-            <div className="panel p-6 text-sm text-muted">
+            <div className="panel p-5 text-sm text-muted">
             No tournaments yet. An admin can create one from /admin.
           </div>
         ) : (

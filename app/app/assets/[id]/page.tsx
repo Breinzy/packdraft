@@ -29,7 +29,7 @@ export default async function AssetDetailPage({
   if (!supabase) {
     return (
       <AppShell nav="market">
-        <main className="page py-8 md:py-12 space-y-6">
+        <main className="page py-6 md:py-8 space-y-6">
           <h1 className="page-title text-2xl">Asset</h1>
           <NeedsDatabase feature="Asset detail" />
         </main>
@@ -42,7 +42,7 @@ export default async function AssetDetailPage({
   } catch {
     return (
       <AppShell nav="market">
-        <main className="page py-8 md:py-12 space-y-6">
+        <main className="page py-6 md:py-8 space-y-6">
           <h1 className="page-title text-2xl">Asset</h1>
           <QueryFailed feature="this asset" />
         </main>
@@ -81,7 +81,7 @@ export default async function AssetDetailPage({
 
   return (
     <AppShell nav="market">
-      <main className="page py-8 md:py-12 space-y-6">
+      <main className="page py-6 md:py-8 space-y-6">
         <Link href="/assets" className="text-sm text-muted min-h-11 inline-flex items-center">
           ← Market
         </Link>
@@ -93,7 +93,7 @@ export default async function AssetDetailPage({
               {asset.tcg_name ?? 'Pokémon'} · {ASSET_TYPE_LABELS[asset.asset_type]}
               {asset.set_name ? ` · ${asset.set_name}` : ''}
             </div>
-            <h1 className="page-title text-3xl md:text-5xl">{asset.name}</h1>
+            <h1 className="page-title text-2xl">{asset.name}</h1>
             <div className="flex items-baseline gap-3">
               <span className="num text-2xl text-foreground">
                 {asset.price == null ? '—' : formatCurrency(asset.price)}
@@ -114,7 +114,7 @@ export default async function AssetDetailPage({
         </div>
 
         <div className="panel p-4 md:p-6">
-          <div className="kicker mb-2">Price history</div>
+          <div className="section-title mb-3">Price history</div>
           <Sparkline points={history.map((p) => p.price)} />
         </div>
 
@@ -152,7 +152,7 @@ export default async function AssetDetailPage({
 
         {tradeable.length > 1 ? (
           <div className="text-xs text-muted space-y-2">
-            <div className="kicker">Trade in</div>
+            <div className="section-title">Trade in</div>
             <div className="flex flex-wrap gap-2">
               {tradeable.map((b) => (
                 <Link

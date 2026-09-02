@@ -35,7 +35,7 @@ export default async function TournamentDetailPage({
   if (!supabase) {
     return (
       <AppShell nav="play">
-        <main className="page py-8 md:py-12 space-y-6">
+        <main className="page py-6 md:py-8 space-y-6">
           <h1 className="page-title text-2xl">Tournament</h1>
           <NeedsDatabase feature="This tournament" />
         </main>
@@ -57,7 +57,7 @@ export default async function TournamentDetailPage({
   } catch {
     return (
       <AppShell nav="play">
-        <main className="page py-8 md:py-12 space-y-6">
+        <main className="page py-6 md:py-8 space-y-6">
           <h1 className="page-title text-2xl">Tournament</h1>
           <QueryFailed feature="this tournament" />
         </main>
@@ -125,14 +125,14 @@ export default async function TournamentDetailPage({
 
   return (
     <AppShell nav="play">
-      <main className="page py-8 md:py-12 space-y-8">
+      <main className="page py-6 md:py-8 space-y-6">
         <Link href="/tournaments" className="text-sm text-muted min-h-11 inline-flex items-center">
           ← Play
         </Link>
 
         <div className="space-y-3">
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="page-title text-3xl md:text-5xl">{tournament.name}</h1>
+            <h1 className="page-title text-2xl">{tournament.name}</h1>
             <StatusBadge status={tournament.status} />
           </div>
           {tournament.description ? (
@@ -179,7 +179,7 @@ export default async function TournamentDetailPage({
         ) : null}
 
         <section className="space-y-3">
-          <h2 className="kicker">Leaderboard</h2>
+          <h2 className="section-title">Leaderboard</h2>
           {standings[0]?.frozen ? (
             <p className="text-xs text-gold">Final — will not change</p>
           ) : tournament.status === 'locked' || tournament.status === 'settling' ? (
@@ -193,11 +193,11 @@ export default async function TournamentDetailPage({
         {portfolio ? (
           <>
             <section className="space-y-3">
-              <h2 className="kicker">Holdings</h2>
+              <h2 className="section-title">Holdings</h2>
               <HoldingsList holdings={holdings} tournamentId={tournament.id} />
             </section>
             <section className="space-y-3">
-              <h2 className="kicker">Trade history</h2>
+              <h2 className="section-title">Trade history</h2>
               <TradeHistory trades={trades} />
             </section>
           </>

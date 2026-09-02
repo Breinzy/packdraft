@@ -66,7 +66,7 @@ function LoginForm() {
         Continue with Google
       </button>
 
-      <div className="flex items-center gap-4 my-8">
+      <div className="flex items-center gap-4 my-6">
         <div className="flex-1 h-px bg-border" />
         <span className="kicker">or</span>
         <div className="flex-1 h-px bg-border" />

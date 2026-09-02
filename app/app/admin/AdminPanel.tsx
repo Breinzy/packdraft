@@ -73,9 +73,9 @@ export default function AdminPanel({
   ];
 
   return (
-    <div className="flex-1 min-h-0 flex flex-col">
-      <header className="bg-background/80 backdrop-blur-md">
-        <div className="page flex items-center justify-between gap-4 py-3 border-b border-border">
+    <div className="min-h-dvh">
+      <header className="border-b border-border">
+        <div className="page flex items-center justify-between gap-4 min-h-14">
           <div className="flex items-center gap-3">
             <Logo href="/" />
             <span className="kicker border border-gold/40 text-gold px-1.5 py-0.5">Admin</span>
@@ -86,7 +86,7 @@ export default function AdminPanel({
         </div>
       </header>
 
-      <main className="page flex-1 min-h-0 overflow-y-auto py-8 md:py-12 space-y-8">
+      <main className="page py-6 md:py-8 space-y-8">
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {[
             { label: 'Active assets', value: stats.totalAssets },
@@ -109,7 +109,7 @@ export default function AdminPanel({
 
         {importJob ? (
           <div className="panel p-4 space-y-2">
-            <div className="kicker">Catalog import</div>
+            <div className="section-title">Catalog import</div>
             <div className="text-sm text-foreground">
               {importJob.status.toUpperCase()} · stage {importJob.stage}
               {importJob.stop_reason ? ` · last stop: ${importJob.stop_reason}` : ''}
@@ -152,7 +152,7 @@ export default function AdminPanel({
         )}
 
         <div className="space-y-3">
-          <div className="kicker mb-2">Market data</div>
+          <div className="section-title mb-2">Market data</div>
           {actions.map((action) => (
             <div
               key={action.id}
@@ -187,7 +187,7 @@ export default function AdminPanel({
         </div>
 
         <div className="space-y-3">
-          <div className="kicker">Create tournament</div>
+          <div className="section-title">Create tournament</div>
           <div className="panel p-4 space-y-3">
             <input
               value={name}
@@ -202,16 +202,16 @@ export default function AdminPanel({
               className="field"
             />
             <div className="grid grid-cols-2 gap-3">
-              <label className="text-xs text-muted">
-                BUDGET
+              <label className="kicker">
+                Budget
                 <input
                   value={budget}
                   onChange={(e) => setBudget(e.target.value)}
                   className="field mt-1"
                 />
               </label>
-              <label className="text-xs text-muted">
-                DAYS
+              <label className="kicker">
+                Days
                 <input
                   value={days}
                   onChange={(e) => setDays(e.target.value)}
@@ -243,7 +243,7 @@ export default function AdminPanel({
         </div>
 
         <div className="space-y-3">
-          <div className="kicker">Settle one</div>
+          <div className="section-title">Settle one</div>
           <div className="flex flex-col md:flex-row gap-2">
             <select
               value={settleId}
@@ -274,7 +274,7 @@ export default function AdminPanel({
         </div>
 
         <div className="space-y-2">
-          <div className="kicker">Tournaments</div>
+          <div className="section-title">Tournaments</div>
           {tournaments.length === 0 ? (
             <p className="text-sm text-muted">None yet. Apply the Phase 5–10 migration, then create one.</p>
           ) : (

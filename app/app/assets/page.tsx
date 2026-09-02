@@ -36,8 +36,8 @@ export default async function AssetsPage({
   if (!supabase) {
     return (
       <AppShell nav="market">
-        <main className="page py-8 md:py-12 space-y-6">
-          <h1 className="page-title text-3xl md:text-4xl">Market</h1>
+        <main className="page py-6 md:py-8 space-y-6">
+          <h1 className="page-title text-2xl">Market</h1>
           <NeedsDatabase feature="The asset catalog" />
         </main>
       </AppShell>
@@ -54,8 +54,8 @@ export default async function AssetsPage({
   } catch {
     return (
       <AppShell nav="market">
-        <main className="page py-8 md:py-12 space-y-6">
-          <h1 className="page-title text-3xl md:text-4xl">Market</h1>
+        <main className="page py-6 md:py-8 space-y-6">
+          <h1 className="page-title text-2xl">Market</h1>
           <QueryFailed feature="the asset catalog" />
         </main>
       </AppShell>
@@ -74,15 +74,15 @@ export default async function AssetsPage({
 
   return (
     <AppShell nav="market">
-      <main className="page py-8 md:py-12 space-y-6">
+      <main className="page py-6 md:py-8 space-y-6">
         <div>
-          <h1 className="page-title text-3xl md:text-4xl">Market</h1>
-          <p className="text-sm text-muted mt-2">
+          <h1 className="page-title text-2xl">Market</h1>
+          <p className="text-sm text-muted mt-1.5">
             Pokémon prices stored by Packdraft. Virtual trades do not move the real market.
           </p>
         </div>
 
-        <form className="space-y-3" action="/assets" method="get">
+        <form className="space-y-4" action="/assets" method="get">
           {tournament ? <input type="hidden" name="tournament" value={tournament} /> : null}
           <input
             name="q"

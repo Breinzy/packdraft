@@ -1,27 +1,19 @@
 import type { Metadata } from 'next';
-import { IBM_Plex_Mono, IBM_Plex_Sans, Newsreader } from 'next/font/google';
+import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 
-const plex = IBM_Plex_Sans({
+const geist = Geist({
   subsets: ['latin'],
-  weight: ['400', '500', '600'],
-  variable: '--font-plex',
+  variable: '--font-geist',
   display: 'swap',
+  fallback: ['Segoe UI', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
 });
 
-const newsreader = Newsreader({
+const geistMono = Geist_Mono({
   subsets: ['latin'],
-  weight: ['400', '500', '600'],
-  style: ['normal', 'italic'],
-  variable: '--font-newsreader',
+  variable: '--font-geist-mono',
   display: 'swap',
-});
-
-const plexMono = IBM_Plex_Mono({
-  subsets: ['latin'],
-  weight: ['400', '500'],
-  variable: '--font-plex-mono',
-  display: 'swap',
+  fallback: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
 });
 
 export const metadata: Metadata = {
@@ -36,10 +28,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${plex.variable} ${newsreader.variable} ${plexMono.variable}`}>
-      <body className="relative bg-black font-sans text-foreground">
-        <div className="grain" aria-hidden />
-        <div className="relative z-10 site-shell">{children}</div>
+    <html lang="en" className={`${geist.variable} ${geistMono.variable}`}>
+      <body className={`${geist.className} min-h-dvh bg-background text-foreground antialiased`}>
+        {children}
       </body>
     </html>
   );

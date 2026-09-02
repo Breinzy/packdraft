@@ -20,7 +20,7 @@ export default async function PlayerProfilePage({
   if (!supabase) {
     return (
       <AppShell nav="dashboard">
-        <main className="page py-8 md:py-12 space-y-6">
+        <main className="page py-6 md:py-8 space-y-6">
           <h1 className="page-title text-2xl">Player</h1>
           <NeedsDatabase feature="player history" />
         </main>
@@ -43,7 +43,7 @@ export default async function PlayerProfilePage({
   } catch {
     return (
       <AppShell nav="dashboard">
-        <main className="page py-8 md:py-12 space-y-6">
+        <main className="page py-6 md:py-8 space-y-6">
           <h1 className="page-title text-2xl">Player</h1>
           <QueryFailed feature="player history" />
         </main>
@@ -56,13 +56,13 @@ export default async function PlayerProfilePage({
 
   return (
     <AppShell nav="dashboard">
-      <main className="page py-8 md:py-12 space-y-8">
+      <main className="page py-6 md:py-8 space-y-6">
         <Link href="/dashboard" className="text-sm text-muted min-h-11 inline-flex items-center">
           ← Home
         </Link>
         <div>
-          <h1 className="page-title text-3xl md:text-5xl">{displayName}</h1>
-          <p className="text-sm text-muted mt-2">
+          <h1 className="page-title text-2xl">{displayName}</h1>
+          <p className="text-sm text-muted mt-1.5">
             Tournament record. Books reset each event; this history stays.
           </p>
         </div>
@@ -71,12 +71,12 @@ export default async function PlayerProfilePage({
         <TradeHighlights history={history} />
 
         <section className="space-y-3">
-          <h2 className="kicker">Achievements</h2>
+          <h2 className="section-title">Achievements</h2>
           <AchievementList achievements={history.achievements} />
         </section>
 
         <section className="space-y-3">
-          <h2 className="kicker">Tournament history</h2>
+          <h2 className="section-title">Tournament history</h2>
           <ResultHistory results={history.results} />
         </section>
       </main>

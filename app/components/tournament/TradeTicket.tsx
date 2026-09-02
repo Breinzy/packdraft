@@ -92,7 +92,7 @@ export default function TradeTicket({
   if (!tradingOpen) {
     return (
       <div className="panel p-5 md:p-6">
-        <div className="kicker mb-2">Trade</div>
+        <div className="section-title mb-2">Trade</div>
         <p className="text-sm text-muted">Trading is closed for {tournamentName}.</p>
       </div>
     );
@@ -102,7 +102,7 @@ export default function TradeTicket({
     <div className="panel p-5 md:p-6 space-y-4">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <div className="kicker">Trade</div>
+          <div className="section-title">Trade</div>
           <div className="text-sm text-muted truncate">{tournamentName}</div>
         </div>
         {stale ? <span className="kicker text-gold">Quote stale</span> : null}

@@ -55,11 +55,11 @@ export default function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-30 shrink-0 bg-background/80 backdrop-blur-md">
-        <div className="page flex items-center justify-between gap-4 py-3 md:py-3.5 border-b border-border">
+      <header className="sticky top-0 z-30 bg-background/90 backdrop-blur-md border-b border-border">
+        <div className="page flex items-center justify-between gap-4 min-h-14">
           <div className="flex items-center gap-3">
             <Logo href={isSignedIn ? '/dashboard' : '/'} />
-            <span className="hidden sm:inline kicker border border-border px-1.5 py-0.5 text-[10px] text-muted">
+            <span className="hidden sm:inline text-[11px] text-faint border border-border rounded px-1.5 py-0.5">
               Beta
             </span>
           </div>
@@ -73,10 +73,10 @@ export default function Header() {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`min-h-11 inline-flex items-center border-b-2 ${
+                    className={`min-h-11 inline-flex items-center ${
                       active
-                        ? 'text-foreground border-accent'
-                        : 'text-muted border-transparent hover:text-foreground'
+                        ? 'text-foreground font-medium'
+                        : 'text-muted hover:text-foreground'
                     }`}
                   >
                     {item.label}
@@ -93,7 +93,7 @@ export default function Header() {
                 >
                   {getDisplayName()}
                 </Link>
-                <button onClick={handleSignOut} className="btn btn-ghost text-xs text-muted">
+                <button onClick={handleSignOut} className="text-sm text-muted hover:text-foreground min-h-11">
                   Sign out
                 </button>
               </div>
@@ -118,8 +118,8 @@ export default function Header() {
       </header>
 
       {menuOpen ? (
-        <div className="md:hidden sheet flex flex-col">
-          <div className="flex items-center justify-between px-5 py-3 border-b border-border">
+        <div className="md:hidden fixed inset-0 z-50 bg-background flex flex-col">
+          <div className="page flex items-center justify-between min-h-14 border-b border-border">
             <Logo href={null} />
             <button
               onClick={() => setMenuOpen(false)}
@@ -130,7 +130,7 @@ export default function Header() {
             </button>
           </div>
 
-          <nav className="flex flex-col py-2 px-2">
+          <nav className="page flex flex-col py-2">
             {NAV.map((item) => {
               if (!isSignedIn && item.href === '/settings') return null;
               const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -139,7 +139,7 @@ export default function Header() {
                   key={item.href}
                   href={item.href}
                   onClick={() => setMenuOpen(false)}
-                  className={`px-5 py-4 min-h-11 text-base rounded-lg ${active ? 'text-foreground' : 'text-muted'}`}
+                  className={`py-4 min-h-11 text-base ${active ? 'text-foreground' : 'text-muted'}`}
                 >
                   {item.label}
                 </Link>
@@ -147,7 +147,7 @@ export default function Header() {
             })}
           </nav>
 
-          <div className="mt-auto p-5 border-t border-border">
+          <div className="page mt-auto py-5 border-t border-border pb-[max(1.25rem,env(safe-area-inset-bottom))]">
             {isSignedIn ? (
               <div className="space-y-4">
                 <Link

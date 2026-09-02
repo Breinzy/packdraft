@@ -15,7 +15,7 @@ export default function AssetThumb({ src, alt, size = 'sm' }: AssetThumbProps) {
   if (!src || failed) {
     return (
       <div
-        className={`${box} shrink-0 rounded-md bg-surface-2 border border-border flex items-center justify-center text-faint font-display italic text-lg`}
+        className={`${box} shrink-0 rounded-md bg-surface-2 border border-border flex items-center justify-center text-faint font-semibold text-lg`}
         aria-hidden
       >
         P

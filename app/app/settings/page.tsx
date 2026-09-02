@@ -80,7 +80,7 @@ export default function SettingsPage() {
 
   if (checking) {
     return (
-      <div className="flex-1 flex items-center justify-center py-16">
+      <div className="min-h-dvh flex items-center justify-center">
         <div className="text-muted text-sm">Loading…</div>
       </div>
     );
@@ -88,47 +88,49 @@ export default function SettingsPage() {
 
   return (
     <AppShell nav="settings">
-      <main className="w-full max-w-lg mx-auto py-8 md:py-12">
-        <div className="mb-10">
-          <h1 className="page-title text-3xl mb-2">Settings</h1>
-          <p className="text-sm text-muted">Manage how you appear in tournaments.</p>
-        </div>
+      <main className="page py-6 md:py-8">
+        <div className="max-w-lg">
+          <div className="mb-8">
+            <h1 className="page-title text-2xl mb-1.5">Settings</h1>
+            <p className="text-sm text-muted">Manage how you appear in tournaments.</p>
+          </div>
 
-        <div className="panel p-6 md:p-8">
-          <h2 className="kicker mb-6">Display name</h2>
+          <div className="panel p-5">
+            <h2 className="section-title mb-4">Display name</h2>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="kicker mb-2 block">Name</label>
-              <input
-                type="text"
-                value={displayName}
-                onChange={(e) => { setDisplayName(e.target.value); setSaved(false); }}
-                maxLength={24}
-                placeholder="TrainerRed"
-                className="field"
-              />
-              <div className="text-xs text-faint mt-2">
-                {displayName.length}/24 characters
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div>
+                <label className="kicker mb-2 block">Name</label>
+                <input
+                  type="text"
+                  value={displayName}
+                  onChange={(e) => { setDisplayName(e.target.value); setSaved(false); }}
+                  maxLength={24}
+                  placeholder="TrainerRed"
+                  className="field"
+                />
+                <div className="text-xs text-faint mt-2">
+                  {displayName.length}/24 characters
+                </div>
               </div>
-            </div>
 
-            {error && (
-              <div className="text-sm text-red border border-red/25 bg-red/10 rounded-md px-4 py-3">
-                {error}
-              </div>
-            )}
+              {error && (
+                <div className="text-sm text-red border border-red/25 bg-red/10 rounded-md px-4 py-3">
+                  {error}
+                </div>
+              )}
 
-            {saved && (
-              <div className="text-sm text-green border border-green/25 bg-green/10 rounded-md px-4 py-3">
-                Saved
-              </div>
-            )}
+              {saved && (
+                <div className="text-sm text-green border border-green/25 bg-green/10 rounded-md px-4 py-3">
+                  Saved
+                </div>
+              )}
 
-            <button type="submit" disabled={loading} className="btn btn-primary w-full">
-              {loading ? 'Saving…' : 'Save changes'}
-            </button>
-          </form>
+              <button type="submit" disabled={loading} className="btn btn-primary w-full">
+                {loading ? 'Saving…' : 'Save changes'}
+              </button>
+            </form>
+          </div>
         </div>
       </main>
     </AppShell>
