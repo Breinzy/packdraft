@@ -12,7 +12,6 @@ export default function TournamentCard({
   cash,
   rank,
   portfolioValue,
-  compact,
 }: {
   tournament: Tournament;
   href?: string;
