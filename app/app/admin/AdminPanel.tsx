@@ -73,18 +73,20 @@ export default function AdminPanel({
   ];
 
   return (
-    <div className="min-h-dvh">
-      <header className="border-b border-border py-3 px-4 md:px-12 flex items-center justify-between bg-background/80 backdrop-blur-md">
-        <div className="flex items-center gap-3">
-          <Logo href="/" />
-          <span className="kicker border border-gold/40 text-gold px-1.5 py-0.5">Admin</span>
+    <div className="flex-1 flex flex-col">
+      <header className="bg-background/80 backdrop-blur-md">
+        <div className="page flex items-center justify-between gap-4 py-3 border-b border-border">
+          <div className="flex items-center gap-3">
+            <Logo href="/" />
+            <span className="kicker border border-gold/40 text-gold px-1.5 py-0.5">Admin</span>
+          </div>
+          <Link href="/dashboard" className="text-sm text-muted hover:text-foreground min-h-11 inline-flex items-center">
+            ← Dashboard
+          </Link>
         </div>
-        <Link href="/dashboard" className="text-sm text-muted hover:text-foreground min-h-11 inline-flex items-center">
-          ← Dashboard
-        </Link>
       </header>
 
-      <main className="px-4 md:px-6 py-6 md:py-8 max-w-4xl mx-auto space-y-8">
+      <main className="page py-8 md:py-12 space-y-8">
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {[
             { label: 'Active assets', value: stats.totalAssets },

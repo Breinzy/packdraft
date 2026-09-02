@@ -56,8 +56,8 @@ export default async function DashboardPage() {
 
   return (
     <AppShell nav="dashboard">
-      <main className="flex-1 overflow-y-auto px-4 md:px-8 py-6 md:py-10">
-        <div className="max-w-4xl mx-auto space-y-6 md:space-y-8">
+      <main className="page py-8 md:py-12 space-y-6 md:space-y-8">
+        <div className="space-y-6 md:space-y-8">
           <div className="panel p-6 md:p-8">
             <p className="kicker mb-2">Dashboard</p>
             <h1 className="page-title text-3xl md:text-4xl mb-2">Welcome back, {name}</h1>

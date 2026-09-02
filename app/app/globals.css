@@ -20,6 +20,27 @@
   --font-mono: var(--font-plex-mono), "IBM Plex Mono", ui-monospace, monospace;
 }
 
+:root {
+  --gutter-x: 1.5rem;
+  --gutter-y: 0.85rem;
+  --page-max: 72rem;
+  --dock-offset: 5.75rem;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --gutter-x: 2.5rem;
+    --gutter-y: 1.15rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  :root {
+    --gutter-x: 3.5rem;
+    --gutter-y: 1.35rem;
+  }
+}
+
 @view-transition {
   navigation: auto;
 }
@@ -60,7 +81,7 @@ body {
 
 ::-webkit-scrollbar-thumb {
   background: #2c2c2e;
-  border-radius: 0;
+  border-radius: 999px;
 }
 
 a,
@@ -94,10 +115,50 @@ button:active:not(:disabled) {
   color: var(--color-foreground);
 }
 
+.site-shell {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding: max(var(--gutter-y), env(safe-area-inset-top))
+    max(var(--gutter-x), env(safe-area-inset-right))
+    max(var(--gutter-y), env(safe-area-inset-bottom))
+    max(var(--gutter-x), env(safe-area-inset-left));
+}
+
+.page {
+  width: 100%;
+  max-width: var(--page-max);
+  margin-inline: auto;
+}
+
+.dock {
+  position: fixed;
+  z-index: 45;
+  left: max(var(--gutter-x), env(safe-area-inset-left));
+  right: max(var(--gutter-x), env(safe-area-inset-right));
+  bottom: max(0.75rem, env(safe-area-inset-bottom));
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: rgba(13, 13, 14, 0.92);
+  backdrop-filter: blur(16px);
+}
+
+.sheet {
+  position: fixed;
+  z-index: 50;
+  inset: max(var(--gutter-y), env(safe-area-inset-top))
+    max(var(--gutter-x), env(safe-area-inset-right))
+    max(var(--gutter-y), env(safe-area-inset-bottom))
+    max(var(--gutter-x), env(safe-area-inset-left));
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: rgba(10, 10, 11, 0.98);
+}
+
 .kicker {
   font-size: 0.6875rem;
   font-weight: 500;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-faint);
 }
@@ -110,12 +171,13 @@ button:active:not(:disabled) {
 .panel {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: 10px;
+  border-radius: 12px;
   transition: border-color 160ms ease, background-color 160ms ease;
 }
 
 .panel-hover:hover {
   border-color: var(--color-border-strong);
+  background: var(--color-surface-2);
 }
 
 .field {
@@ -124,7 +186,7 @@ button:active:not(:disabled) {
   padding: 0 0.95rem;
   background: var(--color-surface-2);
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: 10px;
   color: var(--color-foreground);
   outline: none;
   transition: border-color 160ms ease;
@@ -158,7 +220,7 @@ textarea.field {
   justify-content: center;
   min-height: 2.75rem;
   padding: 0 1.15rem;
-  border-radius: 8px;
+  border-radius: 10px;
   font-weight: 600;
   font-size: 0.875rem;
   border: 1px solid transparent;

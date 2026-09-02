@@ -20,7 +20,7 @@ export default async function PlayerProfilePage({
   if (!supabase) {
     return (
       <AppShell nav="dashboard">
-        <main className="px-4 md:px-8 py-6 md:py-10 max-w-4xl mx-auto space-y-6">
+        <main className="page py-8 md:py-12 space-y-6">
           <h1 className="page-title text-2xl">Player</h1>
           <NeedsDatabase feature="player history" />
         </main>
@@ -43,7 +43,7 @@ export default async function PlayerProfilePage({
   } catch {
     return (
       <AppShell nav="dashboard">
-        <main className="px-4 md:px-8 py-6 md:py-10 max-w-4xl mx-auto space-y-6">
+        <main className="page py-8 md:py-12 space-y-6">
           <h1 className="page-title text-2xl">Player</h1>
           <QueryFailed feature="player history" />
         </main>
@@ -56,7 +56,7 @@ export default async function PlayerProfilePage({
 
   return (
     <AppShell nav="dashboard">
-      <main className="px-4 md:px-8 py-6 md:py-10 max-w-4xl mx-auto space-y-8">
+      <main className="page py-8 md:py-12 space-y-8">
         <Link href="/dashboard" className="text-sm text-muted min-h-11 inline-flex items-center">
           ← Home
         </Link>

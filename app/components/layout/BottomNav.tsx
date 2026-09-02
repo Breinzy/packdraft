@@ -10,24 +10,25 @@ export default function BottomNav({ active }: { active: BottomNavKey }) {
   ];
 
   return (
-    <nav
-      className="md:hidden fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background/92 backdrop-blur-md"
-      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
-    >
-      <div className="grid grid-cols-3">
+    <nav className="md:hidden dock">
+      <div className="grid grid-cols-3 px-1">
         {items.map((item) => {
           const isActive = item.key === active;
           return (
             <Link
               key={item.key}
               href={item.href}
-              className={`flex items-center justify-center min-h-14 text-xs font-medium border-t-2 ${
-                isActive
-                  ? 'text-foreground border-accent'
-                  : 'text-faint border-transparent'
+              className={`flex items-center justify-center min-h-14 text-xs font-medium ${
+                isActive ? 'text-foreground' : 'text-faint'
               }`}
             >
-              {item.label}
+              <span
+                className={`inline-flex min-h-8 items-center border-b-2 ${
+                  isActive ? 'border-accent' : 'border-transparent'
+                }`}
+              >
+                {item.label}
+              </span>
             </Link>
           );
         })}

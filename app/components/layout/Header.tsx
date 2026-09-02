@@ -55,69 +55,71 @@ export default function Header() {
 
   return (
     <>
-      <header className="border-b border-border py-3 px-4 md:py-3.5 md:px-8 lg:px-12 flex items-center justify-between bg-background/80 backdrop-blur-md sticky top-0 z-30">
-        <div className="flex items-center gap-3">
-          <Logo href={isSignedIn ? '/dashboard' : '/'} />
-          <span className="hidden sm:inline kicker border border-border px-1.5 py-0.5 text-[10px] text-muted">
-            Beta
-          </span>
-        </div>
+      <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-md">
+        <div className="page flex items-center justify-between gap-4 py-3 md:py-3.5 border-b border-border">
+          <div className="flex items-center gap-3">
+            <Logo href={isSignedIn ? '/dashboard' : '/'} />
+            <span className="hidden sm:inline kicker border border-border px-1.5 py-0.5 text-[10px] text-muted">
+              Beta
+            </span>
+          </div>
 
-        <div className="hidden md:flex gap-8 items-center">
-          <nav className="flex gap-6 items-center text-sm">
-            {NAV.map((item) => {
-              if (!isSignedIn && item.href === '/settings') return null;
-              const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
-              return (
+          <div className="hidden md:flex gap-8 items-center">
+            <nav className="flex gap-6 items-center text-sm">
+              {NAV.map((item) => {
+                if (!isSignedIn && item.href === '/settings') return null;
+                const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`min-h-11 inline-flex items-center border-b-2 ${
+                      active
+                        ? 'text-foreground border-accent'
+                        : 'text-muted border-transparent hover:text-foreground'
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </nav>
+
+            {isSignedIn ? (
+              <div className="flex items-center gap-3">
                 <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`min-h-11 inline-flex items-center border-b-2 ${
-                    active
-                      ? 'text-foreground border-accent'
-                      : 'text-muted border-transparent hover:text-foreground'
-                  }`}
+                  href={`/players/${user.id}`}
+                  className="text-sm text-muted hover:text-foreground min-h-11 inline-flex items-center"
                 >
-                  {item.label}
+                  {getDisplayName()}
                 </Link>
-              );
-            })}
-          </nav>
-
-          {isSignedIn ? (
-            <div className="flex items-center gap-3">
-              <Link
-                href={`/players/${user.id}`}
-                className="text-sm text-muted hover:text-foreground min-h-11 inline-flex items-center"
-              >
-                {getDisplayName()}
+                <button onClick={handleSignOut} className="btn btn-ghost text-xs text-muted">
+                  Sign out
+                </button>
+              </div>
+            ) : (
+              <Link href="/auth/login" className="btn btn-primary">
+                Sign in
               </Link>
-              <button onClick={handleSignOut} className="btn btn-ghost text-xs text-muted">
-                Sign out
-              </button>
-            </div>
-          ) : (
-            <Link href="/auth/login" className="btn btn-primary">
-              Sign in
-            </Link>
-          )}
-        </div>
+            )}
+          </div>
 
-        <button
-          onClick={() => setMenuOpen(!menuOpen)}
-          className="md:hidden flex flex-col gap-1.5 p-3 min-h-11 min-w-11 items-center justify-center"
-          aria-label="Toggle menu"
-          aria-expanded={menuOpen}
-        >
-          <span className={`block w-5 h-px bg-muted transition-transform ${menuOpen ? 'rotate-45 translate-y-[5px]' : ''}`} />
-          <span className={`block w-5 h-px bg-muted transition-opacity ${menuOpen ? 'opacity-0' : ''}`} />
-          <span className={`block w-5 h-px bg-muted transition-transform ${menuOpen ? '-rotate-45 -translate-y-[5px]' : ''}`} />
-        </button>
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="md:hidden flex flex-col gap-1.5 p-2.5 min-h-11 min-w-11 items-center justify-center"
+            aria-label="Toggle menu"
+            aria-expanded={menuOpen}
+          >
+            <span className={`block w-5 h-px bg-muted transition-transform ${menuOpen ? 'rotate-45 translate-y-[5px]' : ''}`} />
+            <span className={`block w-5 h-px bg-muted transition-opacity ${menuOpen ? 'opacity-0' : ''}`} />
+            <span className={`block w-5 h-px bg-muted transition-transform ${menuOpen ? '-rotate-45 -translate-y-[5px]' : ''}`} />
+          </button>
+        </div>
       </header>
 
       {menuOpen ? (
-        <div className="md:hidden fixed inset-0 z-50 bg-background/97 flex flex-col">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+        <div className="md:hidden sheet flex flex-col">
+          <div className="flex items-center justify-between px-5 py-3 border-b border-border">
             <Logo href={null} />
             <button
               onClick={() => setMenuOpen(false)}
@@ -128,7 +130,7 @@ export default function Header() {
             </button>
           </div>
 
-          <nav className="flex flex-col py-2">
+          <nav className="flex flex-col py-2 px-2">
             {NAV.map((item) => {
               if (!isSignedIn && item.href === '/settings') return null;
               const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -137,7 +139,7 @@ export default function Header() {
                   key={item.href}
                   href={item.href}
                   onClick={() => setMenuOpen(false)}
-                  className={`px-6 py-4 min-h-11 text-base ${active ? 'text-foreground' : 'text-muted'}`}
+                  className={`px-5 py-4 min-h-11 text-base rounded-lg ${active ? 'text-foreground' : 'text-muted'}`}
                 >
                   {item.label}
                 </Link>
@@ -145,7 +147,7 @@ export default function Header() {
             })}
           </nav>
 
-          <div className="mt-auto p-6 border-t border-border pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+          <div className="mt-auto p-5 border-t border-border">
             {isSignedIn ? (
               <div className="space-y-4">
                 <Link

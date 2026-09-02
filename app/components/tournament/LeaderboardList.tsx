@@ -21,7 +21,7 @@ export default function LeaderboardList({
           <li
             key={row.user_id}
             className={cn(
-              'panel px-4 py-3',
+              'panel px-4 py-3.5 md:px-5',
               mine ? 'border-accent/50 bg-accent-dim' : ''
             )}
           >

@@ -35,7 +35,7 @@ export default async function TournamentDetailPage({
   if (!supabase) {
     return (
       <AppShell nav="play">
-        <main className="px-4 md:px-8 py-6 md:py-10 max-w-5xl mx-auto space-y-6">
+        <main className="page py-8 md:py-12 space-y-6">
           <h1 className="page-title text-2xl">Tournament</h1>
           <NeedsDatabase feature="This tournament" />
         </main>
@@ -57,7 +57,7 @@ export default async function TournamentDetailPage({
   } catch {
     return (
       <AppShell nav="play">
-        <main className="px-4 md:px-8 py-6 md:py-10 max-w-5xl mx-auto space-y-6">
+        <main className="page py-8 md:py-12 space-y-6">
           <h1 className="page-title text-2xl">Tournament</h1>
           <QueryFailed feature="this tournament" />
         </main>
@@ -125,7 +125,7 @@ export default async function TournamentDetailPage({
 
   return (
     <AppShell nav="play">
-      <main className="px-4 md:px-8 py-6 md:py-10 max-w-5xl mx-auto space-y-8">
+      <main className="page py-8 md:py-12 space-y-8">
         <Link href="/tournaments" className="text-sm text-muted min-h-11 inline-flex items-center">
           ← Play
         </Link>

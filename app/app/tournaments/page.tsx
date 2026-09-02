@@ -15,7 +15,7 @@ export default async function TournamentsPage() {
   if (!supabase) {
     return (
       <AppShell nav="play">
-        <main className="px-4 md:px-8 py-6 md:py-10 max-w-4xl mx-auto space-y-6">
+        <main className="page py-8 md:py-12 space-y-6">
           <h1 className="page-title text-3xl md:text-4xl">Play</h1>
           <NeedsDatabase feature="Tournaments" />
         </main>
@@ -37,7 +37,7 @@ export default async function TournamentsPage() {
   } catch {
     return (
       <AppShell nav="play">
-        <main className="px-4 md:px-8 py-6 md:py-10 max-w-4xl mx-auto space-y-6">
+        <main className="page py-8 md:py-12 space-y-6">
           <h1 className="page-title text-3xl md:text-4xl">Play</h1>
           <QueryFailed feature="tournaments" />
         </main>
@@ -47,7 +47,7 @@ export default async function TournamentsPage() {
 
   return (
     <AppShell nav="play">
-      <main className="px-4 md:px-8 py-6 md:py-10 max-w-4xl mx-auto space-y-6">
+      <main className="page py-8 md:py-12 space-y-6">
         <div>
           <h1 className="page-title text-3xl md:text-4xl">Play</h1>
           <p className="text-sm text-muted mt-2">
@@ -65,7 +65,7 @@ export default async function TournamentsPage() {
               <li key={t.id}>
                 <Link
                   href={`/tournaments/${t.id}`}
-                  className="block panel p-5 panel-hover"
+              className="block panel p-5 md:p-6 panel-hover"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <h2 className="text-lg font-medium text-foreground">{t.name}</h2>

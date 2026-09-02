@@ -107,7 +107,7 @@ export default function OnboardingPage() {
 
   if (checking) {
     return (
-      <div className="min-h-dvh flex items-center justify-center">
+      <div className="flex-1 flex items-center justify-center py-16">
         <div className="text-muted text-sm">Loading…</div>
       </div>
     );

@@ -39,7 +39,7 @@ export default function RootLayout({
     <html lang="en" className={`${plex.variable} ${newsreader.variable} ${plexMono.variable}`}>
       <body className="min-h-dvh relative overflow-x-hidden bg-background font-sans text-foreground">
         <div className="grain" aria-hidden />
-        <div className="relative z-10 min-h-dvh flex flex-col">{children}</div>
+        <div className="relative z-10 site-shell">{children}</div>
       </body>
     </html>
   );

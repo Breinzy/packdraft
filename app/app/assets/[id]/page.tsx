@@ -29,7 +29,7 @@ export default async function AssetDetailPage({
   if (!supabase) {
     return (
       <AppShell nav="market">
-        <main className="px-4 md:px-8 py-6 md:py-10 max-w-5xl mx-auto space-y-6">
+        <main className="page py-8 md:py-12 space-y-6">
           <h1 className="page-title text-2xl">Asset</h1>
           <NeedsDatabase feature="Asset detail" />
         </main>
@@ -42,7 +42,7 @@ export default async function AssetDetailPage({
   } catch {
     return (
       <AppShell nav="market">
-        <main className="px-4 md:px-8 py-6 md:py-10 max-w-5xl mx-auto space-y-6">
+        <main className="page py-8 md:py-12 space-y-6">
           <h1 className="page-title text-2xl">Asset</h1>
           <QueryFailed feature="this asset" />
         </main>
@@ -81,7 +81,7 @@ export default async function AssetDetailPage({
 
   return (
     <AppShell nav="market">
-      <main className="px-4 md:px-8 py-6 md:py-10 max-w-5xl mx-auto space-y-6">
+      <main className="page py-8 md:py-12 space-y-6">
         <Link href="/assets" className="text-sm text-muted min-h-11 inline-flex items-center">
           ← Market
         </Link>

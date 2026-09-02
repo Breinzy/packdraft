@@ -80,7 +80,7 @@ export default function SettingsPage() {
 
   if (checking) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="flex-1 flex items-center justify-center py-16">
         <div className="text-muted text-sm">Loading…</div>
       </div>
     );
@@ -88,7 +88,7 @@ export default function SettingsPage() {
 
   return (
     <AppShell nav="settings">
-      <main className="flex-1 overflow-y-auto px-4 md:px-6 py-8 md:py-12 max-w-lg mx-auto w-full">
+      <main className="w-full max-w-lg mx-auto py-8 md:py-12">
         <div className="mb-10">
           <h1 className="page-title text-3xl mb-2">Settings</h1>
           <p className="text-sm text-muted">Manage how you appear in tournaments.</p>

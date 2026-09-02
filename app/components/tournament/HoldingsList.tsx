@@ -40,7 +40,7 @@ export default function HoldingsList({
           <li key={row.assetId}>
             <Link
               href={`/assets/${row.assetId}?tournament=${tournamentId}`}
-              className="flex gap-3 panel panel-hover p-3"
+              className="flex gap-3 panel panel-hover p-4"
             >
               <AssetThumb src={row.asset ? assetImageSrc(row.asset) : null} alt={name} />
               <div className="min-w-0 flex-1">
