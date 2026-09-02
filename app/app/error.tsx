@@ -8,7 +8,7 @@ export default function GlobalErrorBoundary({
   reset: () => void;
 }) {
   return (
-    <div className="flex-1 flex items-center justify-center py-16">
+    <div className="flex-1 min-h-0 overflow-y-auto flex items-center justify-center py-16">
       <div className="max-w-md">
         <h2 className="page-title text-3xl mb-3">Something went wrong</h2>
         <p className="text-sm text-muted mb-8">{error.message || 'Please try again.'}</p>

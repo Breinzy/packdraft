@@ -55,7 +55,7 @@ export default function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-md">
+      <header className="sticky top-0 z-30 shrink-0 bg-background/80 backdrop-blur-md">
         <div className="page flex items-center justify-between gap-4 py-3 md:py-3.5 border-b border-border">
           <div className="flex items-center gap-3">
             <Logo href={isSignedIn ? '/dashboard' : '/'} />

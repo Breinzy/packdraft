@@ -73,7 +73,7 @@ export default function AdminPanel({
   ];
 
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="flex-1 min-h-0 flex flex-col">
       <header className="bg-background/80 backdrop-blur-md">
         <div className="page flex items-center justify-between gap-4 py-3 border-b border-border">
           <div className="flex items-center gap-3">
@@ -86,7 +86,7 @@ export default function AdminPanel({
         </div>
       </header>
 
-      <main className="page py-8 md:py-12 space-y-8">
+      <main className="page flex-1 min-h-0 overflow-y-auto py-8 md:py-12 space-y-8">
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {[
             { label: 'Active assets', value: stats.totalAssets },

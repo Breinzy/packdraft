@@ -21,22 +21,24 @@
 }
 
 :root {
-  --gutter-x: 1.5rem;
+  --frame: 0.85rem;
+  --gutter-x: 1.25rem;
   --gutter-y: 0.85rem;
   --page-max: 72rem;
-  --dock-offset: 5.75rem;
 }
 
 @media (min-width: 768px) {
   :root {
-    --gutter-x: 2.5rem;
+    --frame: 1.25rem;
+    --gutter-x: 1.75rem;
     --gutter-y: 1.15rem;
   }
 }
 
 @media (min-width: 1280px) {
   :root {
-    --gutter-x: 3.5rem;
+    --frame: 1.5rem;
+    --gutter-x: 2.25rem;
     --gutter-y: 1.35rem;
   }
 }
@@ -53,16 +55,20 @@
 }
 
 html {
+  height: 100%;
   -webkit-text-size-adjust: 100%;
   color-scheme: dark;
 }
 
 body {
-  background: var(--color-background);
+  background: #060607;
   color: var(--color-foreground);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  height: 100dvh;
+  overflow: hidden;
+  padding: var(--frame);
 }
 
 ::selection {
@@ -116,13 +122,14 @@ button:active:not(:disabled) {
 }
 
 .site-shell {
-  min-height: 100dvh;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  padding: max(var(--gutter-y), env(safe-area-inset-top))
-    max(var(--gutter-x), env(safe-area-inset-right))
-    max(var(--gutter-y), env(safe-area-inset-bottom))
-    max(var(--gutter-x), env(safe-area-inset-left));
+  overflow: hidden;
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 18px;
+  padding-inline: var(--gutter-x);
 }
 
 .page {
@@ -132,26 +139,19 @@ button:active:not(:disabled) {
 }
 
 .dock {
-  position: fixed;
-  z-index: 45;
-  left: max(var(--gutter-x), env(safe-area-inset-left));
-  right: max(var(--gutter-x), env(safe-area-inset-right));
-  bottom: max(0.75rem, env(safe-area-inset-bottom));
+  flex-shrink: 0;
+  margin: 0.35rem 0 0.85rem;
   border: 1px solid var(--color-border);
   border-radius: 16px;
-  background: rgba(13, 13, 14, 0.92);
-  backdrop-filter: blur(16px);
+  background: rgba(16, 16, 18, 0.96);
 }
 
 .sheet {
   position: fixed;
   z-index: 50;
-  inset: max(var(--gutter-y), env(safe-area-inset-top))
-    max(var(--gutter-x), env(safe-area-inset-right))
-    max(var(--gutter-y), env(safe-area-inset-bottom))
-    max(var(--gutter-x), env(safe-area-inset-left));
+  inset: var(--frame);
   border: 1px solid var(--color-border);
-  border-radius: 16px;
+  border-radius: 18px;
   background: rgba(10, 10, 11, 0.98);
 }
 

@@ -10,7 +10,7 @@ export default function AuthShell({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex-1 flex items-center justify-center py-12">
+    <div className="flex-1 min-h-0 overflow-y-auto flex items-center justify-center py-12">
       <div className="w-full max-w-md flash">
         <Logo />
         <h1 className="page-title text-3xl md:text-[2.15rem] mt-10">{title}</h1>

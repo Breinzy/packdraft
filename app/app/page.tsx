@@ -5,7 +5,7 @@ export default function HomePage() {
   return (
     <>
       <Header />
-      <main className="flex-1 page py-14 md:py-20">
+      <main className="flex-1 min-h-0 overflow-y-auto page py-10 md:py-16">
         <div className="grid gap-12 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
           <div className="flash max-w-xl">
             <p className="kicker mb-5">Virtual book · Real TCG prices</p>
