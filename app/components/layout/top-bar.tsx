@@ -30,7 +30,7 @@ export function TopBar({
 
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-background/86 backdrop-blur-md">
-      <div className="flex items-center gap-3 px-4 py-3 lg:gap-6 lg:px-8 lg:py-4">
+      <div className="page flex min-h-16 items-center gap-3 py-4 lg:min-h-[4.75rem] lg:gap-6 lg:py-5">
         <button
           type="button"
           className="icon-btn lg:hidden"
@@ -40,7 +40,7 @@ export function TopBar({
           <Icon name="menu" />
         </button>
 
-        <div className="min-w-0 flex-1 lg:flex-none lg:w-56">
+        <div className="min-w-0 flex-1 lg:flex-none lg:w-60">
           {heading ? (
             <h1 className="truncate text-lg font-semibold tracking-tight text-foreground lg:text-2xl">
               {title}
@@ -51,7 +51,7 @@ export function TopBar({
             </p>
           )}
           {subtitle ? (
-            <p className="mt-0.5 hidden truncate text-sm text-muted sm:block">{subtitle}</p>
+            <p className="mt-1 hidden truncate text-sm text-muted sm:block">{subtitle}</p>
           ) : null}
         </div>
 
@@ -69,21 +69,21 @@ export function TopBar({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search cards, sets, players..."
-              className="h-11 w-full rounded-full border border-border bg-surface-2 pl-10 pr-4 text-sm text-foreground outline-none placeholder:text-muted focus:border-accent"
+              className="h-12 w-full rounded-full border border-border bg-surface-2 pl-11 pr-4 text-sm text-foreground outline-none placeholder:text-muted focus:border-accent"
             />
           </div>
         </form>
 
-        <div className="ml-auto flex items-center gap-2 sm:gap-3">
+        <div className="ml-auto flex items-center gap-3 sm:gap-4">
           {buyingPower != null ? (
-            <div className="hidden text-right sm:block">
+            <div className="hidden rounded-[var(--radius-md)] border border-border bg-surface-2 px-3.5 py-2 text-right sm:block">
               <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted">
                 Buying power
               </p>
-              <p className="num text-sm font-semibold text-foreground">{formatCurrency(buyingPower)}</p>
+              <p className="num mt-0.5 text-sm font-semibold text-foreground">{formatCurrency(buyingPower)}</p>
             </div>
           ) : null}
-          <Link href="/tournaments" className="btn btn-primary !h-10 !px-3.5 text-sm sm:!px-4">
+          <Link href="/tournaments" className="btn btn-primary !h-11 !px-4 text-sm sm:!px-5">
             <Icon name="plus" className="mr-1 hidden h-4 w-4 sm:inline" />
             <span className="hidden sm:inline">Enter tournament</span>
             <span className="sm:hidden">Play</span>

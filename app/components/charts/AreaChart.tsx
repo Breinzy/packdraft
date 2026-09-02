@@ -37,21 +37,23 @@ export default function PortfolioChart({
 
   return (
     <div>
-      <div className="seg" role="tablist" aria-label="Chart range">
-        {RANGES.map((r) => (
-          <button
-            key={r.key}
-            type="button"
-            role="tab"
-            data-active={range === r.key}
-            aria-selected={range === r.key}
-            onClick={() => setRange(r.key)}
-          >
-            {r.key}
-          </button>
-        ))}
+      <div className="flex justify-end">
+        <div className="seg" role="tablist" aria-label="Chart range">
+          {RANGES.map((r) => (
+            <button
+              key={r.key}
+              type="button"
+              role="tab"
+              data-active={range === r.key}
+              aria-selected={range === r.key}
+              onClick={() => setRange(r.key)}
+            >
+              {r.key}
+            </button>
+          ))}
+        </div>
       </div>
-      <div className="mt-5">
+      <div className="mt-6">
         <AreaChart points={points} />
       </div>
     </div>

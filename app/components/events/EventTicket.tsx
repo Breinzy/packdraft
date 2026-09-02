@@ -101,14 +101,14 @@ export default function EventTicket({
   }
 
   return (
-    <div className="panel p-4 md:p-5 space-y-4">
+    <div className="panel space-y-5">
       <div className="section-title">Your prediction</div>
       {!open ? (
         <p className="text-sm text-muted">Entries are closed.</p>
       ) : null}
 
       {type === 'ranking' ? (
-        <ol className="space-y-2">
+        <ol className="stack">
           {rankedAssets.map((row, index) => (
             <li key={row.asset_id} className="flex items-center gap-2">
               <span className="num text-sm text-gold w-6 shrink-0">{index + 1}</span>

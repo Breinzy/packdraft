@@ -32,8 +32,8 @@ export default function TournamentCard({
           : TOURNAMENT_STATUS_HELP[tournament.status];
 
   const inner = (
-    <div className={compact ? 'p-4 md:p-5' : 'p-4 md:p-5'}>
-      <div className="flex items-start gap-3">
+    <div>
+      <div className="flex items-start gap-3.5">
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--radius-md)] bg-accent-dim text-accent">
           <Icon name="trophy" />
         </span>
@@ -54,7 +54,7 @@ export default function TournamentCard({
           </div>
         </div>
       </div>
-      <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs text-muted">
+      <div className="mt-5 flex flex-wrap gap-x-6 gap-y-2.5 text-xs text-muted">
         <span className="inline-flex items-center gap-1.5">
           <Icon name="wallet" className="h-3.5 w-3.5" />
           Budget {formatCurrency(tournament.starting_budget)}

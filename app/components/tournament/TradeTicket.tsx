@@ -97,7 +97,7 @@ export default function TradeTicket({
 
   if (!tradingOpen) {
     return (
-      <div className="panel p-5 md:p-6">
+      <div className="panel">
         <div className="section-title mb-2">Trade</div>
         <p className="text-sm text-muted">{closedMessage ?? `Trading is closed for ${bookName}.`}</p>
       </div>
@@ -105,7 +105,7 @@ export default function TradeTicket({
   }
 
   return (
-    <div className="panel p-5 md:p-6 space-y-4">
+    <div className="panel space-y-5">
       <div className="flex items-center justify-between gap-3">
         <div>
           <div className="section-title">Trade</div>
@@ -148,7 +148,7 @@ export default function TradeTicket({
         </div>
       </label>
 
-      <div className="grid grid-cols-2 gap-3 text-sm">
+      <div className="grid grid-cols-2 gap-4 text-sm">
         <div>
           <div className="kicker">Price</div>
           <div className="num text-foreground">{formatCurrency(price)}</div>

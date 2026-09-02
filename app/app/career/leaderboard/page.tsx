@@ -13,7 +13,7 @@ export default async function CareerLeaderboardPage() {
   if (!supabase) {
     return (
       <AppShell nav="career">
-        <main className="page py-6 md:py-8 space-y-6">
+        <main className="page page-main stack">
           <h1 className="page-title text-2xl">Career ranks</h1>
           <NeedsDatabase feature="Career ranks" />
         </main>
@@ -32,7 +32,7 @@ export default async function CareerLeaderboardPage() {
   } catch {
     return (
       <AppShell nav="career">
-        <main className="page py-6 md:py-8 space-y-6">
+        <main className="page page-main stack">
           <h1 className="page-title text-2xl">Career ranks</h1>
           <QueryFailed feature="Career ranks" />
           <p className="text-sm text-muted">
@@ -45,7 +45,7 @@ export default async function CareerLeaderboardPage() {
 
   return (
     <AppShell nav="career">
-      <main className="page py-6 md:py-8 space-y-6">
+      <main className="page page-main stack">
         <Link href="/career" className="text-sm text-muted min-h-11 inline-flex items-center">
           ← Career
         </Link>
@@ -55,13 +55,13 @@ export default async function CareerLeaderboardPage() {
         {standings.length === 0 ? (
           <p className="text-sm text-muted">No Career books yet.</p>
         ) : (
-          <ol className="space-y-2">
+          <ol className="stack">
             {standings.map((row) => {
               const mine = row.user_id === user.id;
               return (
                 <li
                   key={row.user_id}
-                  className={cn('panel px-4 py-3.5', mine ? 'border-accent/50 bg-accent-dim' : '')}
+                  className={cn('panel panel-row', mine ? 'border-accent/50 bg-accent-dim' : '')}
                 >
                   <div className="flex items-baseline justify-between gap-3">
                     <div className="min-w-0 flex items-baseline gap-3">

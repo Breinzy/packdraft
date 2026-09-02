@@ -32,7 +32,7 @@ export default async function CareerPage() {
   if (!supabase) {
     return (
       <AppShell nav="career">
-        <main className="page py-6 md:py-8 space-y-6">
+        <main className="page page-main stack">
           <h1 className="page-title text-2xl">Career</h1>
           <NeedsDatabase feature="Career Mode" />
         </main>
@@ -60,7 +60,7 @@ export default async function CareerPage() {
   } catch {
     return (
       <AppShell nav="career">
-        <main className="page py-6 md:py-8 space-y-6">
+        <main className="page page-main stack">
           <h1 className="page-title text-2xl">Career</h1>
           <QueryFailed feature="Career Mode" />
         </main>
@@ -71,7 +71,7 @@ export default async function CareerPage() {
   if (!portfolio) {
     return (
       <AppShell nav="career">
-        <main className="page py-6 md:py-8 space-y-6">
+        <main className="page page-main stack">
           <h1 className="page-title text-2xl">Career</h1>
           <p className="text-sm text-muted">
             Career Mode needs the Phase 12 migration. Apply{' '}
@@ -145,15 +145,15 @@ export default async function CareerPage() {
 
   return (
     <AppShell nav="career">
-      <main className="page py-6 md:py-8 space-y-6">
-        <section className="panel-elevated p-5 md:p-6">
+      <main className="page page-main stack">
+        <section className="panel-elevated">
           <p className="label-caps">Career value</p>
-          <p className="metric mt-2">{formatCurrency(portfolioValue)}</p>
-          <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-muted">
+          <p className="metric mt-4">{formatCurrency(portfolioValue)}</p>
+          <div className="mt-4 flex flex-wrap items-center gap-2.5 text-sm text-muted">
             <span className={ret >= 0 ? 'text-green' : 'text-red'}>{formatReturn(ret)}</span>
             <span>Starts at {formatCurrency(CAREER_STARTING_CASH)}. Isolated from every tournament.</span>
           </div>
-          <div className="mt-5">
+          <div className="mt-8">
             <Sparkline points={chart} className="w-full h-28 md:h-36" variant="brand" />
           </div>
           <p className="text-[11px] text-faint mt-2">
@@ -163,7 +163,7 @@ export default async function CareerPage() {
           </p>
         </section>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="card-grid grid-cols-2 md:grid-cols-4">
           {[
             { label: 'Cash', value: formatCurrency(portfolio.cash) },
             { label: 'Holdings', value: formatCurrency(holdingsValue) },
@@ -174,7 +174,7 @@ export default async function CareerPage() {
             { label: 'Peak', value: formatCurrency(progression.stats.peakValue) },
             { label: 'Trades', value: String(progression.stats.tradeCount) },
           ].map((stat) => (
-            <div key={stat.label} className="panel px-4 py-3">
+            <div key={stat.label} className="panel">
               <div className="label-caps mb-1">{stat.label}</div>
               <div className="num text-base md:text-lg font-semibold text-foreground">{stat.value}</div>
             </div>
@@ -190,7 +190,7 @@ export default async function CareerPage() {
           </Link>
         </div>
 
-        <section className="space-y-3">
+        <section className="stack">
           <h2 className="section-title">Milestones</h2>
           <p className="text-sm text-muted">
             {progression.level.nextAt
@@ -199,11 +199,11 @@ export default async function CareerPage() {
             {' '}
             {progression.archetype.reason}
           </p>
-          <ul className="grid grid-cols-2 md:grid-cols-3 gap-2">
+          <ul className="card-grid grid-cols-2 md:grid-cols-3">
             {progression.milestones.map((row) => (
               <li
                 key={row.value}
-                className={`px-4 py-3 text-sm rounded-[10px] border ${
+                className={`px-5 py-4 text-sm rounded-[var(--radius-lg)] border ${
                   row.earned
                     ? 'border-accent/40 bg-accent-dim text-foreground'
                     : 'border-border bg-surface text-faint'
@@ -216,29 +216,29 @@ export default async function CareerPage() {
           </ul>
         </section>
 
-        <section className="space-y-3">
+        <section className="stack">
           <h2 className="section-title">Challenges</h2>
           <AchievementList achievements={progression.challenges} />
         </section>
 
-        <section className="space-y-3">
+        <section className="stack">
           <h2 className="section-title">Badges</h2>
           <AchievementList achievements={progression.achievements} />
         </section>
 
-        <section className="grid grid-cols-2 gap-3">
+        <section className="card-grid grid-cols-2">
           {[
             { label: 'Realized P&L', value: formatCurrency(progression.stats.realizedPnl) },
             { label: 'Assets held', value: String(progression.stats.distinctAssets) },
           ].map((stat) => (
-            <div key={stat.label} className="panel px-4 py-3">
+            <div key={stat.label} className="panel">
               <div className="label-caps mb-1">{stat.label}</div>
               <div className="num text-base font-semibold text-foreground">{stat.value}</div>
             </div>
           ))}
         </section>
 
-        <section className="space-y-3">
+        <section className="stack">
           <h2 className="section-title">Holdings</h2>
           <HoldingsList
             holdings={holdings}
@@ -247,7 +247,7 @@ export default async function CareerPage() {
           />
         </section>
 
-        <section className="space-y-3">
+        <section className="stack">
           <h2 className="section-title">Trade history</h2>
           <TradeHistory trades={trades} />
         </section>

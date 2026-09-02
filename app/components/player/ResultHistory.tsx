@@ -12,12 +12,12 @@ export default function ResultHistory({ results }: { results: HistoryResult[] })
   }
 
   return (
-    <ul className="space-y-2">
+    <ul className="stack">
       {results.map((row) => (
         <li key={row.tournamentId}>
           <Link
             href={`/tournaments/${row.tournamentId}`}
-            className="block panel px-4 py-3 panel-hover"
+            className="block panel panel-hover"
           >
             <div className="flex items-baseline justify-between gap-3">
               <span className="text-sm text-foreground font-bold truncate">{row.tournamentName}</span>

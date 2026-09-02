@@ -17,7 +17,7 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur-md">
-      <div className="page flex min-h-14 items-center justify-between gap-4">
+      <div className="page flex min-h-16 items-center justify-between gap-4 py-4">
         <Logo href={isSignedIn ? '/dashboard' : '/'} />
         <nav className="hidden items-center gap-5 text-sm md:flex" aria-label="Marketing">
           {NAV.map((item) => {

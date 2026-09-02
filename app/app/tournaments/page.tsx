@@ -13,7 +13,7 @@ export default async function TournamentsPage() {
   if (!supabase) {
     return (
       <AppShell nav="play">
-        <main className="page py-6 md:py-8 space-y-6">
+        <main className="page page-main stack">
           <h1 className="page-title text-2xl">Play</h1>
           <NeedsDatabase feature="Tournaments" />
         </main>
@@ -35,7 +35,7 @@ export default async function TournamentsPage() {
   } catch {
     return (
       <AppShell nav="play">
-        <main className="page py-6 md:py-8 space-y-6">
+        <main className="page page-main stack">
           <h1 className="page-title text-2xl">Play</h1>
           <QueryFailed feature="tournaments" />
         </main>
@@ -45,7 +45,7 @@ export default async function TournamentsPage() {
 
   return (
     <AppShell nav="play">
-      <main className="page py-6 md:py-8 space-y-6">
+      <main className="page page-main stack">
         <div className="flex flex-wrap gap-x-4">
           <Link href="/events" className="inline-flex min-h-11 items-center text-sm text-accent-light">
             Predict a market event
@@ -59,11 +59,11 @@ export default async function TournamentsPage() {
         </div>
 
         {tournaments.length === 0 ? (
-            <div className="panel p-5 text-sm text-muted">
+            <div className="panel text-sm text-muted">
               No tournaments yet. An admin can create one from /admin.
             </div>
         ) : (
-          <ul className="space-y-3">
+          <ul className="stack">
             {tournaments.map((t) => (
               <li key={t.id}>
                 <TournamentCard tournament={t} href={`/tournaments/${t.id}`} />

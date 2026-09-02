@@ -47,7 +47,7 @@ export default async function HomePage() {
   return (
     <>
       <Header />
-      <main className="page py-8 md:py-14">
+      <main className="page page-main py-10 md:py-16">
         <div className="max-w-2xl">
           <p className="label-caps">Competitive TCG markets</p>
           <h1 className="page-title mt-3 text-4xl md:text-5xl">Highest book wins.</h1>
@@ -55,7 +55,7 @@ export default async function HomePage() {
             Join a tournament, spend a fixed virtual budget, and trade Pokémon using live Packdraft
             prices.
           </p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <div className="mt-8 flex flex-col gap-4 sm:flex-row">
             <Link href="/tournaments" className="btn btn-primary min-h-12 px-5">
               Enter a tournament
             </Link>
@@ -68,9 +68,9 @@ export default async function HomePage() {
           </div>
         </div>
 
-        <ol className="mt-14 grid gap-3 sm:grid-cols-3">
+        <ol className="mt-14 card-grid sm:grid-cols-3">
           {STEPS.map((step, i) => (
-            <li key={step.title} className="panel p-5">
+            <li key={step.title} className="panel">
               <div className="num mb-3 text-xs font-semibold text-accent-light">{String(i + 1).padStart(2, '0')}</div>
               <div className="section-title mb-2">{step.title}</div>
               <p className="text-sm leading-6 text-muted">{step.body}</p>
@@ -79,8 +79,8 @@ export default async function HomePage() {
         </ol>
 
         {shown.length > 0 ? (
-          <section className="mt-12">
-            <div className="mb-4 flex items-center justify-between gap-3">
+          <section className="mt-12 stack">
+            <div className="flex items-center justify-between gap-3">
               <h2 className="section-title">Tournaments</h2>
               <Link
                 href="/tournaments"
@@ -89,7 +89,7 @@ export default async function HomePage() {
                 All
               </Link>
             </div>
-            <ul className="space-y-3">
+            <ul className="stack">
               {shown.map((t) => (
                 <li key={t.id}>
                   <TournamentCard tournament={t} href={`/tournaments/${t.id}`} compact />
@@ -100,8 +100,8 @@ export default async function HomePage() {
         ) : null}
 
         {shownEvents.length > 0 ? (
-          <section className="mt-12">
-            <div className="mb-4 flex items-center justify-between gap-3">
+          <section className="mt-12 stack">
+            <div className="flex items-center justify-between gap-3">
               <h2 className="section-title">Events</h2>
               <Link
                 href="/events"
@@ -110,10 +110,10 @@ export default async function HomePage() {
                 All
               </Link>
             </div>
-            <ul className="space-y-3">
+            <ul className="stack">
               {shownEvents.map((event) => (
                 <li key={event.id}>
-                  <Link href={`/events/${event.id}`} className="panel panel-hover block p-4 md:p-5">
+                  <Link href={`/events/${event.id}`} className="panel panel-hover block">
                     <div className="flex items-center justify-between gap-3">
                       <span className="truncate font-semibold text-foreground">{event.name}</span>
                       <EventStatusBadge status={event.status} />

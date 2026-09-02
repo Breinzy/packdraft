@@ -14,14 +14,14 @@ export default function LeaderboardList({
   }
 
   return (
-    <ol className="space-y-1.5">
+    <ol className="stack">
       {standings.map((row) => {
         const mine = userId && row.user_id === userId;
         return (
           <li
             key={row.user_id}
             className={cn(
-              'panel px-4 py-3 md:px-5',
+              'panel panel-row',
               mine ? 'border-accent/50 bg-accent-dim' : ''
             )}
           >

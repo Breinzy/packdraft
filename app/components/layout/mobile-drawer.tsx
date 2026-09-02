@@ -46,8 +46,8 @@ export function MobileDrawer({
         onClick={onClose}
       />
       <aside
-        className={`absolute inset-y-0 left-0 flex w-[min(20rem,88vw)] flex-col border-r border-border bg-background shadow-[var(--shadow-lg)] transition-transform duration-[var(--duration)] ${
-          open ? "translate-x-0" : "-translate-x-full"
+        className={`absolute top-4 bottom-4 left-4 flex w-[min(19.5rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-[var(--radius-xl)] border border-border bg-background shadow-[var(--shadow-lg)] transition-transform duration-[var(--duration)] ${
+          open ? "translate-x-0" : "-translate-x-[calc(100%+1rem)]"
         }`}
         role="dialog"
         aria-modal="true"
@@ -56,7 +56,7 @@ export function MobileDrawer({
       >
         <button
           type="button"
-          className="icon-btn absolute right-3 top-4 z-10"
+          className="icon-btn absolute right-4 top-5 z-10"
           aria-label="Close menu"
           onClick={onClose}
         >

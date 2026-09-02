@@ -25,10 +25,10 @@ export default function PlayerStatGrid({ history }: { history: PlayerHistory }) 
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+    <div className="card-grid grid-cols-2 md:grid-cols-3">
       {stats.map((stat) => (
-        <div key={stat.label} className="panel px-4 py-3">
-          <div className="kicker mb-1">{stat.label}</div>
+        <div key={stat.label} className="panel">
+          <div className="kicker mb-2">{stat.label}</div>
           <div className="num text-base md:text-lg font-medium text-foreground">{stat.value}</div>
         </div>
       ))}
@@ -39,8 +39,8 @@ export default function PlayerStatGrid({ history }: { history: PlayerHistory }) 
 export function TradeHighlights({ history }: { history: PlayerHistory }) {
   if (history.totalTrades == null) return null;
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-      <div className="panel p-4">
+    <div className="card-grid grid-cols-1 md:grid-cols-2">
+      <div className="panel">
         <div className="kicker mb-2">Best trade</div>
         {history.bestTrade ? (
           <>
@@ -51,7 +51,7 @@ export function TradeHighlights({ history }: { history: PlayerHistory }) {
           <p className="text-sm text-muted">No realized sells yet.</p>
         )}
       </div>
-      <div className="panel p-4">
+      <div className="panel">
         <div className="kicker mb-2">Worst trade</div>
         {history.worstTrade ? (
           <>

@@ -25,7 +25,7 @@ export default function BottomNav({ active }: { active: BottomNavKey }) {
               key={item.key}
               href={item.href}
               aria-current={isActive ? 'page' : undefined}
-              className={`flex min-h-14 flex-col items-center justify-center gap-1 text-[11px] ${
+              className={`flex min-h-16 flex-col items-center justify-center gap-1.5 text-[11px] ${
                 isActive ? 'text-foreground font-semibold' : 'text-faint font-medium'
               }`}
             >

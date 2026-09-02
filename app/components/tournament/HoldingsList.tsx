@@ -31,7 +31,7 @@ export default function HoldingsList({
   }
 
   return (
-    <ul className="space-y-2">
+    <ul className="stack">
       {holdings.map((row) => {
         const pnl =
           row.markPrice == null
@@ -44,7 +44,7 @@ export default function HoldingsList({
         const marketValue = row.markPrice == null ? null : row.quantity * row.markPrice;
         return (
           <li key={row.assetId}>
-            <Link href={hrefFor(row.assetId)} className="panel panel-hover flex gap-3 p-3.5 md:p-4">
+            <Link href={hrefFor(row.assetId)} className="panel panel-hover flex gap-4">
               <AssetThumb src={row.asset ? assetImageSrc(row.asset) : null} alt={name} />
               <div className="min-w-0 flex-1">
                 <div className="flex items-start justify-between gap-3">

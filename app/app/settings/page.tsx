@@ -89,8 +89,8 @@ export default function SettingsPage() {
   if (checking) {
     return (
       <AppShell nav="settings">
-        <main className="page py-6">
-          <div className="panel max-w-lg p-6">
+        <main className="page page-main">
+          <div className="panel max-w-lg">
             <div className="skeleton h-24 w-full" />
           </div>
         </main>
@@ -100,14 +100,12 @@ export default function SettingsPage() {
 
   return (
     <AppShell nav="settings">
-      <main className="page py-6 md:py-8">
-        <div className="max-w-lg">
-          <div className="mb-8">
-            <p className="text-sm text-muted">Manage how you appear in tournaments.</p>
-          </div>
+      <main className="page page-main stack">
+        <div className="max-w-lg stack">
+          <p className="text-sm text-muted">Manage how you appear in tournaments.</p>
 
-          <div className="panel p-5">
-            <h2 className="section-title mb-4">Display name</h2>
+          <div className="panel">
+            <h2 className="section-title mb-5">Display name</h2>
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
@@ -143,7 +141,7 @@ export default function SettingsPage() {
             </form>
           </div>
 
-          <div className="panel p-5 mt-4 space-y-3">
+          <div className="panel stack">
             <h2 className="section-title">Account</h2>
             <p className="text-sm text-muted">
               {isPro(proUntil)

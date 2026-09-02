@@ -23,7 +23,7 @@ export default async function PlayerProfilePage({
   if (!supabase) {
     return (
       <AppShell nav="dashboard">
-        <main className="page py-6 md:py-8 space-y-6">
+        <main className="page page-main stack">
           <h1 className="page-title text-2xl">Player</h1>
           <NeedsDatabase feature="player history" />
         </main>
@@ -46,7 +46,7 @@ export default async function PlayerProfilePage({
   } catch {
     return (
       <AppShell nav="dashboard">
-        <main className="page py-6 md:py-8 space-y-6">
+        <main className="page page-main stack">
           <h1 className="page-title text-2xl">Player</h1>
           <QueryFailed feature="player history" />
         </main>
@@ -68,7 +68,7 @@ export default async function PlayerProfilePage({
 
   return (
     <AppShell nav="dashboard">
-      <main className="page py-6 md:py-8 space-y-6">
+      <main className="page page-main stack">
         <Link href="/players" className="text-sm text-muted min-h-11 inline-flex items-center">
           ← Players
         </Link>
@@ -95,12 +95,12 @@ export default async function PlayerProfilePage({
         <PlayerStatGrid history={history} />
         <TradeHighlights history={history} />
 
-        <section className="space-y-3">
+        <section className="stack">
           <h2 className="section-title">Achievements</h2>
           <AchievementList achievements={history.achievements} />
         </section>
 
-        <section className="space-y-3">
+        <section className="stack">
           <h2 className="section-title">Tournament history</h2>
           <ResultHistory results={history.results} />
         </section>

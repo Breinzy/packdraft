@@ -34,7 +34,7 @@ export default function ClaimCreatorForm() {
   }
 
   return (
-    <form onSubmit={submit} className="panel p-4 md:p-5 space-y-3">
+    <form onSubmit={submit} className="panel stack">
       <label className="kicker">
         Creator slug
         <input value={slug} onChange={(e) => setSlug(e.target.value)} className="field mt-1" placeholder="pokestreamer" />

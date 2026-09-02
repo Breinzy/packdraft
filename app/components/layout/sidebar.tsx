@@ -23,13 +23,13 @@ export function SidebarNav({
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex items-center justify-between px-5 pb-6 pt-5">
+      <div className="flex items-center justify-between px-6 pb-8 pt-7">
         <Logo href={user ? "/dashboard" : "/"} compact />
       </div>
 
-      <nav className="flex-1 overflow-y-auto px-3 pb-4" aria-label="Primary">
-        <p className="label-caps px-3 pb-2">Menu</p>
-        <ul className="space-y-0.5">
+      <nav className="flex-1 overflow-y-auto px-4 pb-6" aria-label="Primary">
+        <p className="label-caps px-3 pb-3">Menu</p>
+        <ul className="space-y-1">
           {menu.map((item) => (
             <li key={item.href}>
               <NavLink item={item} pathname={pathname} onNavigate={onNavigate} />
@@ -37,8 +37,8 @@ export function SidebarNav({
           ))}
         </ul>
 
-        <p className="label-caps mt-6 px-3 pb-2">General</p>
-        <ul className="space-y-0.5">
+        <p className="label-caps mt-8 px-3 pb-3">General</p>
+        <ul className="space-y-1">
           {general.map((item) => (
             <li key={item.href}>
               <NavLink item={item} pathname={pathname} onNavigate={onNavigate} />
@@ -48,7 +48,7 @@ export function SidebarNav({
       </nav>
 
       {user ? (
-        <div className="mx-3 mb-4 rounded-[var(--radius-lg)] border border-border bg-surface-2 p-3">
+        <div className="mx-4 mb-5 rounded-[var(--radius-lg)] border border-border bg-surface-2 p-4">
           <Link
             href="/settings"
             onClick={onNavigate}
@@ -71,7 +71,7 @@ export function SidebarNav({
           </Link>
         </div>
       ) : (
-        <div className="mx-3 mb-4 space-y-2">
+        <div className="mx-4 mb-5 space-y-2">
           <Link href="/auth/login" onClick={onNavigate} className="btn btn-ghost w-full">
             Log in
           </Link>
@@ -99,7 +99,7 @@ function NavLink({
       href={item.href}
       onClick={onNavigate}
       aria-current={active ? "page" : undefined}
-      className={`flex items-center gap-3 rounded-[var(--radius-md)] px-3 py-2.5 text-sm font-medium transition-colors duration-[var(--duration-fast)] ${
+      className={`flex items-center gap-3 rounded-[var(--radius-md)] px-3 py-3 text-sm font-medium transition-colors duration-[var(--duration-fast)] ${
         active
           ? "nav-active text-foreground"
           : "text-muted hover:bg-surface-2 hover:text-foreground"
