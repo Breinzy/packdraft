@@ -31,34 +31,42 @@ export default function HoldingsList({
   }
 
   return (
-    <ul className="space-y-3">
+    <ul className="space-y-2">
       {holdings.map((row) => {
-        const pnl = row.markPrice == null ? null : unrealizedPnL(
-          { assetId: row.assetId, quantity: row.quantity, averageCost: row.averageCost },
-          row.markPrice
-        );
+        const pnl =
+          row.markPrice == null
+            ? null
+            : unrealizedPnL(
+                { assetId: row.assetId, quantity: row.quantity, averageCost: row.averageCost },
+                row.markPrice
+              );
         const name = row.asset?.name ?? 'Asset';
+        const marketValue = row.markPrice == null ? null : row.quantity * row.markPrice;
         return (
           <li key={row.assetId}>
-            <Link
-              href={hrefFor(row.assetId)}
-              className="flex gap-3 panel panel-hover p-4"
-            >
+            <Link href={hrefFor(row.assetId)} className="panel panel-hover flex gap-3 p-3.5 md:p-4">
               <AssetThumb src={row.asset ? assetImageSrc(row.asset) : null} alt={name} />
               <div className="min-w-0 flex-1">
-                <div className="text-sm text-foreground font-bold truncate">{name}</div>
-                <div className="text-xs text-muted mt-1">
-                  {row.quantity} @ {formatCurrency(row.averageCost)}
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="truncate text-sm font-semibold text-foreground">{name}</div>
+                    <div className="mt-1 text-xs text-muted">
+                      {row.quantity} @ {formatCurrency(row.averageCost)}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="num text-sm font-medium text-foreground">
+                      {marketValue == null ? '—' : formatCurrency(marketValue)}
+                    </div>
+                    {pnl ? (
+                      <div className={`mt-1 text-xs num ${pnl.amount >= 0 ? 'text-green' : 'text-red'}`}>
+                        {formatCurrency(pnl.amount)} ({formatReturn(pnl.pct)})
+                      </div>
+                    ) : null}
+                  </div>
                 </div>
-                <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs">
-                  <span className="text-accent-light">
-                    {row.markPrice == null ? '—' : formatCurrency(row.markPrice)}
-                  </span>
-                  {pnl ? (
-                    <span className={pnl.amount >= 0 ? 'text-green' : 'text-red'}>
-                      {formatCurrency(pnl.amount)} ({formatReturn(pnl.pct)})
-                    </span>
-                  ) : null}
+                <div className="mt-1 text-xs text-muted">
+                  Mark {row.markPrice == null ? '—' : formatCurrency(row.markPrice)}
                 </div>
               </div>
             </Link>

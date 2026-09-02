@@ -166,15 +166,15 @@ export default async function TournamentDetailPage({
         {portfolio ? (
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
             {[
-              { label: 'Value', value: formatCurrency(portfolioValue), color: 'var(--color-foreground)' },
-              { label: 'Cash', value: formatCurrency(portfolio.cash), color: 'var(--color-muted)' },
-              { label: 'Holdings', value: formatCurrency(holdingsValue), color: 'var(--color-muted)' },
-              { label: 'Return', value: formatReturn(ret), color: ret >= 0 ? 'var(--color-green)' : 'var(--color-red)' },
-              { label: 'Rank', value: myStanding ? `#${myStanding.rank}` : '—', color: 'var(--color-gold)' },
+              { label: 'Value', value: formatCurrency(portfolioValue) },
+              { label: 'Cash', value: formatCurrency(portfolio.cash) },
+              { label: 'Holdings', value: formatCurrency(holdingsValue) },
+              { label: 'Return', value: formatReturn(ret), tone: ret >= 0 ? 'text-green' : 'text-red' },
+              { label: 'Rank', value: myStanding ? `#${myStanding.rank}` : '—' },
             ].map((stat) => (
               <div key={stat.label} className="panel px-4 py-3">
-                <div className="kicker mb-1">{stat.label}</div>
-                <div className="num text-base md:text-lg font-medium" style={{ color: stat.color }}>
+                <div className="label-caps mb-1">{stat.label}</div>
+                <div className={`num text-base md:text-lg font-semibold ${stat.tone ?? 'text-foreground'}`}>
                   {stat.value}
                 </div>
               </div>

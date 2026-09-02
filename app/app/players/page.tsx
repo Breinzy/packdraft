@@ -38,8 +38,7 @@ export default async function PlayersPage() {
     <AppShell nav="dashboard">
       <main className="page py-6 md:py-8 space-y-6">
         <div>
-          <h1 className="page-title text-2xl">Players</h1>
-          <p className="text-sm text-muted mt-1.5">
+          <p className="text-sm text-muted">
             Tournament record only. Career value is a separate book.
           </p>
         </div>
@@ -48,10 +47,10 @@ export default async function PlayersPage() {
         ) : (
           <ol className="space-y-2">
             {rankings.map((row) => (
-              <li key={row.user_id} className="panel px-4 py-3.5 flex items-baseline justify-between gap-3">
-                <div className="min-w-0 flex items-baseline gap-3">
-                  <span className="num text-sm text-gold font-medium w-8 shrink-0">#{row.rank}</span>
-                  <Link href={`/players/${row.user_id}`} className="text-sm font-medium truncate">
+              <li key={row.user_id} className="panel px-4 py-3.5 flex items-center justify-between gap-3">
+                <div className="min-w-0 flex items-center gap-3">
+                  <span className="num text-sm font-semibold text-muted w-8 shrink-0">#{row.rank}</span>
+                  <Link href={`/players/${row.user_id}`} className="text-sm font-semibold truncate">
                     {row.display_name}
                   </Link>
                 </div>

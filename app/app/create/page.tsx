@@ -38,8 +38,7 @@ export default async function CreatePage() {
     <AppShell nav="play">
       <main className="page py-6 md:py-8 space-y-6">
         <div>
-          <h1 className="page-title text-2xl">Host</h1>
-          <p className="text-sm text-muted mt-1.5">
+          <p className="text-sm text-muted">
             Creator tournaments use the same isolated virtual books. No real money. No pay-to-win.
           </p>
         </div>

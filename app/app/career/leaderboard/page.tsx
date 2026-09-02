@@ -46,15 +46,12 @@ export default async function CareerLeaderboardPage() {
   return (
     <AppShell nav="career">
       <main className="page py-6 md:py-8 space-y-6">
-        <Link href="/career" className="text-sm text-accent-light min-h-11 inline-flex items-center">
+        <Link href="/career" className="text-sm text-muted min-h-11 inline-flex items-center">
           ← Career
         </Link>
-        <div>
-          <h1 className="page-title text-2xl">Career ranks</h1>
-          <p className="text-sm text-muted mt-1.5">
-            Live marked value of each Career book. Tournament results stay on player history.
-          </p>
-        </div>
+        <p className="text-sm text-muted">
+          Live marked value of each Career book. Tournament results stay on player history.
+        </p>
         {standings.length === 0 ? (
           <p className="text-sm text-muted">No Career books yet.</p>
         ) : (
@@ -68,7 +65,7 @@ export default async function CareerLeaderboardPage() {
                 >
                   <div className="flex items-baseline justify-between gap-3">
                     <div className="min-w-0 flex items-baseline gap-3">
-                      <span className="num text-sm text-gold font-medium w-8 shrink-0">#{row.rank}</span>
+                      <span className="num text-sm font-semibold text-muted w-8 shrink-0">#{row.rank}</span>
                       <Link href={`/players/${row.user_id}`} className="text-sm font-medium truncate">
                         {row.display_name}
                       </Link>

@@ -1,14 +1,37 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
+import { tryCreateServiceClient } from '@/lib/supabase/service';
 import AppShell from '@/components/layout/AppShell';
-import StatusBadge from '@/components/tournament/StatusBadge';
 import type { Profile } from '@/types';
-import { getUserActiveBooks } from '@/lib/tournament/queries';
-import { formatCurrency } from '@/lib/utils';
+import { getStandings, getTransactions, getUserActiveBooks } from '@/lib/tournament/queries';
 import { canTradeStatus } from '@/lib/tournament/lifecycle';
 import AdSlot from '@/components/ads/AdSlot';
-import { isPro } from '@/lib/auth/pro';
+import { isPro, careerChartLimit } from '@/lib/auth/pro';
+import { getCurrentPrices } from '@/lib/market/prices';
+import {
+  CAREER_STARTING_CASH,
+  ensureCareerPortfolio,
+  getCareerHoldings,
+  getCareerPortfolio,
+  getCareerStandings,
+  getCareerTransactions,
+  getCareerValueHistory,
+} from '@/lib/career/queries';
+import { formatCurrency } from '@/lib/utils';
+import { returnPct } from '@/lib/money';
+import { MetricCard } from '@/components/ui/metric-card';
+import { EmptyState } from '@/components/ui/empty-state';
+import { SectionHeader } from '@/components/ui/section-header';
+import { Delta } from '@/components/ui/delta';
+import TournamentCard from '@/components/tournament/TournamentCard';
+import PortfolioChart from '@/components/charts/AreaChart';
+import {
+  ActivityList,
+  LeaderboardPreview,
+  formatActivityDetail,
+  type LeaderRow,
+} from '@/components/ui/leaderboard-preview';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,11 +42,7 @@ export default async function DashboardPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect('/auth/login');
 
-  let { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single();
+  let { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
 
   if (!profile) {
     const displayName =
@@ -51,96 +70,196 @@ export default async function DashboardPage() {
   }
 
   const typed = profile as Profile;
-  const name = typed.display_name || typed.email.split('@')[0];
-  const books = await getUserActiveBooks(supabase, user.id);
-  const live = books.filter((b) => canTradeStatus(b.tournament.status) || b.tournament.status === 'upcoming');
-  const past = books.filter((b) => !live.includes(b));
   const pro = isPro(typed.pro_until);
+
+  const service = tryCreateServiceClient();
+  if (service) {
+    try {
+      await ensureCareerPortfolio(service, user.id);
+    } catch {
+      // Career migration may not be applied yet.
+    }
+  }
+
+  const career = await getCareerPortfolio(supabase, user.id).catch(() => null);
+  const books = await getUserActiveBooks(supabase, user.id).catch(() => []);
+  const liveBooks = books.filter(
+    (b) => canTradeStatus(b.tournament.status) || b.tournament.status === 'upcoming'
+  );
+  const featuredBook = liveBooks[0] ?? books[0] ?? null;
+
+  let holdingsValue = 0;
+  let costBasis = 0;
+  let cash = career?.cash ?? 0;
+  let starting = career?.starting_cash ?? CAREER_STARTING_CASH;
+  let history: { at: string; value: number }[] = [];
+  let careerTrades: Awaited<ReturnType<typeof getCareerTransactions>> = [];
+  let careerStandings: Awaited<ReturnType<typeof getCareerStandings>> = [];
+
+  if (career) {
+    const holdingsRaw = await getCareerHoldings(supabase, career.id).catch(() => []);
+    const prices = await getCurrentPrices(
+      supabase,
+      holdingsRaw.map((h) => h.asset_id)
+    );
+    holdingsValue = holdingsRaw.reduce((sum, h) => sum + h.quantity * (prices.get(h.asset_id)?.price ?? 0), 0);
+    costBasis = holdingsRaw.reduce((sum, h) => sum + h.quantity * h.average_cost, 0);
+    cash = career.cash;
+    starting = career.starting_cash || CAREER_STARTING_CASH;
+    const snaps = await getCareerValueHistory(supabase, career.id, careerChartLimit(pro)).catch(() => []);
+    history = snaps.map((p) => ({ at: p.recorded_at, value: p.portfolio_value }));
+    careerTrades = await getCareerTransactions(supabase, career.id, 8).catch(() => []);
+    careerStandings = await getCareerStandings(supabase).catch(() => []);
+  }
+
+  const portfolioValue = cash + holdingsValue;
+  const totalReturnPct = returnPct(portfolioValue, starting);
+  const totalReturnAmt = portfolioValue - starting;
+  const day = dayChange(history, portfolioValue);
+
+  let leaderRows: LeaderRow[] = careerStandings.map((row) => ({
+    user_id: row.user_id,
+    display_name: row.display_name,
+    rank: row.rank,
+    portfolio_value: row.portfolio_value,
+    return_pct: row.return_pct,
+  }));
+  let leaderHref = '/career/leaderboard';
+
+  if (featuredBook && canTradeStatus(featuredBook.tournament.status)) {
+    const standings = await getStandings(supabase, featuredBook.tournament.id).catch(() => []);
+    if (standings.length > 0) {
+      leaderRows = standings.map((row) => ({
+        user_id: row.user_id,
+        display_name: row.display_name,
+        rank: row.rank,
+        portfolio_value: row.portfolio_value,
+        return_pct: row.return_pct,
+      }));
+      leaderHref = `/tournaments/${featuredBook.tournament.id}`;
+    }
+  }
+
+  let activity = careerTrades.map((tx) => ({
+    id: tx.id,
+    title: tx.asset_name ?? 'Asset',
+    detail: formatActivityDetail(tx.side, tx.quantity, tx.total_value),
+    at: tx.executed_at,
+    side: tx.side,
+  }));
+  if (activity.length === 0 && featuredBook) {
+    const txs = await getTransactions(supabase, featuredBook.portfolio.id, 8).catch(() => []);
+    activity = txs.map((tx) => ({
+      id: tx.id,
+      title: tx.asset_name ?? 'Asset',
+      detail: formatActivityDetail(tx.side, tx.quantity, tx.total_value),
+      at: tx.executed_at,
+      side: tx.side,
+    }));
+  }
+
+  const myCareerRank = careerStandings.find((row) => row.user_id === user.id)?.rank ?? null;
 
   return (
     <AppShell nav="dashboard">
-      <main className="page py-6 md:py-8 space-y-8">
-        <div>
-          <h1 className="page-title text-2xl">Hey, {name}</h1>
-          <p className="text-sm text-muted mt-1.5">{typed.email}</p>
-          <div className="flex flex-wrap gap-x-4">
-            <Link href={`/players/${user.id}`} className="inline-flex min-h-11 items-center text-sm text-accent-light">
-              View record
-            </Link>
-            <Link href="/social" className="inline-flex min-h-11 items-center text-sm text-accent-light">
-              Social
-            </Link>
-          </div>
-        </div>
+      <main className="page py-6 lg:py-8">
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_20rem]">
+          <div className="space-y-6">
+            <section className="panel-elevated p-5 md:p-6">
+              <p className="label-caps">Total portfolio value</p>
+              <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
+                <p className="metric">{formatCurrency(portfolioValue)}</p>
+              </div>
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <Delta pct={totalReturnPct} />
+                <span className="text-sm text-muted">
+                  {totalReturnAmt >= 0 ? '+' : ''}
+                  {formatCurrency(totalReturnAmt)} total return
+                  {myCareerRank != null ? ` · Rank #${myCareerRank}` : ''}
+                </span>
+              </div>
+              <div className="mt-6">
+                <PortfolioChart series={history} currentValue={portfolioValue} />
+              </div>
+            </section>
 
-        <AdSlot hidden={pro} />
-
-        <section className="space-y-3">
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="section-title">Your tournaments</h2>
-            <Link href="/tournaments" className="text-sm text-accent-light min-h-11 inline-flex items-center">
-              All
-            </Link>
-          </div>
-          {books.length === 0 ? (
-            <div className="panel p-5">
-              <p className="text-sm text-muted mb-4">No tournament book yet.</p>
-              <Link href="/tournaments" className="btn btn-primary">
-                Find a tournament
-              </Link>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <MetricCard
+                label="Today's change"
+                value={day ? formatCurrency(day.amount) : '—'}
+                deltaPct={day?.pct}
+                hint={day ? undefined : 'Needs a prior snapshot'}
+                icon="chart"
+              />
+              <MetricCard
+                label="Invested basis"
+                value={formatCurrency(costBasis)}
+                hint="Holdings cost"
+                icon="link"
+              />
+              <MetricCard
+                label="Buying power"
+                value={formatCurrency(cash)}
+                hint="Career cash available"
+                icon="wallet"
+              />
             </div>
-          ) : (
-            <ul className="space-y-2">
-              {[...live, ...past].map(({ tournament, portfolio }) => (
-                <li key={tournament.id}>
-                  <Link href={`/tournaments/${tournament.id}`} className="block panel panel-hover px-4 py-3.5">
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="text-foreground font-medium truncate">{tournament.name}</span>
-                      <StatusBadge status={tournament.status} />
-                    </div>
-                    <div className="mt-1.5 text-xs text-muted">Cash {formatCurrency(portfolio.cash)}</div>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          <Link href="/assets" className="panel panel-hover px-4 py-4">
-            <div className="section-title mb-1">Market</div>
-            <div className="text-sm text-muted">Browse Pokémon assets</div>
-          </Link>
-          <Link href="/tournaments" className="panel panel-hover px-4 py-4">
-            <div className="section-title mb-1">Play</div>
-            <div className="text-sm text-muted">Join a tournament</div>
-          </Link>
-          <Link href="/events" className="panel panel-hover px-4 py-4">
-            <div className="section-title mb-1">Events</div>
-            <div className="text-sm text-muted">Predict a market move</div>
-          </Link>
-          <Link href="/career" className="panel panel-hover px-4 py-4">
-            <div className="section-title mb-1">Career</div>
-            <div className="text-sm text-muted">Grow a $1,000 book</div>
-          </Link>
-          <Link href="/social" className="panel panel-hover px-4 py-4">
-            <div className="section-title mb-1">Social</div>
-            <div className="text-sm text-muted">Friends, follows, feed</div>
-          </Link>
-          <Link href="/create" className="panel panel-hover px-4 py-4">
-            <div className="section-title mb-1">Host</div>
-            <div className="text-sm text-muted">Creator tournament</div>
-          </Link>
-          <Link href="/releases" className="panel panel-hover px-4 py-4">
-            <div className="section-title mb-1">Releases</div>
-            <div className="text-sm text-muted">Set-drop weekends</div>
-          </Link>
-          <Link href="/players" className="panel panel-hover px-4 py-4">
-            <div className="section-title mb-1">Rankings</div>
-            <div className="text-sm text-muted">Tournament records</div>
-          </Link>
+            <section className="space-y-3">
+              <SectionHeader title="Current tournament" href="/tournaments" actionLabel="All" />
+              {featuredBook ? (
+                <TournamentCard
+                  tournament={featuredBook.tournament}
+                  href={`/tournaments/${featuredBook.tournament.id}`}
+                  cash={featuredBook.portfolio.cash}
+                />
+              ) : (
+                <EmptyState
+                  title="No tournament book yet"
+                  description="Join an event to get an isolated virtual budget. Career cash stays separate."
+                  action={
+                    <Link href="/tournaments" className="btn btn-primary">
+                      Find a tournament
+                    </Link>
+                  }
+                />
+              )}
+            </section>
+          </div>
+
+          <aside className="space-y-6">
+            <section className="panel p-4 md:p-5">
+              <SectionHeader title="Leaderboard" href={leaderHref} />
+              <div className="mt-4">
+                <LeaderboardPreview rows={leaderRows} userId={user.id} />
+              </div>
+            </section>
+            <section className="panel p-4 md:p-5">
+              <SectionHeader title="Recent activity" href={career ? '/career' : '/tournaments'} />
+              <div className="mt-2">
+                <ActivityList items={activity} />
+              </div>
+            </section>
+            <AdSlot hidden={pro} />
+          </aside>
         </div>
       </main>
     </AppShell>
   );
+}
+
+function dayChange(
+  history: { at: string; value: number }[],
+  current: number
+): { amount: number; pct: number } | null {
+  const start = new Date();
+  start.setUTCHours(0, 0, 0, 0);
+  const startMs = start.getTime();
+  const prior =
+    [...history].reverse().find((p) => new Date(p.at).getTime() < startMs) ??
+    (history.length >= 2 ? history[history.length - 2] : null);
+  if (!prior || prior.value === 0) return null;
+  const amount = current - prior.value;
+  const pct = ((current - prior.value) / prior.value) * 100;
+  return { amount, pct };
 }

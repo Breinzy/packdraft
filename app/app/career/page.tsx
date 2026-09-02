@@ -146,46 +146,39 @@ export default async function CareerPage() {
   return (
     <AppShell nav="career">
       <main className="page py-6 md:py-8 space-y-6">
-        <div>
-          <h1 className="page-title text-2xl">Career</h1>
-          <p className="text-sm text-muted mt-1.5">
-            Persistent solo book. Starts at {formatCurrency(CAREER_STARTING_CASH)}. Separate from
-            every tournament.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {[
-            { label: 'Value', value: formatCurrency(portfolioValue) },
-            { label: 'Cash', value: formatCurrency(portfolio.cash) },
-            { label: 'Holdings', value: formatCurrency(holdingsValue) },
-            { label: 'Return', value: formatReturn(ret) },
-            {
-              label: 'Level',
-              value: `Lv ${progression.level.level} ${progression.level.name}`,
-            },
-            { label: 'Archetype', value: progression.archetype.label },
-            { label: 'Streak', value: `${progression.stats.streakDays}d` },
-            {
-              label: 'Career rank',
-              value: myRank != null ? `#${myRank}` : '—',
-            },
-          ].map((stat) => (
-            <div key={stat.label} className="panel px-4 py-3">
-              <div className="kicker mb-1">{stat.label}</div>
-              <div className="num text-base md:text-lg font-medium text-foreground">{stat.value}</div>
-            </div>
-          ))}
-        </div>
-
-        <div className="panel p-4 md:p-5">
-          <div className="section-title mb-3">Portfolio</div>
-          <Sparkline points={chart} className="w-full h-24" />
+        <section className="panel-elevated p-5 md:p-6">
+          <p className="label-caps">Career value</p>
+          <p className="metric mt-2">{formatCurrency(portfolioValue)}</p>
+          <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-muted">
+            <span className={ret >= 0 ? 'text-green' : 'text-red'}>{formatReturn(ret)}</span>
+            <span>Starts at {formatCurrency(CAREER_STARTING_CASH)}. Isolated from every tournament.</span>
+          </div>
+          <div className="mt-5">
+            <Sparkline points={chart} className="w-full h-28 md:h-36" variant="brand" />
+          </div>
           <p className="text-[11px] text-faint mt-2">
             {pro
               ? 'Pro chart window. Pro does not change Career cash, trades, or ranks.'
               : 'Free chart window. Pro extends history only.'}
           </p>
+        </section>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {[
+            { label: 'Cash', value: formatCurrency(portfolio.cash) },
+            { label: 'Holdings', value: formatCurrency(holdingsValue) },
+            { label: 'Level', value: `Lv ${progression.level.level} ${progression.level.name}` },
+            { label: 'Career rank', value: myRank != null ? `#${myRank}` : '—' },
+            { label: 'Archetype', value: progression.archetype.label },
+            { label: 'Streak', value: `${progression.stats.streakDays}d` },
+            { label: 'Peak', value: formatCurrency(progression.stats.peakValue) },
+            { label: 'Trades', value: String(progression.stats.tradeCount) },
+          ].map((stat) => (
+            <div key={stat.label} className="panel px-4 py-3">
+              <div className="label-caps mb-1">{stat.label}</div>
+              <div className="num text-base md:text-lg font-semibold text-foreground">{stat.value}</div>
+            </div>
+          ))}
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3">
@@ -233,16 +226,14 @@ export default async function CareerPage() {
           <AchievementList achievements={progression.achievements} />
         </section>
 
-        <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <section className="grid grid-cols-2 gap-3">
           {[
-            { label: 'Trades', value: String(progression.stats.tradeCount) },
-            { label: 'Peak', value: formatCurrency(progression.stats.peakValue) },
             { label: 'Realized P&L', value: formatCurrency(progression.stats.realizedPnl) },
             { label: 'Assets held', value: String(progression.stats.distinctAssets) },
           ].map((stat) => (
             <div key={stat.label} className="panel px-4 py-3">
-              <div className="kicker mb-1">{stat.label}</div>
-              <div className="num text-base font-medium text-foreground">{stat.value}</div>
+              <div className="label-caps mb-1">{stat.label}</div>
+              <div className="num text-base font-semibold text-foreground">{stat.value}</div>
             </div>
           ))}
         </section>

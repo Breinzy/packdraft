@@ -120,16 +120,13 @@ export default function TradeTicket({
             key={s}
             type="button"
             onClick={() => setSide(s)}
-            className={`min-h-11 rounded-md text-sm font-semibold ${
-              side === s ? 'text-foreground' : 'text-faint'
-            }`}
-            style={
+            className={`min-h-11 rounded-[var(--radius-md)] text-sm font-semibold border ${
               side === s
                 ? s === 'buy'
-                  ? { background: 'rgba(98,181,138,0.14)', border: '1px solid rgba(98,181,138,0.4)' }
-                  : { background: 'rgba(217,107,94,0.14)', border: '1px solid rgba(217,107,94,0.4)' }
-                : { background: 'transparent', border: '1px solid var(--color-border)' }
-            }
+                  ? 'btn-buy'
+                  : 'btn-sell'
+                : 'border-border bg-transparent text-faint'
+            }`}
           >
             {s === 'buy' ? 'Buy' : 'Sell'}
           </button>

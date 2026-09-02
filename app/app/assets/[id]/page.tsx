@@ -178,7 +178,7 @@ export default async function AssetDetailPage({
 
         <div className="panel p-4 md:p-6">
           <div className="section-title mb-3">Price history</div>
-          <Sparkline points={history.map((p) => p.price)} />
+          <Sparkline points={history.map((p) => p.price)} className="h-28 w-full md:h-36" variant="brand" />
           <p className="text-[11px] text-faint mt-2">
             {pro ? 'Pro history window.' : 'Free history window. Pro extends this. It does not change prices or ranks.'}
           </p>

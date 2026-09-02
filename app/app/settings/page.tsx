@@ -88,9 +88,13 @@ export default function SettingsPage() {
 
   if (checking) {
     return (
-      <div className="min-h-dvh flex items-center justify-center">
-        <div className="text-muted text-sm">Loading…</div>
-      </div>
+      <AppShell nav="settings">
+        <main className="page py-6">
+          <div className="panel max-w-lg p-6">
+            <div className="skeleton h-24 w-full" />
+          </div>
+        </main>
+      </AppShell>
     );
   }
 
@@ -99,7 +103,6 @@ export default function SettingsPage() {
       <main className="page py-6 md:py-8">
         <div className="max-w-lg">
           <div className="mb-8">
-            <h1 className="page-title text-2xl mb-1.5">Settings</h1>
             <p className="text-sm text-muted">Manage how you appear in tournaments.</p>
           </div>
 
@@ -140,7 +143,7 @@ export default function SettingsPage() {
             </form>
           </div>
 
-          <div className="panel p-5 mt-4 space-y-2">
+          <div className="panel p-5 mt-4 space-y-3">
             <h2 className="section-title">Account</h2>
             <p className="text-sm text-muted">
               {isPro(proUntil)
@@ -156,6 +159,17 @@ export default function SettingsPage() {
                 Become a creator host
               </Link>
             )}
+            <button
+              type="button"
+              className="btn btn-ghost w-full"
+              onClick={async () => {
+                const supabase = tryCreateBrowserClient();
+                if (supabase) await supabase.auth.signOut();
+                window.location.href = '/';
+              }}
+            >
+              Sign out
+            </button>
           </div>
         </div>
       </main>

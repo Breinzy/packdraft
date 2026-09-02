@@ -56,11 +56,7 @@ export default async function EventsPage() {
   return (
     <AppShell nav="play">
       <main className="page py-6 md:py-8 space-y-6">
-        <div>
-          <h1 className="page-title text-2xl">Events</h1>
-          <p className="text-sm text-muted mt-1.5">
-            Temporary predictions. Independent of Career cash and tournament books.
-          </p>
+        <div className="flex flex-wrap gap-x-4">
           <Link href="/releases" className="inline-flex min-h-11 items-center text-sm text-accent-light">
             Release weekends
           </Link>

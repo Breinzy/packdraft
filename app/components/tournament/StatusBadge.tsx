@@ -1,17 +1,19 @@
 import { TOURNAMENT_STATUS_LABELS, type TournamentStatus } from '@/types';
 
 const STYLES: Record<TournamentStatus, string> = {
-  upcoming: 'text-accent-light border-accent/35',
-  active: 'text-green border-green/40',
-  locked: 'text-gold border-gold/40',
-  settling: 'text-gold border-gold/40',
-  completed: 'text-muted border-border-strong',
-  archived: 'text-faint border-border',
+  upcoming: 'text-accent-light bg-accent-dim',
+  active: 'pill-live',
+  locked: 'text-gold bg-[rgba(201,178,122,0.12)]',
+  settling: 'text-gold bg-[rgba(201,178,122,0.12)]',
+  completed: 'text-muted bg-surface-3',
+  archived: 'text-faint bg-surface-3',
 };
 
 export default function StatusBadge({ status }: { status: TournamentStatus }) {
+  const live = status === 'active';
   return (
-    <span className={`inline-flex items-center kicker border px-2 py-0.5 ${STYLES[status]}`}>
+    <span className={`pill ${STYLES[status]}`}>
+      {live ? <span className="live-dot" /> : null}
       {TOURNAMENT_STATUS_LABELS[status]}
     </span>
   );

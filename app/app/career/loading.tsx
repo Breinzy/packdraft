@@ -1,9 +1,14 @@
+import AppShell from '@/components/layout/AppShell';
+import { Skeleton } from '@/components/ui/skeleton';
+
 export default function Loading() {
   return (
-    <div className="page py-6 space-y-4">
-      <div className="skeleton h-8 w-32" />
-      <div className="skeleton h-20 w-full" />
-      <div className="skeleton h-28 w-full" />
-    </div>
+    <AppShell>
+      <main className="page space-y-4 py-6">
+        <Skeleton className="h-8 w-40" />
+        <Skeleton className="h-24 w-full rounded-[var(--radius-lg)]" />
+        <Skeleton className="h-40 w-full rounded-[var(--radius-lg)]" />
+      </main>
+    </AppShell>
   );
 }

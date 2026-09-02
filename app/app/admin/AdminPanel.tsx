@@ -95,11 +95,11 @@ export default function AdminPanel({
 
   return (
     <div className="min-h-dvh">
-      <header className="border-b border-border">
-        <div className="page flex items-center justify-between gap-4 min-h-14">
+      <header className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur-md">
+        <div className="page flex min-h-14 items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <Logo href="/" />
-            <span className="kicker border border-gold/40 text-gold px-1.5 py-0.5">Admin</span>
+            <Logo href="/dashboard" compact />
+            <span className="pill bg-[rgba(201,178,122,0.12)] text-gold">Admin</span>
           </div>
           <Link href="/dashboard" className="text-sm text-muted hover:text-foreground min-h-11 inline-flex items-center">
             ← Dashboard

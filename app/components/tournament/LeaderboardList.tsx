@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { formatCurrency, formatReturn, cn } from '@/lib/utils';
+import { formatCurrency, formatReturn, cn, initialsFromName } from '@/lib/utils';
 import type { TournamentStanding } from '@/types';
 
 export default function LeaderboardList({
@@ -14,27 +14,33 @@ export default function LeaderboardList({
   }
 
   return (
-    <ol className="space-y-2">
+    <ol className="space-y-1.5">
       {standings.map((row) => {
         const mine = userId && row.user_id === userId;
         return (
           <li
             key={row.user_id}
             className={cn(
-              'panel px-4 py-3.5 md:px-5',
+              'panel px-4 py-3 md:px-5',
               mine ? 'border-accent/50 bg-accent-dim' : ''
             )}
           >
-            <div className="flex items-baseline justify-between gap-3">
-              <div className="min-w-0 flex items-baseline gap-3">
-                <span className="num text-sm text-gold font-medium w-8 shrink-0">#{row.rank}</span>
-                <Link href={`/players/${row.user_id}`} className="text-sm text-foreground font-medium truncate hover:text-accent-light">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-3">
+                <span className="num w-8 shrink-0 text-sm font-semibold text-muted">#{row.rank}</span>
+                <span className="avatar h-8 w-8 text-[11px]">{initialsFromName(row.display_name)}</span>
+                <Link
+                  href={`/players/${row.user_id}`}
+                  className="truncate text-sm font-semibold text-foreground hover:text-accent-light"
+                >
                   {row.display_name}
                 </Link>
               </div>
-              <span className="num text-sm text-foreground shrink-0">{formatCurrency(row.portfolio_value)}</span>
+              <span className="num shrink-0 text-sm font-medium text-foreground">
+                {formatCurrency(row.portfolio_value)}
+              </span>
             </div>
-            <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted">
+            <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 pl-11 text-[11px] text-muted md:pl-[4.75rem]">
               <span className={row.return_pct >= 0 ? 'text-green' : 'text-red'}>
                 {formatReturn(row.return_pct)}
               </span>

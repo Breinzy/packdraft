@@ -52,8 +52,7 @@ export default async function SocialPage() {
     <AppShell nav="dashboard">
       <main className="page py-6 md:py-8 space-y-6">
         <div>
-          <h1 className="page-title text-2xl">Social</h1>
-          <p className="text-sm text-muted mt-1.5">
+          <p className="text-sm text-muted mt-0">
             Friends, follows, and a feed. Tournament books stay isolated.
           </p>
         </div>

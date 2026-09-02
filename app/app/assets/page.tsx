@@ -78,8 +78,7 @@ export default async function AssetsPage({
     <AppShell nav="market">
       <main className="page py-6 md:py-8 space-y-6">
         <div>
-          <h1 className="page-title text-2xl">Market</h1>
-          <p className="text-sm text-muted mt-1.5">
+          <p className="text-sm text-muted">
             Pokémon prices stored by Packdraft. Virtual trades do not move the real market.
           </p>
         </div>
@@ -132,7 +131,7 @@ export default async function AssetsPage({
               : 'No assets in the catalog yet. An admin can import them from /admin.'}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
             {catalog.assets.map((asset) => (
               <AssetCard
                 key={asset.id}

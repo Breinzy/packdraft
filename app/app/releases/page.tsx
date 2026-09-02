@@ -38,8 +38,7 @@ export default async function ReleasesPage() {
     <AppShell nav="play">
       <main className="page py-6 md:py-8 space-y-6">
         <div>
-          <h1 className="page-title text-2xl">Releases</h1>
-          <p className="text-sm text-muted mt-1.5">
+          <p className="text-sm text-muted">
             A tournament plus predictions around a set drop. Still virtual. Still free.
           </p>
         </div>

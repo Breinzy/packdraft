@@ -1,11 +1,11 @@
 import Link from 'next/link';
 import Header from '@/components/layout/Header';
-import StatusBadge from '@/components/tournament/StatusBadge';
 import EventStatusBadge from '@/components/events/EventStatusBadge';
+import TournamentCard from '@/components/tournament/TournamentCard';
 import { tryCreateServerClient } from '@/lib/supabase/server';
 import { listTournaments } from '@/lib/tournament/queries';
 import { listMarketEvents } from '@/lib/events/queries';
-import { formatCountdown, formatCurrency } from '@/lib/utils';
+import { formatCountdown } from '@/lib/utils';
 import type { MarketEvent, Tournament } from '@/types';
 
 const STEPS = [
@@ -47,14 +47,15 @@ export default async function HomePage() {
   return (
     <>
       <Header />
-      <main className="page py-6 md:py-10">
-        <div className="max-w-xl">
-          <h1 className="page-title text-3xl md:text-4xl">Highest book wins.</h1>
-          <p className="mt-3 text-[15px] text-muted leading-6">
+      <main className="page py-8 md:py-14">
+        <div className="max-w-2xl">
+          <p className="label-caps">Competitive TCG markets</p>
+          <h1 className="page-title mt-3 text-4xl md:text-5xl">Highest book wins.</h1>
+          <p className="mt-4 max-w-xl text-[15px] leading-7 text-muted">
             Join a tournament, spend a fixed virtual budget, and trade Pokémon using live Packdraft
             prices.
           </p>
-          <div className="mt-6 flex flex-col sm:flex-row gap-3">
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Link href="/tournaments" className="btn btn-primary min-h-12 px-5">
               Enter a tournament
             </Link>
@@ -67,41 +68,31 @@ export default async function HomePage() {
           </div>
         </div>
 
-        <ol className="mt-12 grid gap-3 sm:grid-cols-3">
+        <ol className="mt-14 grid gap-3 sm:grid-cols-3">
           {STEPS.map((step, i) => (
             <li key={step.title} className="panel p-5">
-              <div className="num text-xs text-accent-light mb-3">{i + 1}</div>
+              <div className="num mb-3 text-xs font-semibold text-accent-light">{String(i + 1).padStart(2, '0')}</div>
               <div className="section-title mb-2">{step.title}</div>
-              <p className="text-sm text-muted leading-5">{step.body}</p>
+              <p className="text-sm leading-6 text-muted">{step.body}</p>
             </li>
           ))}
         </ol>
 
         {shown.length > 0 ? (
-          <section className="mt-10">
-            <div className="flex items-center justify-between gap-3 mb-3">
+          <section className="mt-12">
+            <div className="mb-4 flex items-center justify-between gap-3">
               <h2 className="section-title">Tournaments</h2>
               <Link
                 href="/tournaments"
-                className="text-sm text-accent-light min-h-11 inline-flex items-center"
+                className="link-quiet inline-flex min-h-11 items-center"
               >
                 All
               </Link>
             </div>
-            <ul className="space-y-2">
+            <ul className="space-y-3">
               {shown.map((t) => (
                 <li key={t.id}>
-                  <Link href={`/tournaments/${t.id}`} className="block panel panel-hover px-4 py-3.5">
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="font-medium text-foreground truncate">{t.name}</span>
-                      <StatusBadge status={t.status} />
-                    </div>
-                    <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
-                      <span>Budget {formatCurrency(t.starting_budget)}</span>
-                      {t.status === 'upcoming' ? <span>Starts {formatCountdown(t.starts_at)}</span> : null}
-                      {t.status === 'active' ? <span>Closes {formatCountdown(t.trading_closes_at)}</span> : null}
-                    </div>
-                  </Link>
+                  <TournamentCard tournament={t} href={`/tournaments/${t.id}`} compact />
                 </li>
               ))}
             </ul>
@@ -109,25 +100,25 @@ export default async function HomePage() {
         ) : null}
 
         {shownEvents.length > 0 ? (
-          <section className="mt-10">
-            <div className="flex items-center justify-between gap-3 mb-3">
+          <section className="mt-12">
+            <div className="mb-4 flex items-center justify-between gap-3">
               <h2 className="section-title">Events</h2>
               <Link
                 href="/events"
-                className="text-sm text-accent-light min-h-11 inline-flex items-center"
+                className="link-quiet inline-flex min-h-11 items-center"
               >
                 All
               </Link>
             </div>
-            <ul className="space-y-2">
+            <ul className="space-y-3">
               {shownEvents.map((event) => (
                 <li key={event.id}>
-                  <Link href={`/events/${event.id}`} className="block panel panel-hover px-4 py-3.5">
+                  <Link href={`/events/${event.id}`} className="panel panel-hover block p-4 md:p-5">
                     <div className="flex items-center justify-between gap-3">
-                      <span className="font-medium text-foreground truncate">{event.name}</span>
+                      <span className="truncate font-semibold text-foreground">{event.name}</span>
                       <EventStatusBadge status={event.status} />
                     </div>
-                    <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
+                    <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
                       {event.status === 'upcoming' ? <span>Opens {formatCountdown(event.opens_at)}</span> : null}
                       {event.status === 'open' ? <span>Locks {formatCountdown(event.locks_at)}</span> : null}
                     </div>
@@ -138,7 +129,7 @@ export default async function HomePage() {
           </section>
         ) : null}
 
-        <p className="mt-8 text-xs text-faint">No real money. Simulated portfolios only.</p>
+        <p className="mt-10 text-xs text-faint">No real money. Simulated portfolios only.</p>
       </main>
     </>
   );
