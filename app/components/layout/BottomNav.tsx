@@ -17,7 +17,7 @@ export default function BottomNav({ active }: { active: BottomNavKey }) {
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       aria-label="Primary mobile"
     >
-      <div className="grid grid-cols-4">
+      <div className="grid grid-cols-4 px-2 py-1.5">
         {ITEMS.map((item) => {
           const isActive = item.key === active;
           return (
@@ -25,7 +25,7 @@ export default function BottomNav({ active }: { active: BottomNavKey }) {
               key={item.key}
               href={item.href}
               aria-current={isActive ? 'page' : undefined}
-              className={`flex min-h-16 flex-col items-center justify-center gap-1.5 text-[11px] ${
+              className={`flex min-h-[4.25rem] flex-col items-center justify-center gap-1.5 text-[11px] ${
                 isActive ? 'text-foreground font-semibold' : 'text-faint font-medium'
               }`}
             >

@@ -22,14 +22,14 @@ export function SidebarNav({
   const general = GENERAL_NAV.filter((item) => !item.auth || user);
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="flex items-center justify-between px-6 pb-8 pt-8">
+    <div className="sidebar-inner">
+      <div className="px-3 pb-8">
         <Logo href={user ? "/dashboard" : "/"} compact />
       </div>
 
-      <nav className="flex-1 overflow-y-auto px-4 pb-6" aria-label="Primary">
-        <p className="label-caps px-3 pb-3">Menu</p>
-        <ul className="space-y-1.5">
+      <nav className="flex-1 overflow-y-auto pb-8" aria-label="Primary">
+        <p className="label-caps px-4 pb-4">Menu</p>
+        <ul className="space-y-2">
           {menu.map((item) => (
             <li key={item.href}>
               <NavLink item={item} pathname={pathname} onNavigate={onNavigate} />
@@ -37,8 +37,8 @@ export function SidebarNav({
           ))}
         </ul>
 
-        <p className="label-caps mt-8 px-3 pb-3">General</p>
-        <ul className="space-y-1.5">
+        <p className="label-caps mt-10 px-4 pb-4">General</p>
+        <ul className="space-y-2">
           {general.map((item) => (
             <li key={item.href}>
               <NavLink item={item} pathname={pathname} onNavigate={onNavigate} />
@@ -48,16 +48,16 @@ export function SidebarNav({
       </nav>
 
       {user ? (
-        <div className="mx-4 mb-5 rounded-[var(--radius-lg)] border border-border bg-surface-2 p-4">
+        <div className="rounded-[var(--radius-lg)] border border-border bg-surface-2 p-4">
           <Link
             href="/settings"
             onClick={onNavigate}
-            className="flex items-center gap-3 rounded-[var(--radius-md)] outline-none"
+            className="flex items-center gap-3.5 rounded-[var(--radius-md)] outline-none"
           >
-            <span className="avatar h-10 w-10 text-sm">{user.initials}</span>
+            <span className="avatar h-11 w-11 text-sm">{user.initials}</span>
             <span className="min-w-0 flex-1">
               <span className="block truncate text-sm font-semibold text-foreground">{user.displayName}</span>
-              <span className="mt-0.5 block truncate text-xs text-muted">
+              <span className="mt-1 block truncate text-xs text-muted">
                 {rank.rank != null ? (
                   <>
                     Rank #{rank.rank}
@@ -71,7 +71,7 @@ export function SidebarNav({
           </Link>
         </div>
       ) : (
-        <div className="mx-4 mb-5 space-y-2">
+        <div className="stack">
           <Link href="/auth/login" onClick={onNavigate} className="btn btn-ghost w-full">
             Log in
           </Link>
@@ -99,7 +99,7 @@ function NavLink({
       href={item.href}
       onClick={onNavigate}
       aria-current={active ? "page" : undefined}
-      className={`flex items-center gap-3 rounded-[var(--radius-md)] px-3.5 py-3.5 text-sm font-medium transition-colors duration-[var(--duration-fast)] ${
+      className={`flex items-center gap-3.5 rounded-[var(--radius-md)] px-4 py-3.5 text-sm font-medium transition-colors duration-[var(--duration-fast)] ${
         active
           ? "nav-active text-foreground"
           : "text-muted hover:bg-surface-2 hover:text-foreground"

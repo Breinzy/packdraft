@@ -73,10 +73,10 @@ export function AreaChart({ points }: { points: number[] }) {
   const span = max - min || 1;
   const w = 640;
   const h = 220;
-  const padL = 52;
-  const padR = 12;
-  const padT = 12;
-  const padB = 28;
+  const padL = 64;
+  const padR = 24;
+  const padT = 20;
+  const padB = 36;
   const coords = points.map((p, i) => {
     const x = padL + (i / (points.length - 1)) * (w - padL - padR);
     const y = padT + (1 - (p - min) / span) * (h - padT - padB);
@@ -108,7 +108,7 @@ export function AreaChart({ points }: { points: number[] }) {
               strokeDasharray="3 6"
               strokeWidth="1"
             />
-            <text x={4} y={y + 4} fill="#6e7681" fontSize="11">
+            <text x={10} y={y + 4} fill="#6e7681" fontSize="11">
               {compactUsd(tick)}
             </text>
           </g>
@@ -128,7 +128,7 @@ export function AreaChart({ points }: { points: number[] }) {
           <text
             key={label}
             x={padL + (i / (xLabels.length - 1)) * (w - padL - padR)}
-            y={h - 6}
+            y={h - 8}
             fill="#6e7681"
             fontSize="11"
             textAnchor={i === 0 ? 'start' : i === xLabels.length - 1 ? 'end' : 'middle'}

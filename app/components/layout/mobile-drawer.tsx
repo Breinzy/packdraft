@@ -56,7 +56,7 @@ export function MobileDrawer({
       >
         <button
           type="button"
-          className="icon-btn absolute right-4 top-5 z-10"
+          className="icon-btn absolute right-5 top-6 z-10"
           aria-label="Close menu"
           onClick={onClose}
         >

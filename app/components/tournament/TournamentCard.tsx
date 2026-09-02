@@ -32,8 +32,8 @@ export default function TournamentCard({
 
   const inner = (
     <div>
-      <div className="flex items-start gap-3.5">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--radius-md)] bg-accent-dim text-accent">
+      <div className="flex items-start gap-4">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[var(--radius-md)] bg-accent-dim text-accent">
           <Icon name="trophy" />
         </span>
         <div className="min-w-0 flex-1">

@@ -90,13 +90,13 @@ export default async function AssetsPage({
             name="q"
             defaultValue={q}
             placeholder="Search assets"
-            className="field min-h-12"
+            className="field min-h-12 px-4"
           />
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2.5">
             {TYPES.map((t) => (
               <label key={t.id} className="cursor-pointer">
                 <input type="radio" name="type" value={t.id} defaultChecked={assetType === t.id} className="sr-only peer" />
-                <span className="inline-flex min-h-11 items-center px-3.5 rounded-md border border-border text-sm text-muted peer-checked:text-foreground peer-checked:border-accent/50 peer-checked:bg-accent-dim">
+                <span className="inline-flex min-h-12 items-center px-4 rounded-md border border-border text-sm text-muted peer-checked:text-foreground peer-checked:border-accent/50 peer-checked:bg-accent-dim">
                   {t.label}
                 </span>
               </label>

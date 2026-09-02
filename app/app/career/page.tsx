@@ -148,12 +148,12 @@ export default async function CareerPage() {
       <main className="page page-main stack">
         <section className="panel-elevated">
           <p className="label-caps">Career value</p>
-          <p className="metric mt-4">{formatCurrency(portfolioValue)}</p>
-          <div className="mt-4 flex flex-wrap items-center gap-2.5 text-sm text-muted">
+          <p className="metric mt-5">{formatCurrency(portfolioValue)}</p>
+          <div className="mt-5 flex flex-wrap items-center gap-2.5 text-sm text-muted">
             <span className={ret >= 0 ? 'text-green' : 'text-red'}>{formatReturn(ret)}</span>
             <span>Starts at {formatCurrency(CAREER_STARTING_CASH)}. Isolated from every tournament.</span>
           </div>
-          <div className="mt-8">
+          <div className="mt-10">
             <Sparkline points={chart} className="w-full h-28 md:h-36" variant="brand" />
           </div>
           <p className="text-[11px] text-faint mt-2">

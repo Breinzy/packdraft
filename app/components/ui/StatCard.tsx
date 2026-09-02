@@ -8,8 +8,8 @@ export default function StatCard({
   color?: string;
 }) {
   return (
-    <div className="panel">
-      <div className="label-caps mb-2">{label}</div>
+    <div className="panel stat-tile">
+      <div className="label-caps">{label}</div>
       <div className="num text-lg font-semibold text-foreground" style={color ? { color } : undefined}>
         {value}
       </div>

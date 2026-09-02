@@ -167,8 +167,8 @@ export default async function DashboardPage() {
           <div className="stack">
             <section className="panel-elevated">
               <p className="label-caps">Total portfolio value</p>
-              <p className="metric mt-4">{formatCurrency(portfolioValue)}</p>
-              <div className="mt-4 flex flex-wrap items-center gap-2.5">
+              <p className="metric mt-5">{formatCurrency(portfolioValue)}</p>
+              <div className="mt-5 flex flex-wrap items-center gap-2.5">
                 <Delta pct={totalReturnPct} />
                 <span className="text-sm text-muted">
                   {totalReturnAmt >= 0 ? '+' : ''}
@@ -176,7 +176,7 @@ export default async function DashboardPage() {
                   {myCareerRank != null ? ` · Rank #${myCareerRank}` : ''}
                 </span>
               </div>
-              <div className="mt-8">
+              <div className="mt-10">
                 <PortfolioChart series={history} currentValue={portfolioValue} />
               </div>
             </section>
