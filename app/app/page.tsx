@@ -1,5 +1,10 @@
 import Link from 'next/link';
 import Header from '@/components/layout/Header';
+import StatusBadge from '@/components/tournament/StatusBadge';
+import { tryCreateServerClient } from '@/lib/supabase/server';
+import { listTournaments } from '@/lib/tournament/queries';
+import { formatCountdown, formatCurrency } from '@/lib/utils';
+import type { Tournament } from '@/types';
 
 const STEPS = [
   {
@@ -16,7 +21,19 @@ const STEPS = [
   },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const supabase = await tryCreateServerClient();
+  let tournaments: Tournament[] = [];
+  if (supabase) {
+    try {
+      tournaments = await listTournaments(supabase);
+    } catch {
+      tournaments = [];
+    }
+  }
+  const live = tournaments.filter((t) => t.status === 'upcoming' || t.status === 'active');
+  const shown = (live.length > 0 ? live : tournaments).slice(0, 3);
+
   return (
     <>
       <Header />
@@ -37,15 +54,46 @@ export default function HomePage() {
           </div>
         </div>
 
-        <ol className="mt-10 md:mt-12 grid gap-3 sm:grid-cols-3">
+        <ol className="mt-12 grid gap-3 sm:grid-cols-3">
           {STEPS.map((step, i) => (
-            <li key={step.title} className="panel p-4 md:p-5">
-              <div className="num text-xs text-accent-light mb-2">{i + 1}</div>
-              <div className="section-title mb-1.5">{step.title}</div>
+            <li key={step.title} className="panel p-5">
+              <div className="num text-xs text-accent-light mb-3">{i + 1}</div>
+              <div className="section-title mb-2">{step.title}</div>
               <p className="text-sm text-muted leading-5">{step.body}</p>
             </li>
           ))}
         </ol>
+
+        {shown.length > 0 ? (
+          <section className="mt-10">
+            <div className="flex items-center justify-between gap-3 mb-3">
+              <h2 className="section-title">Tournaments</h2>
+              <Link
+                href="/tournaments"
+                className="text-sm text-accent-light min-h-11 inline-flex items-center"
+              >
+                All
+              </Link>
+            </div>
+            <ul className="space-y-2">
+              {shown.map((t) => (
+                <li key={t.id}>
+                  <Link href={`/tournaments/${t.id}`} className="block panel panel-hover px-4 py-3.5">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="font-medium text-foreground truncate">{t.name}</span>
+                      <StatusBadge status={t.status} />
+                    </div>
+                    <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
+                      <span>Budget {formatCurrency(t.starting_budget)}</span>
+                      {t.status === 'upcoming' ? <span>Starts {formatCountdown(t.starts_at)}</span> : null}
+                      {t.status === 'active' ? <span>Closes {formatCountdown(t.trading_closes_at)}</span> : null}
+                    </div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
 
         <p className="mt-8 text-xs text-faint">No real money. Simulated portfolios only.</p>
       </main>

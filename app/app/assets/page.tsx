@@ -82,7 +82,7 @@ export default async function AssetsPage({
           </p>
         </div>
 
-        <form className="space-y-4" action="/assets" method="get">
+        <form className="space-y-5" action="/assets" method="get">
           {tournament ? <input type="hidden" name="tournament" value={tournament} /> : null}
           <input
             name="q"
@@ -94,7 +94,7 @@ export default async function AssetsPage({
             {TYPES.map((t) => (
               <label key={t.id} className="cursor-pointer">
                 <input type="radio" name="type" value={t.id} defaultChecked={assetType === t.id} className="sr-only peer" />
-                <span className="inline-flex min-h-11 items-center px-4 rounded-md border border-border text-xs text-muted peer-checked:text-foreground peer-checked:border-accent/50 peer-checked:bg-accent-dim">
+                <span className="inline-flex min-h-11 items-center px-3.5 rounded-md border border-border text-sm text-muted peer-checked:text-foreground peer-checked:border-accent/50 peer-checked:bg-accent-dim">
                   {t.label}
                 </span>
               </label>

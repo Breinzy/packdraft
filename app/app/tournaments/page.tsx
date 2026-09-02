@@ -57,15 +57,15 @@ export default async function TournamentsPage() {
 
         {tournaments.length === 0 ? (
             <div className="panel p-5 text-sm text-muted">
-            No tournaments yet. An admin can create one from /admin.
-          </div>
+              No tournaments yet. An admin can create one from /admin.
+            </div>
         ) : (
-          <ul className="space-y-3">
+          <ul className="space-y-2">
             {tournaments.map((t) => (
               <li key={t.id}>
                 <Link
                   href={`/tournaments/${t.id}`}
-              className="block panel p-5 md:p-6 panel-hover"
+                  className="block panel p-4 md:p-5 panel-hover"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <h2 className="text-lg font-medium text-foreground">{t.name}</h2>

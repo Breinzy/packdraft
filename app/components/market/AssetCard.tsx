@@ -17,7 +17,7 @@ export default function AssetCard({ asset, href }: AssetCardProps) {
   return (
     <Link
       href={href ?? `/assets/${asset.id}`}
-      className="panel panel-hover p-4 md:p-[1.15rem] flex gap-3.5 min-h-[5.75rem]"
+      className="panel panel-hover p-4 flex gap-3.5 min-h-[5.75rem]"
     >
       <AssetThumb src={src} alt={asset.name} />
       <div className="min-w-0 flex-1">
