@@ -61,15 +61,24 @@ Immutable historical market prices. “Current price” is the latest row for an
 | `condition` | Optional (PSA 10, unopened, …) |
 | `price_type` | `market`, `unopened`, `ebay_smart`, `ebay_average` |
 | `change_7d` | Percent change vs ~7d ago when known |
-| `volume` | Optional trade/sales count from the provider |
-| `metadata` | Extra provider payload |
-| `product_id` | Legacy FK to `products` (nullable) |
+| `volume` | Copies sold on that snapshot’s day when PPT sent history; still 0 when unknown |
 
 Writes use the service role. Clients may `SELECT`.
 
+### `asset_market_stats`
+
+One row per asset after the 6-month history pass (and after daily refreshes).
+
+| Column | Role |
+|---|---|
+| `volume_7d` / `volume_30d` / `volume_180d` | Sum of PPT daily sales volume in that window |
+| `daily_tier` | `always` (ETB / booster box), `high` (≥10 sales in 30d), `normal`, `skip` |
+| `always_daily` | True for ETBs and booster boxes |
+| `history_points` | Number of PPT history days stored |
+
 ### `market_job_state`
 
-Singleton rows `catalog_import` and `price_sync`. Each cron/admin chunk claims a row, writes a cursor (`sealed_offset`, `set_index`, `graded_offset`, or `last_asset_id`), and releases it. Clients may `SELECT`. Writes are service-role only.
+Singleton rows `catalog_import`, `price_sync`, and `history_backfill`. `history_backfill` is inserted **paused**. Each cron/admin chunk claims a row, writes a cursor (`last_asset_id` or import offsets), and releases it. Clients may `SELECT`. Writes are service-role only.
 
 ## Tournament data (Phases 5–10)
 

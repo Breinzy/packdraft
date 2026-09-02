@@ -35,6 +35,7 @@ export interface NormalizedPrice {
   volume?: number;
   change7d?: number;
   metadata?: Record<string, unknown>;
+  history?: { date: string; price: number; volume: number }[];
 }
 
 export interface AssetPriceRef {
@@ -73,5 +74,8 @@ export interface MarketDataProvider {
     setId?: string;
     fetchAllInSet?: boolean;
   }): Promise<ProviderPage>;
-  fetchPrices(refs: AssetPriceRef[]): Promise<NormalizedPrice[]>;
+  fetchPrices(
+    refs: AssetPriceRef[],
+    options?: { includeHistory?: boolean; days?: number }
+  ): Promise<NormalizedPrice[]>;
 }

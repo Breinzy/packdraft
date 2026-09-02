@@ -69,9 +69,28 @@ Do not reconstruct prices from holdings.
 
 ## Daily price sync
 
-`syncMarketPrices` walks **existing** active assets by `id` cursor (`market_job_state` job `price_sync`). It does not add products.
+`syncMarketPrices` no longer walks the whole catalog.
 
-It is also time- and credit-boxed. Cron runs at **09:00 UTC** so it does not race PPT’s 06:00 UTC regenerate. A Hobby run will not refresh 50k rows in one day; the cursor continues on later runs.
+Daily universe (union):
+
+1. **Always** — Pokémon **Elite Trainer Boxes** and **booster boxes** (name/metadata subtype). These refresh **with sales volume** every run.
+2. **High volume** — cards whose trailing **30-day PPT volume ≥ 10** after the 6-month history pass (`asset_market_stats.daily_tier = high`).
+3. **Held** — any asset with quantity > 0 in a tournament book or Career book.
+
+Zero-volume filler is skipped. Each daily fetch uses `includeHistory=true` (`days=180`) so volume windows stay current. Cron is still **09:00 UTC**.
+
+### One-pass 6-month history
+
+Admin job `history_backfill` (starts **paused**):
+
+* Walks every active sealed product and card
+* Requests PPT `includeHistory=true&days=180`
+* Inserts missing daily `price_snapshots` (stable noon-UTC `recorded_at` per day)
+* Upserts `asset_market_stats` (`volume_7d` / `volume_30d` / `volume_180d`, `daily_tier`)
+
+Cost is about **2 credits per single/sealed** (price + history) and **3** if eBay graded is needed. An API-plan key (~20k credits/day) cannot finish ~20k assets in one day; run chunks from `/admin` across days. Do not unpause this job until you intend to spend those credits.
+
+Admin **Volume leaders** is the operator view of that table.
 
 ## Stale data
 
@@ -81,7 +100,7 @@ Sync is scheduled daily. 36 hours is a one-miss buffer. Stale flags are informat
 
 ## History
 
-Every sync **inserts** a new snapshot. Existing rows are not updated. This is how Packdraft answers “what was this worth at time T?”
+Snapshots are insert-only. A re-run skips a day that already has a row for that asset (noon UTC key). The 6-month backfill is how charts get a real series; daily sync then adds/refreshes the priority set. UI still shows 14 days free / 90 with Pro from Packdraft snapshots, not a live PPT call.
 
 ## Settlement
 

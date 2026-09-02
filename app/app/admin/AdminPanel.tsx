@@ -18,6 +18,17 @@ interface AdminStats {
   lastSync: string | null;
 }
 
+interface VolumeLeader {
+  assetId: string;
+  name: string;
+  assetType: string;
+  volume7d: number;
+  volume30d: number;
+  volume180d: number;
+  dailyTier: string;
+  alwaysDaily: boolean;
+}
+
 interface ActionResult {
   ok?: boolean;
   error?: string;
@@ -30,12 +41,20 @@ export default function AdminPanel({
   tournaments,
   events,
   importJob,
+  historyJob,
+  volumeLeaders,
+  alwaysDailyCount,
+  highVolumeCount,
   sets,
 }: {
   stats: AdminStats;
   tournaments: Tournament[];
   events: MarketEvent[];
   importJob: MarketJobState | null;
+  historyJob: MarketJobState | null;
+  volumeLeaders: VolumeLeader[];
+  alwaysDailyCount: number;
+  highVolumeCount: number;
   sets: { id: string; name: string }[];
 }) {
   const [results, setResults] = useState<Record<string, ActionResult | null>>({});
@@ -80,13 +99,22 @@ export default function AdminPanel({
   }
 
   const actions: { id: string; label: string; description: string; warn?: boolean }[] = [
-    { id: 'sync-prices', label: 'Sync prices', description: 'Insert latest Packdraft snapshots for active assets' },
+    { id: 'sync-prices', label: 'Sync prices', description: 'Daily priority set only: ETBs, booster boxes, high-volume cards, and holdings' },
     {
       id: 'import-assets',
       label: 'Import catalog chunk',
       description: 'Resume full PPT ingest. Stops at ~4 minutes, PPT credits, or daily remaining.',
       warn: true,
     },
+    {
+      id: 'history-backfill',
+      label: 'History + volume chunk',
+      description:
+        'One-pass 6-month PPT history and sales volume. Starts paused. ~2 credits/card. Stops at ~4 minutes.',
+      warn: true,
+    },
+    { id: 'pause-history', label: 'Pause history backfill', description: 'Do not spend more PPT credits on the 6-month pass' },
+    { id: 'resume-history', label: 'Resume history backfill', description: 'Allow the next 6-month history chunk to run' },
     { id: 'pause-import', label: 'Pause import', description: 'Stop cron/admin from continuing the catalog job' },
     { id: 'resume-import', label: 'Resume import', description: 'Allow the next chunk to run from the saved cursor' },
     { id: 'tick-tournaments', label: 'Tick tournaments', description: 'Advance lifecycle and settle locked books' },
@@ -172,6 +200,71 @@ export default function AdminPanel({
             Apply the market_job_state migration to track resumable catalog import.
           </p>
         )}
+
+        {historyJob ? (
+          <div className="panel p-4 space-y-2">
+            <div className="section-title">6-month history / volume</div>
+            <div className="text-sm text-foreground">
+              {historyJob.status.toUpperCase()} · {historyJob.stop_reason ? `last stop: ${historyJob.stop_reason}` : 'paused until you resume'}
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs text-muted">
+              <div>Visited {historyJob.assets_visited}</div>
+              <div>Snapshots {historyJob.snapshots_written}</div>
+              <div>Credits used {historyJob.credits_used}</div>
+              <div>Daily remaining {historyJob.daily_remaining ?? '—'}</div>
+            </div>
+            <p className="text-xs text-faint">
+              Daily sync then refreshes ETBs, booster boxes, high-volume cards (30d ≥ 10 sales), and
+              anything held in a Packdraft book. Zero-volume filler is skipped.
+            </p>
+            {historyJob.last_error ? (
+              <div className="text-xs text-red-400 break-all">{historyJob.last_error}</div>
+            ) : null}
+          </div>
+        ) : null}
+
+        <div className="panel p-4 space-y-3">
+          <div className="section-title">Volume leaders</div>
+          <div className="text-xs text-muted">
+            Always-daily sealed {alwaysDailyCount.toLocaleString()} · high-volume cards{' '}
+            {highVolumeCount.toLocaleString()}
+          </div>
+          {volumeLeaders.length === 0 ? (
+            <p className="text-sm text-muted">
+              No volume rows yet. Resume the 6-month history backfill, then this list fills in.
+            </p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="text-faint">
+                  <tr>
+                    <th className="py-2 pr-3 font-medium">Asset</th>
+                    <th className="py-2 pr-3 font-medium">Tier</th>
+                    <th className="py-2 pr-3 font-medium num">7d</th>
+                    <th className="py-2 pr-3 font-medium num">30d</th>
+                    <th className="py-2 font-medium num">180d</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {volumeLeaders.map((row) => (
+                    <tr key={row.assetId} className="border-t border-border">
+                      <td className="py-2 pr-3">
+                        <div className="text-foreground truncate max-w-[14rem]">{row.name}</div>
+                        <div className="text-faint">{row.assetType}</div>
+                      </td>
+                      <td className="py-2 pr-3 text-muted">
+                        {row.alwaysDaily ? 'always' : row.dailyTier}
+                      </td>
+                      <td className="py-2 pr-3 num">{row.volume7d}</td>
+                      <td className="py-2 pr-3 num">{row.volume30d}</td>
+                      <td className="py-2 num">{row.volume180d}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
 
         <div className="space-y-3">
           <div className="section-title mb-2">Market data</div>
