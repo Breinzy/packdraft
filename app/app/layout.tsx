@@ -37,7 +37,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${plex.variable} ${newsreader.variable} ${plexMono.variable}`}>
-      <body className="relative bg-[#060607] font-sans text-foreground">
+      <body className="relative bg-black font-sans text-foreground">
         <div className="grain" aria-hidden />
         <div className="relative z-10 site-shell">{children}</div>
       </body>

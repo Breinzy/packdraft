@@ -21,24 +21,24 @@
 }
 
 :root {
-  --frame: 0.85rem;
-  --gutter-x: 1.25rem;
+  --frame: 1rem;
+  --gutter-x: 1.5rem;
   --gutter-y: 0.85rem;
   --page-max: 72rem;
 }
 
 @media (min-width: 768px) {
   :root {
-    --frame: 1.25rem;
-    --gutter-x: 1.75rem;
+    --frame: 1.35rem;
+    --gutter-x: 2rem;
     --gutter-y: 1.15rem;
   }
 }
 
 @media (min-width: 1280px) {
   :root {
-    --frame: 1.5rem;
-    --gutter-x: 2.25rem;
+    --frame: 1.65rem;
+    --gutter-x: 2.5rem;
     --gutter-y: 1.35rem;
   }
 }
@@ -61,7 +61,7 @@ html {
 }
 
 body {
-  background: #060607;
+  background: #000000;
   color: var(--color-foreground);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
@@ -127,9 +127,9 @@ button:active:not(:disabled) {
   flex-direction: column;
   overflow: hidden;
   background: var(--color-background);
-  border: 1px solid var(--color-border);
+  border: 1px solid #3a3a3e;
   border-radius: 18px;
-  padding-inline: var(--gutter-x);
+  padding: 0.7rem var(--gutter-x) 0.85rem;
 }
 
 .page {
