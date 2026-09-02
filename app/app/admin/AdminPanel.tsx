@@ -286,8 +286,6 @@ export default function AdminPanel({
           ) : null}
         </div>
 
-        </div>
-
         <div className="space-y-3">
           <div className="section-title">Create market event</div>
           <div className="panel p-4 space-y-3">

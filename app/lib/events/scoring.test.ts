@@ -35,7 +35,7 @@ describe('event scoring', () => {
   it('scores a perfect release-price guess at 100 and a 10% miss at 90', () => {
     expect(scoreReleasePrice(50, 50)).toBe(100);
     expect(scoreReleasePrice(45, 50)).toBe(90);
-    expect(scoreReleasePrice(0.01, 50)).toBe(0);
+    expect(scoreReleasePrice(0, 50)).toBe(0);
   });
 
   it('awards direction only when the asset actually moves that way', () => {

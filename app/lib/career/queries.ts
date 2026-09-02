@@ -1,9 +1,16 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Asset, CareerStanding } from '@/types';
+import type {
+  Asset,
+  CareerPortfolio,
+  CareerPosition,
+  CareerStanding,
+  CareerTransaction,
+  CareerValueSnapshot,
+} from '@/types';
 import { CAREER_STARTING_CASH } from '@/types';
 import type { TransactionRow } from '@/lib/tournament/queries';
 
-function asNumber(value: number | string | null | undefined): number {
+function asNumber(value: unknown): number {
   return Number(value ?? 0);
 }
 
@@ -21,7 +28,7 @@ export async function ensureCareerPortfolio(
 export async function getCareerPortfolio(
   supabase: SupabaseClient,
   userId: string
-): Promise<import('@/types').CareerPortfolio | null> {
+): Promise<CareerPortfolio | null> {
   const { data, error } = await supabase
     .from('career_portfolios')
     .select('*')
@@ -38,7 +45,7 @@ export async function getCareerPortfolio(
   };
 }
 
-export interface CareerHoldingRow extends import('@/types').CareerPosition {
+export interface CareerHoldingRow extends CareerPosition {
   asset: Asset | null;
 }
 
@@ -87,7 +94,7 @@ export async function getCareerTransactions(
       id: row.id as string,
       portfolio_id: row.portfolio_id as string,
       asset_id: row.asset_id as string,
-      side: row.side as import('@/types').CareerTransaction['side'],
+      side: row.side as CareerTransaction['side'],
       quantity: Number(row.quantity),
       execution_price: asNumber(row.execution_price as number),
       total_value: asNumber(row.total_value as number),
@@ -102,7 +109,7 @@ export async function getCareerValueHistory(
   supabase: SupabaseClient,
   portfolioId: string,
   limit = 90
-): Promise<import('@/types').CareerValueSnapshot[]> {
+): Promise<CareerValueSnapshot[]> {
   const { data, error } = await supabase
     .from('career_value_snapshots')
     .select('*')
