@@ -23,7 +23,7 @@ function asType(value: string | undefined): 'all' | AssetType {
 export default async function AssetsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; type?: string; set?: string; page?: string; tournament?: string }>;
+  searchParams: Promise<{ q?: string; type?: string; set?: string; page?: string; tournament?: string; book?: string }>;
 }) {
   const sp = await searchParams;
   const supabase = await tryCreateServerClient();
@@ -32,6 +32,7 @@ export default async function AssetsPage({
   const setId = sp.set || undefined;
   const page = Number(sp.page ?? '1') || 1;
   const tournament = sp.tournament;
+  const book = sp.book === 'career' ? 'career' : undefined;
 
   if (!supabase) {
     return (
@@ -68,6 +69,7 @@ export default async function AssetsPage({
     if (assetType !== 'all') params.set('type', assetType);
     if (setId) params.set('set', setId);
     if (tournament) params.set('tournament', tournament);
+    if (book) params.set('book', book);
     params.set('page', String(nextPage));
     return `/assets?${params.toString()}`;
   }
@@ -84,6 +86,7 @@ export default async function AssetsPage({
 
         <form className="space-y-5" action="/assets" method="get">
           {tournament ? <input type="hidden" name="tournament" value={tournament} /> : null}
+          {book ? <input type="hidden" name="book" value={book} /> : null}
           <input
             name="q"
             defaultValue={q}
@@ -134,7 +137,13 @@ export default async function AssetsPage({
               <AssetCard
                 key={asset.id}
                 asset={asset}
-                href={`/assets/${asset.id}${tournament ? `?tournament=${tournament}` : ''}`}
+                href={
+                  tournament
+                    ? `/assets/${asset.id}?tournament=${tournament}`
+                    : book
+                      ? `/assets/${asset.id}?book=career`
+                      : `/assets/${asset.id}`
+                }
               />
             ))}
           </div>

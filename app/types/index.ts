@@ -183,3 +183,42 @@ export const ASSET_TYPE_LABELS: Record<AssetType, string> = {
   single: 'Single',
   graded: 'Graded',
 };
+
+export const CAREER_STARTING_CASH = 1000;
+
+export interface CareerPortfolio {
+  id: string;
+  user_id: string;
+  starting_cash: number;
+  cash: number;
+  created_at: string;
+}
+
+export interface CareerPosition {
+  id: string;
+  portfolio_id: string;
+  asset_id: string;
+  quantity: number;
+  average_cost: number;
+}
+
+export interface CareerTransaction {
+  id: string;
+  portfolio_id: string;
+  asset_id: string;
+  side: TradeSide;
+  quantity: number;
+  execution_price: number;
+  total_value: number;
+  executed_at: string;
+  price_snapshot_id: string | null;
+}
+
+export interface CareerValueSnapshot {
+  id: string;
+  portfolio_id: string;
+  cash: number;
+  holdings_value: number;
+  portfolio_value: number;
+  recorded_at: string;
+};

@@ -27,6 +27,7 @@ FILES = [
     REPO / "supabase/migrations/20260831120000_phase2_market_and_user_foundation.sql",
     REPO / "supabase/migrations/20260831180000_phase5_10_tournament_engine.sql",
     REPO / "supabase/migrations/20260901120000_market_job_state.sql",
+    REPO / "supabase/migrations/20260902120000_phase12_career_mode.sql",
 ]
 
 

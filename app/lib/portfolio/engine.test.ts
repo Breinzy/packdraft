@@ -26,6 +26,7 @@ function book(userId: string, cash = 10000, joinedAt = '2026-08-01T00:00:00.000Z
   return emptyBook({
     id: `book-${userId}`,
     userId,
+    kind: 'tournament',
     tournamentId: T1,
     startingCash: cash,
     joinedAt,
@@ -128,6 +129,7 @@ describe('tournament isolation', () => {
     const t2 = emptyBook({
       id: 'book-t2',
       userId: U1,
+      kind: 'tournament',
       tournamentId: T2,
       startingCash: 10000,
       joinedAt: '2026-08-10T00:00:00.000Z',
@@ -174,6 +176,33 @@ describe('ranking and settlement freeze', () => {
     expect(laterLive[0]?.portfolioValue).not.toBe(frozen[0]?.portfolioValue);
     // Historical result is the frozen ranking, not the later live mark.
     expect(frozen[0]?.portfolioValue).toBe(10100);
+  });
+});
+
+describe('career isolation', () => {
+  it('starts career at $1,000 and never shares cash with a tournament book', () => {
+    const career = applyBuy(
+      emptyBook({
+        id: 'career-u1',
+        userId: U1,
+        kind: 'career',
+        startingCash: 1000,
+        joinedAt: '2026-09-02T00:00:00.000Z',
+      }),
+      { assetId: BOX, quantity: 1, price: 100 }
+    );
+    const tournament = applyBuy(book(U1), { assetId: ETB, quantity: 1, price: 40 });
+
+    expect(career.kind).toBe('career');
+    expect(career.tournamentId).toBeNull();
+    expect(career.startingCash).toBe(1000);
+    expect(career.cash).toBe(900);
+    expect(career.positions.map((p) => p.assetId)).toEqual([BOX]);
+
+    expect(tournament.kind).toBe('tournament');
+    expect(tournament.tournamentId).toBe(T1);
+    expect(tournament.cash).toBe(9960);
+    expect(tournament.positions.map((p) => p.assetId)).toEqual([ETB]);
   });
 });
 

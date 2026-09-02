@@ -13,10 +13,13 @@ export interface EnginePosition {
   averageCost: number;
 }
 
+export type EngineBookKind = 'tournament' | 'career';
+
 export interface EngineBook {
   id: string;
   userId: string;
-  tournamentId: string;
+  kind: EngineBookKind;
+  tournamentId: string | null;
   startingCash: number;
   cash: number;
   positions: EnginePosition[];
@@ -222,14 +225,17 @@ export function rankBooks(
 export function emptyBook(input: {
   id: string;
   userId: string;
-  tournamentId: string;
+  kind?: EngineBookKind;
+  tournamentId?: string | null;
   startingCash: number;
   joinedAt: string;
 }): EngineBook {
+  const kind = input.kind ?? 'tournament';
   return {
     id: input.id,
     userId: input.userId,
-    tournamentId: input.tournamentId,
+    kind,
+    tournamentId: kind === 'career' ? null : (input.tournamentId ?? null),
     startingCash: input.startingCash,
     cash: input.startingCash,
     positions: [],

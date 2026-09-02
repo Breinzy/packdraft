@@ -112,11 +112,29 @@ Writes go through security-definer RPCs executed by the service role after the N
 
 ## Player history
 
-A basic `/players/[id]` page already exists. Public record is derived from `tournament_results` (and, for the owner, `tournament_transactions` replayed with the same average-cost rules as live trading). Tournament cash and positions still do not carry over. Do not expand this into Career Mode.
+A basic `/players/[id]` page already exists. Public record is derived from `tournament_results` (and, for the owner, `tournament_transactions` replayed with the same average-cost rules as live trading). Tournament cash and positions still do not carry over. Career Mode is a separate book and is not shown here.
+
+## Career Mode (Phase 12)
+
+Persistent solo book. Isolated from every tournament.
+
+### `career_portfolios`
+
+One row per user. `starting_cash` is always `$1,000`. `cash` never leaves this table into a tournament.
+
+### `career_positions` / `career_transactions`
+
+Same quantity, average-cost, and immutable ledger rules as tournament books. Writes go through `ensure_career_portfolio` and `execute_career_trade` (service role). Clients may `SELECT` their own rows.
+
+### `career_value_snapshots`
+
+Point-in-time cash + marked holdings, written when the book is created and after each career trade. Used for the career chart. Not a tournament settlement freeze.
+
+Do not store career cash on `profiles`. Do not transfer cash or positions between Career and tournaments.
 
 ## Reserved domains (not implemented)
 
-Career Mode and Market Event tables are **not** created in this migration. Do not store tournament cash on `profiles`.
+Market Event tables are **not** created. Career progression (levels, archetypes, milestones) is Phase 13.
 
 ## Legacy tables (unused by the app)
 

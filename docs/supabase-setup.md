@@ -86,7 +86,8 @@ Fallback if MCP is not connected: CLI `db push` has previously failed on this pr
    - `supabase/migrations/20260831120000_phase2_market_and_user_foundation.sql`
    - `supabase/migrations/20260831180000_phase5_10_tournament_engine.sql`
    - `supabase/migrations/20260901120000_market_job_state.sql`
-3. In Table Editor, confirm `assets`, `tcgs`, `tournaments`, and `market_job_state` exist.
+   - `supabase/migrations/20260902120000_phase12_career_mode.sql`
+3. In Table Editor, confirm `assets`, `tcgs`, `tournaments`, `market_job_state`, and `career_portfolios` exist.
 
 To apply from this repo instead of the SQL editor, set one of:
 
@@ -101,7 +102,7 @@ python3 script/cloud/apply-hosted-schema.py
 python3 script/cloud/copy-catalog-to-hosted.py
 ```
 
-Or `python3 script/cloud/print-hosted-migrations.py` to dump all three files as one SQL script for a single paste.
+Or `python3 script/cloud/print-hosted-migrations.py` to dump the pending migration files as one SQL script for a single paste.
 
 `SUPABASE_SERVICE_ROLE_KEY` can write catalog rows after the tables exist. It cannot run migrations.
 
@@ -110,4 +111,4 @@ Or `python3 script/cloud/print-hosted-migrations.py` to dump all three files as 
 1. Sign in on the app.
 2. Open `/admin` with an email listed in `ADMIN_EMAILS`.
 3. Import assets, sync prices, create a tournament.
-4. Join from `/tournaments` and trade from `/assets`.
+4. Join from `/tournaments` and trade from `/assets`. Career Mode is `/career` (separate $1,000 book).

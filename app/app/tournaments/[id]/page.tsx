@@ -194,7 +194,10 @@ export default async function TournamentDetailPage({
           <>
             <section className="space-y-3">
               <h2 className="section-title">Holdings</h2>
-              <HoldingsList holdings={holdings} tournamentId={tournament.id} />
+              <HoldingsList
+                holdings={holdings}
+                hrefFor={(assetId) => `/assets/${assetId}?tournament=${tournament.id}`}
+              />
             </section>
             <section className="space-y-3">
               <h2 className="section-title">Trade history</h2>

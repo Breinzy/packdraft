@@ -8,8 +8,10 @@ import { getCatalogAsset, asAsset } from '@/lib/market/catalog';
 import { assetImageSrc } from '@/lib/market/images';
 import { getPriceHistory } from '@/lib/market/prices';
 import { tryCreateServerClient } from '@/lib/supabase/server';
+import { tryCreateServiceClient } from '@/lib/supabase/service';
 import NeedsDatabase, { QueryFailed } from '@/components/ui/NeedsDatabase';
 import { getUserActiveBooks, getUserPortfolio, getHoldings } from '@/lib/tournament/queries';
+import { ensureCareerPortfolio, getCareerHoldings, getCareerPortfolio } from '@/lib/career/queries';
 import { canTradeStatus } from '@/lib/tournament/lifecycle';
 import { formatCurrency, formatPct } from '@/lib/utils';
 import { ASSET_TYPE_LABELS } from '@/types';
@@ -21,7 +23,7 @@ export default async function AssetDetailPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ tournament?: string }>;
+  searchParams: Promise<{ tournament?: string; book?: string }>;
 }) {
   const { id } = await params;
   const sp = await searchParams;
@@ -62,14 +64,37 @@ export default async function AssetDetailPage({
 
   const books = user ? await getUserActiveBooks(supabase, user.id).catch(() => []) : [];
   const tradeable = books.filter((b) => canTradeStatus(b.tournament.status));
-  const selected =
-    tradeable.find((b) => b.tournament.id === sp.tournament) ??
-    tradeable[0] ??
-    null;
+
+  let career = user ? await getCareerPortfolio(supabase, user.id).catch(() => null) : null;
+  if (user && !career) {
+    const service = tryCreateServiceClient();
+    if (service) {
+      try {
+        await ensureCareerPortfolio(service, user.id);
+        career = await getCareerPortfolio(supabase, user.id);
+      } catch {
+        career = null;
+      }
+    }
+  }
+
+  const wantCareer = sp.book === 'career' || (!sp.tournament && !!career);
+  const selectedTournament =
+    !wantCareer
+      ? tradeable.find((b) => b.tournament.id === sp.tournament) ?? tradeable[0] ?? null
+      : tradeable.find((b) => b.tournament.id === sp.tournament) ?? null;
+  const usingCareer = Boolean(career && (wantCareer || !selectedTournament));
 
   let ownedQty = 0;
-  if (selected) {
-    const portfolio = await getUserPortfolio(supabase, selected.tournament.id, selected.portfolio.user_id);
+  if (usingCareer && career) {
+    const holdings = await getCareerHoldings(supabase, career.id).catch(() => []);
+    ownedQty = holdings.find((h) => h.asset_id === asset.id)?.quantity ?? 0;
+  } else if (selectedTournament) {
+    const portfolio = await getUserPortfolio(
+      supabase,
+      selectedTournament.tournament.id,
+      selectedTournament.portfolio.user_id
+    );
     if (portfolio) {
       const holdings = await getHoldings(supabase, portfolio.id);
       ownedQty = holdings.find((h) => h.asset_id === asset.id)?.quantity ?? 0;
@@ -78,6 +103,18 @@ export default async function AssetDetailPage({
 
   const changeColor =
     (asset.change_7d ?? 0) > 0 ? 'text-green' : (asset.change_7d ?? 0) < 0 ? 'text-red' : 'text-muted';
+
+  const venues = [
+    ...(career
+      ? [{ key: 'career', href: `/assets/${asset.id}?book=career`, label: 'Career', active: usingCareer }]
+      : []),
+    ...tradeable.map((b) => ({
+      key: b.tournament.id,
+      href: `/assets/${asset.id}?tournament=${b.tournament.id}`,
+      label: b.tournament.name,
+      active: !usingCareer && selectedTournament?.tournament.id === b.tournament.id,
+    })),
+  ];
 
   return (
     <AppShell nav="market">
@@ -118,53 +155,72 @@ export default async function AssetDetailPage({
           <Sparkline points={history.map((p) => p.price)} />
         </div>
 
-        {selected && asset.price != null ? (
+        {usingCareer && career && asset.price != null ? (
           <TradeTicket
             assetId={asset.id}
             assetName={asset.name}
-            tournamentId={selected.tournament.id}
-            tournamentName={selected.tournament.name}
+            bookName="Career"
             price={asset.price}
             stale={asset.stale}
-            cash={selected.portfolio.cash}
+            cash={career.cash}
             ownedQty={ownedQty}
-            tradingOpen={canTradeStatus(selected.tournament.status)}
+            tradingOpen
+            submitPath="/api/career/trade"
+            loginNext={`/assets/${asset.id}?book=career`}
           />
-        ) : selected && asset.price == null ? (
+        ) : selectedTournament && asset.price != null ? (
+          <TradeTicket
+            assetId={asset.id}
+            assetName={asset.name}
+            bookName={selectedTournament.tournament.name}
+            price={asset.price}
+            stale={asset.stale}
+            cash={selectedTournament.portfolio.cash}
+            ownedQty={ownedQty}
+            tradingOpen={canTradeStatus(selectedTournament.tournament.status)}
+            submitPath="/api/trade"
+            extraBody={{ tournamentId: selectedTournament.tournament.id }}
+            loginNext={`/assets/${asset.id}?tournament=${selectedTournament.tournament.id}`}
+          />
+        ) : (usingCareer || selectedTournament) && asset.price == null ? (
           <div className="panel p-5 text-sm text-muted">
             No Packdraft price for this asset yet. Trading needs a stored snapshot.
           </div>
-        ) : user && tradeable.length === 0 ? (
+        ) : user ? (
           <div className="panel p-5 text-sm text-muted">
-            Join an active tournament to trade this asset.{' '}
+            Open Career or join an active tournament to trade this asset.{' '}
+            <Link href="/career" className="text-accent-light">
+              Career
+            </Link>
+            {' · '}
             <Link href="/tournaments" className="text-accent-light">
-              View tournaments
+              Play
             </Link>
           </div>
-        ) : !user ? (
+        ) : (
           <Link
             href={`/auth/login?next=/assets/${asset.id}`}
             className="inline-flex min-h-12 items-center text-sm text-accent-light"
           >
             Sign in to trade
           </Link>
-        ) : null}
+        )}
 
-        {tradeable.length > 1 ? (
+        {venues.length > 1 ? (
           <div className="text-xs text-muted space-y-2">
             <div className="section-title">Trade in</div>
             <div className="flex flex-wrap gap-2">
-              {tradeable.map((b) => (
+              {venues.map((v) => (
                 <Link
-                  key={b.tournament.id}
-                  href={`/assets/${asset.id}?tournament=${b.tournament.id}`}
+                  key={v.key}
+                  href={v.href}
                   className={`min-h-11 inline-flex items-center px-3 rounded-md border text-xs ${
-                    selected?.tournament.id === b.tournament.id
+                    v.active
                       ? 'border-accent/50 text-foreground bg-accent-dim'
                       : 'border-border text-muted'
                   }`}
                 >
-                  {b.tournament.name}
+                  {v.label}
                 </Link>
               ))}
             </div>

@@ -15,15 +15,17 @@ export interface HoldingView {
 
 export default function HoldingsList({
   holdings,
-  tournamentId,
+  hrefFor,
+  empty,
 }: {
   holdings: HoldingView[];
-  tournamentId: string;
+  hrefFor: (assetId: string) => string;
+  empty?: string;
 }) {
   if (holdings.length === 0) {
     return (
       <p className="text-sm text-muted">
-        No holdings yet. Browse the market and buy with your tournament cash.
+        {empty ?? 'No holdings yet. Browse the market and buy with your tournament cash.'}
       </p>
     );
   }
@@ -39,7 +41,7 @@ export default function HoldingsList({
         return (
           <li key={row.assetId}>
             <Link
-              href={`/assets/${row.assetId}?tournament=${tournamentId}`}
+              href={hrefFor(row.assetId)}
               className="flex gap-3 panel panel-hover p-4"
             >
               <AssetThumb src={row.asset ? assetImageSrc(row.asset) : null} alt={name} />

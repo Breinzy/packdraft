@@ -8,25 +8,31 @@ import { formatCurrency } from '@/lib/utils';
 interface TradeTicketProps {
   assetId: string;
   assetName: string;
-  tournamentId: string;
-  tournamentName: string;
+  bookName: string;
   price: number;
   stale: boolean;
   cash: number;
   ownedQty: number;
   tradingOpen: boolean;
+  submitPath: string;
+  extraBody?: Record<string, unknown>;
+  loginNext: string;
+  closedMessage?: string;
 }
 
 export default function TradeTicket({
   assetId,
   assetName,
-  tournamentId,
-  tournamentName,
+  bookName,
   price,
   stale,
   cash,
   ownedQty,
   tradingOpen,
+  submitPath,
+  extraBody,
+  loginNext,
+  closedMessage,
 }: TradeTicketProps) {
   const router = useRouter();
   const [side, setSide] = useState<'buy' | 'sell'>('buy');
@@ -55,15 +61,15 @@ export default function TradeTicket({
     try {
       const quantity = parseQuantity(qtyRaw);
       setLoading(true);
-      const res = await fetch('/api/trade', {
+      const res = await fetch(submitPath, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tournamentId, assetId, side, quantity }),
+        body: JSON.stringify({ assetId, side, quantity, ...extraBody }),
       });
       const data = (await res.json()) as { error?: string; execution_price?: number; total_value?: number };
       if (!res.ok) {
         if (res.status === 401) {
-          router.push(`/auth/login?next=/assets/${assetId}?tournament=${tournamentId}`);
+          router.push(`/auth/login?next=${encodeURIComponent(loginNext)}`);
           return;
         }
         setError(data.error ?? 'Trade failed');
@@ -93,7 +99,7 @@ export default function TradeTicket({
     return (
       <div className="panel p-5 md:p-6">
         <div className="section-title mb-2">Trade</div>
-        <p className="text-sm text-muted">Trading is closed for {tournamentName}.</p>
+        <p className="text-sm text-muted">{closedMessage ?? `Trading is closed for ${bookName}.`}</p>
       </div>
     );
   }
@@ -103,7 +109,7 @@ export default function TradeTicket({
       <div className="flex items-center justify-between gap-3">
         <div>
           <div className="section-title">Trade</div>
-          <div className="text-sm text-muted truncate">{tournamentName}</div>
+          <div className="text-sm text-muted truncate">{bookName}</div>
         </div>
         {stale ? <span className="kicker text-gold">Quote stale</span> : null}
       </div>

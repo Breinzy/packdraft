@@ -1314,23 +1314,21 @@ A phase is complete when:
 
 Account, catalog, join, buy/sell, leaderboard, and settlement exist. That **is** the MVP.
 
-A basic player history page also exists. Do not expand it.
+A basic player history page also exists. Do not expand it into Career stats.
 
-## Now — Phase 11 MVP polish
+## Now — Phase 12 Career Mode (initial)
 
-Fix bugs and playability in the tournament loop. Stop when the loop is honest and usable.
+Persistent $1,000 solo book, isolated from tournaments. Buy, sell, valuation, trade history, lifetime return, holdings, and a portfolio chart.
 
 ## Not now
 
 Do **not** start:
 
-* Career Mode (Phase 12)
-* Career progression
+* Career progression (Phase 13): levels, archetypes, milestones
 * Market Events
 * Social features, creator tournaments, monetization
 * Native apps, multi-TCG, advanced rankings
 
-Career Mode is post-MVP even though it is the next numbered phase. Do not implement it because it appears next on this list.
 
 ---
 
