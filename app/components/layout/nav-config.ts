@@ -60,7 +60,7 @@ export const COMPETE_NAV: NavItem[] = [
 ];
 
 export const PRACTICE_NAV: NavItem[] = [
-  { href: SANDBOX_PATH, label: 'Sandbox', icon: 'flask', auth: true, match: 'prefix' },
+  { href: SANDBOX_PATH, label: 'Sandbox', icon: 'flask', match: 'prefix' },
   { href: PRO_PATH, label: 'Pro', icon: 'sparkles', match: 'prefix' },
 ];
 

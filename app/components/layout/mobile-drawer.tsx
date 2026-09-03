@@ -31,9 +31,21 @@ export function MobileDrawer({
     };
   }, [open, onClose]);
 
+  useEffect(() => {
+    if (open) return;
+    if (document.activeElement instanceof HTMLElement) {
+      const active = document.activeElement;
+      if (active.closest('[aria-label="Navigation"]') || active.getAttribute('aria-label') === 'Close menu') {
+        active.blur();
+      }
+    }
+  }, [open]);
+
   return (
     <div
-      className={`fixed inset-0 z-50 lg:hidden ${open ? "pointer-events-auto" : "pointer-events-none"}`}
+      className={`fixed inset-0 lg:hidden ${
+        open ? "pointer-events-auto z-50" : "pointer-events-none invisible z-30"
+      }`}
       aria-hidden={!open}
     >
       <button
