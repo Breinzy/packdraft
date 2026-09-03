@@ -1,25 +1,32 @@
-import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import type { Metadata, Viewport } from 'next';
+import { Manrope, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 
-const geist = Geist({
+const manrope = Manrope({
   subsets: ['latin'],
-  variable: '--font-geist',
+  variable: '--font-manrope',
   display: 'swap',
-  fallback: ['Segoe UI', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
+  weight: ['400', '500', '600', '700', '800'],
 });
 
-const geistMono = Geist_Mono({
+const jetbrains = JetBrains_Mono({
   subsets: ['latin'],
-  variable: '--font-geist-mono',
+  variable: '--font-jetbrains',
   display: 'swap',
-  fallback: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+  weight: ['400', '500', '600'],
 });
 
 export const metadata: Metadata = {
-  title: 'Packdraft — Competitive TCG Market Game',
+  title: 'Packdraft — Pokémon TCG Portfolio & Market Intelligence',
   description:
-    'Compete with virtual money using real Pokémon TCG market prices. Tournaments, temporary portfolios, and leaderboards.',
+    'Track your Pokémon cards and sealed products, research live market prices, and compete in tournaments on real TCG movement.',
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  themeColor: '#0a0b0f',
+  colorScheme: 'dark',
 };
 
 export default function RootLayout({
@@ -28,8 +35,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${geist.variable} ${geistMono.variable}`}>
-      <body className={`${geist.className} min-h-dvh bg-background text-foreground antialiased`}>
+    <html lang="en" className={`dark ${manrope.variable} ${jetbrains.variable}`}>
+      <body className={`${manrope.className} min-h-dvh bg-background text-foreground antialiased`}>
         {children}
       </body>
     </html>

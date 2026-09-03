@@ -7,19 +7,20 @@ import { listTournaments } from '@/lib/tournament/queries';
 import { listMarketEvents } from '@/lib/events/queries';
 import { formatCountdown } from '@/lib/utils';
 import type { MarketEvent, Tournament } from '@/types';
+import { MARKET_PATH, PREDICTIONS_PATH, TOURNAMENTS_PATH } from '@/lib/product/paths';
 
 const STEPS = [
   {
-    title: 'Join a tournament',
-    body: 'Every player gets the same virtual budget. Books do not carry over.',
+    title: 'Track what you own',
+    body: 'A free Pokémon collection ledger with live Packdraft marks — quantity, cost basis, and value.',
   },
   {
-    title: 'Trade the catalog',
-    body: 'Buy and sell Pokémon against Packdraft prices. Nothing here moves the real market.',
+    title: 'Read the market',
+    body: 'Browse cards, sealed, and sets using stored prices. Nothing you do here moves the real TCG market.',
   },
   {
-    title: 'Finish on the board',
-    body: 'Trading closes, values lock, and rank is final.',
+    title: 'Compete when you want',
+    body: 'Tournaments, predictions, and a virtual sandbox sit on top of the tracker. They are the differentiator, not the whole product.',
   },
 ];
 
@@ -49,21 +50,21 @@ export default async function HomePage() {
       <Header />
       <main className="page py-8 md:py-14">
         <div className="max-w-2xl">
-          <p className="label-caps">Competitive TCG markets</p>
-          <h1 className="page-title mt-3 text-4xl md:text-5xl">Highest book wins.</h1>
+          <p className="label-caps">Pokémon TCG portfolio</p>
+          <h1 className="page-title mt-3 text-4xl md:text-5xl">Know what your cards are worth.</h1>
           <p className="mt-4 max-w-xl text-[15px] leading-7 text-muted">
-            Join a tournament, spend a fixed virtual budget, and trade Pokémon using live Packdraft
-            prices.
+            Packdraft is a Pokémon collection tracker with live market data. Tournaments and
+            predictions turn that market into a game — they do not replace the tracker.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <Link href="/tournaments" className="btn btn-primary min-h-12 px-5">
-              Enter a tournament
+            <Link href="/auth/signup" className="btn btn-primary min-h-12 px-5">
+              Start tracking
             </Link>
-            <Link href="/events" className="btn btn-ghost min-h-12 px-5">
-              Predict an event
+            <Link href={MARKET_PATH} className="btn btn-ghost min-h-12 px-5">
+              Browse the market
             </Link>
-            <Link href="/releases" className="btn btn-ghost min-h-12 px-5">
-              Release weekends
+            <Link href={TOURNAMENTS_PATH} className="btn btn-ghost min-h-12 px-5">
+              Tournaments
             </Link>
           </div>
         </div>
@@ -71,7 +72,9 @@ export default async function HomePage() {
         <ol className="mt-14 grid gap-3 sm:grid-cols-3">
           {STEPS.map((step, i) => (
             <li key={step.title} className="panel p-5">
-              <div className="num mb-3 text-xs font-semibold text-accent-light">{String(i + 1).padStart(2, '0')}</div>
+              <div className="num mb-3 text-xs font-semibold text-accent-light">
+                {String(i + 1).padStart(2, '0')}
+              </div>
               <div className="section-title mb-2">{step.title}</div>
               <p className="text-sm leading-6 text-muted">{step.body}</p>
             </li>
@@ -82,10 +85,7 @@ export default async function HomePage() {
           <section className="mt-12">
             <div className="mb-4 flex items-center justify-between gap-3">
               <h2 className="section-title">Tournaments</h2>
-              <Link
-                href="/tournaments"
-                className="link-quiet inline-flex min-h-11 items-center"
-              >
+              <Link href={TOURNAMENTS_PATH} className="link-quiet inline-flex min-h-11 items-center">
                 All
               </Link>
             </div>
@@ -102,11 +102,8 @@ export default async function HomePage() {
         {shownEvents.length > 0 ? (
           <section className="mt-12">
             <div className="mb-4 flex items-center justify-between gap-3">
-              <h2 className="section-title">Events</h2>
-              <Link
-                href="/events"
-                className="link-quiet inline-flex min-h-11 items-center"
-              >
+              <h2 className="section-title">Predictions</h2>
+              <Link href={PREDICTIONS_PATH} className="link-quiet inline-flex min-h-11 items-center">
                 All
               </Link>
             </div>
@@ -129,7 +126,10 @@ export default async function HomePage() {
           </section>
         ) : null}
 
-        <p className="mt-10 text-xs text-faint">No real money. Simulated portfolios only.</p>
+        <p className="mt-10 text-xs text-faint">
+          No real-money trading. Collection tracking is bookkeeping against market data. Tournament
+          and Sandbox cash is simulated.
+        </p>
       </main>
     </>
   );

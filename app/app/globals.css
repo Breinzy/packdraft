@@ -1,23 +1,32 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-background: #0a0b0f;
-  --color-foreground: #f4f6fa;
-  --color-muted: #8b949e;
-  --color-faint: #6e7681;
-  --color-surface: #12141c;
-  --color-surface-2: #161b22;
-  --color-surface-3: #1c222c;
-  --color-border: #232a35;
-  --color-border-strong: #343d4c;
-  --color-accent: #3b82f6;
-  --color-accent-light: #60a5fa;
-  --color-accent-dim: rgba(59, 130, 246, 0.14);
-  --color-gold: #c9b27a;
-  --color-green: #10b981;
-  --color-red: #f87171;
-  --font-sans: var(--font-geist), "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
+  --color-background: oklch(0.145 0.006 258);
+  --color-foreground: oklch(0.975 0.004 258);
+  --color-muted: oklch(0.7 0.014 258);
+  --color-faint: oklch(0.58 0.012 258);
+  --color-surface: oklch(0.184 0.007 258);
+  --color-surface-2: oklch(0.219 0.008 258);
+  --color-surface-3: oklch(0.252 0.009 258);
+  --color-border: oklch(1 0 0 / 8%);
+  --color-border-strong: oklch(1 0 0 / 15%);
+  --color-accent: oklch(0.62 0.198 258);
+  --color-accent-light: oklch(0.74 0.14 258);
+  --color-accent-dim: oklch(0.62 0.198 258 / 0.15);
+  --color-gold: oklch(0.84 0.13 84);
+  --color-green: oklch(0.78 0.15 164);
+  --color-red: oklch(0.665 0.2 20);
+  --color-primary: oklch(0.62 0.198 258);
+  --color-primary-foreground: oklch(0.99 0.005 258);
+  --color-card: oklch(0.184 0.007 258);
+  --color-card-elevated: oklch(0.219 0.008 258);
+  --color-muted-foreground: oklch(0.7 0.014 258);
+  --color-positive: oklch(0.78 0.15 164);
+  --color-negative: oklch(0.665 0.2 20);
+  --color-sidebar: oklch(0.162 0.007 258);
+  --color-sidebar-border: oklch(1 0 0 / 7%);
+  --font-sans: var(--font-manrope), "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, "SF Mono", Menlo, monospace;
 }
 
 :root {
@@ -27,7 +36,8 @@
   --radius-md: 10px;
   --radius-lg: 16px;
   --radius-xl: 20px;
-  --sidebar-w: 16.5rem;
+  --sidebar-w: 16rem;
+  --radius: 0.875rem;
   --shadow-panel: 0 0 0 1px rgba(255, 255, 255, 0.03), 0 12px 40px rgba(0, 0, 0, 0.28);
   --shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.45);
   --duration-fast: 150ms;

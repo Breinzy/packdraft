@@ -2,7 +2,18 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 import { getOptionalPublicEnv } from '@/lib/env';
 
-const PROTECTED_PREFIXES = ['/dashboard', '/settings', '/admin', '/auth/onboarding', '/auth/update-password'];
+const PROTECTED_PREFIXES = [
+  '/overview',
+  '/dashboard',
+  '/portfolio',
+  '/watchlist',
+  '/sandbox',
+  '/career',
+  '/settings',
+  '/admin',
+  '/auth/onboarding',
+  '/auth/update-password',
+];
 const AUTH_ONLY_PREFIXES = ['/auth/login', '/auth/signup', '/auth/forgot'];
 
 function copyCookies(from: NextResponse, to: NextResponse) {
@@ -52,7 +63,7 @@ export async function updateSession(request: NextRequest) {
     if (user && isPath(pathname, AUTH_ONLY_PREFIXES)) {
       return copyCookies(
         supabaseResponse,
-        NextResponse.redirect(new URL('/dashboard', request.url))
+        NextResponse.redirect(new URL('/overview', request.url))
       );
     }
   } catch {

@@ -4,7 +4,7 @@ import { getPublicEnv } from '@/lib/env';
 
 function safeNextPath(next: string | null): string {
   if (next && next.startsWith('/') && !next.startsWith('//')) return next;
-  return '/dashboard';
+  return '/overview';
 }
 
 export async function GET(request: Request) {

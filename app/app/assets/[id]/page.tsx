@@ -121,7 +121,7 @@ export default async function AssetDetailPage({
 
   const venues = [
     ...(career
-      ? [{ key: 'career', href: `/assets/${asset.id}?book=career`, label: 'Career', active: usingCareer }]
+      ? [{ key: 'career', href: `/assets/${asset.id}?book=career`, label: 'Sandbox', active: usingCareer }]
       : []),
     ...tradeable.map((b) => ({
       key: b.tournament.id,
@@ -135,7 +135,7 @@ export default async function AssetDetailPage({
   return (
     <AppShell nav="market">
       <main className="page py-6 md:py-8 space-y-6">
-        <Link href="/assets" className="text-sm text-muted min-h-11 inline-flex items-center">
+        <Link href="/market" className="text-sm text-muted min-h-11 inline-flex items-center">
           ← Market
         </Link>
 
@@ -190,7 +190,7 @@ export default async function AssetDetailPage({
           <TradeTicket
             assetId={asset.id}
             assetName={asset.name}
-            bookName="Career"
+            bookName="Sandbox"
             price={asset.price}
             stale={asset.stale}
             cash={career.cash}
@@ -219,9 +219,9 @@ export default async function AssetDetailPage({
           </div>
         ) : user ? (
           <div className="panel p-5 text-sm text-muted">
-            Open Career or join an active tournament to trade this asset.{' '}
-            <Link href="/career" className="text-accent-light">
-              Career
+            Open Sandbox or join an active tournament to trade this asset.{' '}
+            <Link href="/sandbox" className="text-accent-light">
+              Sandbox
             </Link>
             {' · '}
             <Link href="/tournaments" className="text-accent-light">

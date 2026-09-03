@@ -10,7 +10,8 @@ export type IconName =
   | 'link'
   | 'bell'
   | 'cart'
-  | 'tag';
+  | 'tag'
+  | 'command';
 
 const COMMON = {
   viewBox: '0 0 24 24',
@@ -155,6 +156,41 @@ export function Icon({ name, className = 'h-[18px] w-[18px]' }: { name: IconName
         <svg {...props}>
           <path d="M20 13.5 12.5 21a2 2 0 0 1-2.8 0L3 14.3V4h10.3l6.7 6.7a2 2 0 0 1 0 2.8z" />
           <circle cx="8.5" cy="8.5" r="1.2" />
+        </svg>
+      );
+    case 'star':
+      return (
+        <svg {...props}>
+          <path d="M12 3.6 14.4 9l5.8.5-4.4 3.8 1.3 5.7L12 16.8 6.9 19l1.3-5.7L3.8 9.5 9.6 9z" />
+        </svg>
+      );
+    case 'layers':
+      return (
+        <svg {...props}>
+          <path d="m12 3 9 5-9 5-9-5z" />
+          <path d="m3 12 9 5 9-5" />
+          <path d="m3 16 9 5 9-5" />
+        </svg>
+      );
+    case 'flask':
+      return (
+        <svg {...props}>
+          <path d="M9 3h6" />
+          <path d="M10 3v6.2L5.2 18a2.4 2.4 0 0 0 2 3.5h9.6a2.4 2.4 0 0 0 2-3.5L14 9.2V3" />
+        </svg>
+      );
+    case 'sparkles':
+      return (
+        <svg {...props}>
+          <path d="M12 3.5 13.2 8 17.5 9.2 13.2 10.4 12 15l-1.2-4.6L6.5 9.2 10.8 8z" />
+          <path d="M18.5 14.5 19.2 17 21.5 17.7 19.2 18.4 18.5 21 17.8 18.4 15.5 17.7 17.8 17z" />
+        </svg>
+      );
+    case 'command':
+      return (
+        <svg {...props}>
+          <path d="M9 9V7.5A2.5 2.5 0 1 0 6.5 10H9v4H6.5A2.5 2.5 0 1 0 9 16.5V15" />
+          <path d="M15 9h2.5A2.5 2.5 0 1 0 15 6.5V9H11V6.5A2.5 2.5 0 1 0 8.5 9H11v6H8.5A2.5 2.5 0 1 0 11 17.5V15h4v2.5A2.5 2.5 0 1 0 17.5 15H15V9z" />
         </svg>
       );
     default:

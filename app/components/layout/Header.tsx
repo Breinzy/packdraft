@@ -4,11 +4,12 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Logo from '@/components/brand/Logo';
 import { useSession } from '@/lib/auth/use-session';
+import { APP_HOME, MARKET_PATH, PREDICTIONS_PATH, TOURNAMENTS_PATH } from '@/lib/product/paths';
 
 const NAV = [
-  { href: '/tournaments', label: 'Tournaments' },
-  { href: '/assets', label: 'Markets' },
-  { href: '/events', label: 'Events' },
+  { href: MARKET_PATH, label: 'Market' },
+  { href: TOURNAMENTS_PATH, label: 'Tournaments' },
+  { href: PREDICTIONS_PATH, label: 'Predictions' },
 ];
 
 export default function Header() {
@@ -18,7 +19,7 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur-md">
       <div className="page flex min-h-14 items-center justify-between gap-4">
-        <Logo href={isSignedIn ? '/dashboard' : '/'} />
+        <Logo href={isSignedIn ? APP_HOME : '/'} />
         <nav className="hidden items-center gap-5 text-sm md:flex" aria-label="Marketing">
           {NAV.map((item) => {
             const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -37,8 +38,8 @@ export default function Header() {
         </nav>
         <div className="flex items-center gap-2">
           {ready && isSignedIn ? (
-            <Link href="/dashboard" className="btn btn-primary !h-10">
-              Dashboard
+            <Link href={APP_HOME} className="btn btn-primary !h-10">
+              Open Packdraft
             </Link>
           ) : (
             <>

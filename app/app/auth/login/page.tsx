@@ -39,7 +39,7 @@ function LoginForm() {
     const next =
       nextParam && nextParam.startsWith('/') && !nextParam.startsWith('//')
         ? nextParam
-        : '/dashboard';
+        : '/overview';
     router.push(next);
   }
 
@@ -55,7 +55,7 @@ function LoginForm() {
   }
 
   return (
-    <AuthShell title="Sign in" subtitle="Same book, same prices — pick up where you left off.">
+    <AuthShell title="Sign in" subtitle="Track your Pokémon book and pick up where you left off.">
       <button onClick={handleGoogleLogin} className="btn btn-ghost w-full min-h-12 gap-3">
         <svg className="w-5 h-5" viewBox="0 0 24 24" aria-hidden>
           <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />

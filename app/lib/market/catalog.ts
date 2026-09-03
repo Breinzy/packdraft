@@ -146,10 +146,33 @@ export async function getCatalogAsset(
   return toCatalogAsset(data as AssetRow, prices);
 }
 
+export type CatalogSet = {
+  id: string;
+  name: string;
+  slug: string | null;
+  release_date: string | null;
+  asset_count: number;
+};
+
+type SetRow = {
+  id: string;
+  name: string;
+  slug: string | null;
+  release_date: string | null;
+  assets?: { count: number }[] | { count: number } | null;
+};
+
+function setAssetCount(row: SetRow): number {
+  const nested = row.assets;
+  if (!nested) return 0;
+  const first = Array.isArray(nested) ? nested[0] : nested;
+  return Number(first?.count ?? 0);
+}
+
 export async function listSets(
   supabase: SupabaseClient,
   tcgSlug = 'pokemon'
-): Promise<{ id: string; name: string }[]> {
+): Promise<CatalogSet[]> {
   const { data: tcg, error: tcgError } = await supabase
     .from('tcgs')
     .select('id')
@@ -158,13 +181,72 @@ export async function listSets(
   if (tcgError) throw new Error(`Failed to load TCG: ${tcgError.message}`);
   if (!tcg) return [];
 
+  const withCounts = await supabase
+    .from('sets')
+    .select('id, name, slug, release_date, assets(count)')
+    .eq('tcg_id', tcg.id)
+    .order('name', { ascending: true });
+
+  if (!withCounts.error && withCounts.data) {
+    return (withCounts.data as SetRow[]).map((row) => ({
+      id: row.id,
+      name: row.name,
+      slug: row.slug ?? null,
+      release_date: row.release_date ?? null,
+      asset_count: setAssetCount(row),
+    }));
+  }
+
   const { data, error } = await supabase
     .from('sets')
-    .select('id, name')
+    .select('id, name, slug, release_date')
     .eq('tcg_id', tcg.id)
     .order('name', { ascending: true });
   if (error) throw new Error(`Failed to load sets: ${error.message}`);
-  return data ?? [];
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    name: row.name,
+    slug: row.slug ?? null,
+    release_date: row.release_date ?? null,
+    asset_count: 0,
+  }));
+}
+
+export async function getSet(
+  supabase: SupabaseClient,
+  setId: string
+): Promise<CatalogSet | null> {
+  const withCounts = await supabase
+    .from('sets')
+    .select('id, name, slug, release_date, assets(count)')
+    .eq('id', setId)
+    .maybeSingle();
+
+  if (!withCounts.error && withCounts.data) {
+    const row = withCounts.data as SetRow;
+    return {
+      id: row.id,
+      name: row.name,
+      slug: row.slug ?? null,
+      release_date: row.release_date ?? null,
+      asset_count: setAssetCount(row),
+    };
+  }
+
+  const { data, error } = await supabase
+    .from('sets')
+    .select('id, name, slug, release_date')
+    .eq('id', setId)
+    .maybeSingle();
+  if (error) throw new Error(`Failed to load set: ${error.message}`);
+  if (!data) return null;
+  return {
+    id: data.id,
+    name: data.name,
+    slug: data.slug ?? null,
+    release_date: data.release_date ?? null,
+    asset_count: 0,
+  };
 }
 
 export function asAsset(catalog: CatalogAsset): Pick<Asset, 'image_url' | 'external_id'> {

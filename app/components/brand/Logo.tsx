@@ -20,7 +20,7 @@ export function Logo({
         <span className="block text-[1.05rem] font-semibold text-foreground">Packdraft</span>
         {compact ? (
           <span className="mt-0.5 block text-[11px] font-medium tracking-[0.01em] text-muted">
-            Portfolio Arena
+            Pokémon TCG portfolio
           </span>
         ) : null}
       </span>

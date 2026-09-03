@@ -1,4 +1,11 @@
-# Packdraft — Market Events
+# Packdraft — Predictions (Market Events)
+
+**Product name:** Predictions.  
+**Code/schema name:** Market Events (`market_events`, `/events`).
+
+Under the collector-first roadmap, this is the prediction skill loop. It does not use collection, Sandbox, or tournament cash.
+
+---
 
 Market Events are temporary prediction competitions. They are not a portfolio and they do not use Career or tournament cash.
 

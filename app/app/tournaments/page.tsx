@@ -14,7 +14,7 @@ export default async function TournamentsPage() {
     return (
       <AppShell nav="play">
         <main className="page py-6 md:py-8 space-y-6">
-          <h1 className="page-title text-2xl">Play</h1>
+          <h1 className="page-title text-2xl">Tournaments</h1>
           <NeedsDatabase feature="Tournaments" />
         </main>
       </AppShell>
@@ -36,7 +36,7 @@ export default async function TournamentsPage() {
     return (
       <AppShell nav="play">
         <main className="page py-6 md:py-8 space-y-6">
-          <h1 className="page-title text-2xl">Play</h1>
+          <h1 className="page-title text-2xl">Tournaments</h1>
           <QueryFailed feature="tournaments" />
         </main>
       </AppShell>
