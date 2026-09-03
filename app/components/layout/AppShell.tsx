@@ -30,7 +30,7 @@ export default function AppShell({ children }: AppShellProps) {
 
         <div className="lg:pl-64">
           <TopBar homeHref={chrome.user ? APP_HOME : "/"} />
-          <main className="mx-auto w-full max-w-[1400px] px-4 pb-28 pt-5 lg:px-8 lg:pb-12">
+          <main className="mx-auto w-full max-w-[1400px] px-4 pb-32 pt-5 lg:px-8 lg:pb-12">
             {children}
           </main>
           <BottomNav pathname={pathname} />

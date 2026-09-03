@@ -92,16 +92,16 @@ export function MarketView({
         </span>
       </button>
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="inline-flex w-fit rounded-xl border border-border bg-secondary/60 p-1">
+      <div className="space-y-3">
+        <div className="inline-flex w-fit gap-0.5 rounded-xl border border-border bg-secondary/60 p-1">
           {(["all", "card", "sealed"] as const).map((next) => (
             <button
               key={next}
               type="button"
               onClick={() => setFilter(next)}
               className={cn(
-                "rounded-lg px-3.5 py-1.5 text-sm font-semibold capitalize transition-colors",
-                filter === next ? "bg-card-elevated text-foreground shadow-sm" : "text-muted-foreground",
+                "min-h-9 rounded-lg px-3.5 py-1.5 text-sm font-semibold capitalize transition-colors",
+                filter === next ? "bg-card-elevated text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
               )}
             >
               {next === "card" ? "Cards" : next === "sealed" ? "Sealed" : "All"}

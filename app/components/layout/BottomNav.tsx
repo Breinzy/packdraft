@@ -22,7 +22,7 @@ const ICONS: Record<string, LucideIcon> = {
 export default function BottomNav({ pathname }: { pathname: string; active?: BottomNavKey }) {
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden"
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background pb-[max(env(safe-area-inset-bottom),0.5rem)] lg:hidden"
       aria-label="Primary mobile"
     >
       <ul className="flex items-stretch justify-around">
@@ -34,7 +34,7 @@ export default function BottomNav({ pathname }: { pathname: string; active?: Bot
               <Link
                 href={item.href}
                 aria-current={active ? "page" : undefined}
-                className={`flex min-h-[3.75rem] flex-col items-center justify-center gap-1 px-1 pt-2 pb-1.5 text-[10px] font-semibold transition-colors ${
+                className={`flex min-h-14 flex-col items-center justify-center gap-1 px-1 pt-2 pb-1.5 text-[10px] font-semibold transition-colors ${
                   active ? "text-primary" : "text-muted-foreground"
                 }`}
               >

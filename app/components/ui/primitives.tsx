@@ -29,8 +29,8 @@ export function ChangeBadge({
     );
   }
 
-  const up = value > 0;
-  const flat = value === 0;
+  const up = value > 0.005;
+  const flat = Math.abs(value) <= 0.005;
   const Icon = up ? ArrowUpRight : ArrowDownRight;
   return (
     <span

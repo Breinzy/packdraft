@@ -6,6 +6,13 @@ import { cn } from "@/lib/utils";
 import AssetThumb from "@/components/market/AssetThumb";
 import { ChangeBadge, TypePill } from "@/components/ui/primitives";
 
+function catalogSubtitle(asset: CatalogAsset) {
+  const meta = asset.metadata ?? {};
+  const number = typeof meta.number === "string" ? meta.number : null;
+  const rarity = typeof meta.rarity === "string" ? meta.rarity : null;
+  return [number, rarity].filter(Boolean).join(" · ") || null;
+}
+
 export function AssetRow({
   asset,
   rank,
@@ -50,6 +57,7 @@ export function AssetCard({
   asset: CatalogAsset;
   href?: string;
 }) {
+  const subtitle = catalogSubtitle(asset);
   return (
     <Link
       href={href ?? `/assets/${asset.id}`}
@@ -66,9 +74,9 @@ export function AssetCard({
           <span className="truncate text-[11px] text-muted-foreground">{asset.set_name ?? "Pokémon TCG"}</span>
         </div>
         <h3 className="mt-1 truncate text-sm font-semibold text-foreground">{asset.name}</h3>
-        <p className="truncate text-xs text-muted-foreground">
-          {asset.condition ?? asset.price_type ?? "Market price"}
-        </p>
+        {subtitle ? (
+          <p className="truncate text-xs text-muted-foreground">{subtitle}</p>
+        ) : null}
       </div>
       <div className="mt-3 flex items-end justify-between">
         <span className="tabular text-base font-bold text-foreground">
