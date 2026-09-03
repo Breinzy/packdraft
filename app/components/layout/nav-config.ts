@@ -54,23 +54,26 @@ export const PRIMARY_NAV: NavItem[] = [
   { href: SETS_PATH, label: 'Sets', icon: 'layers', match: 'prefix' },
 ];
 
-export const COMPETE_NAV: NavItem[] = [
+export const FUTURE_NAV: NavItem[] = [
   { href: TOURNAMENTS_PATH, label: 'Tournaments', icon: 'trophy', match: 'prefix' },
   { href: PREDICTIONS_PATH, label: 'Predictions', icon: 'events', match: 'prefix' },
-];
-
-export const PRACTICE_NAV: NavItem[] = [
   { href: SANDBOX_PATH, label: 'Sandbox', icon: 'flask', match: 'prefix' },
   { href: PRO_PATH, label: 'Pro', icon: 'sparkles', match: 'prefix' },
 ];
+
+/** @deprecated Use FUTURE_NAV. Kept for older imports. */
+export const COMPETE_NAV: NavItem[] = FUTURE_NAV.slice(0, 2);
+
+/** @deprecated Use FUTURE_NAV. Kept for older imports. */
+export const PRACTICE_NAV: NavItem[] = FUTURE_NAV.slice(2);
 
 export const GENERAL_NAV: NavItem[] = [
   { href: '/players', label: 'Rankings', icon: 'users', match: 'prefix' },
   { href: '/settings', label: 'Settings', icon: 'settings', auth: true, match: 'prefix' },
 ];
 
-/** @deprecated Use PRIMARY_NAV / COMPETE_NAV. Kept for older imports. */
-export const MENU_NAV: NavItem[] = [...PRIMARY_NAV, ...COMPETE_NAV];
+/** @deprecated Use PRIMARY_NAV / FUTURE_NAV. Kept for older imports. */
+export const MENU_NAV: NavItem[] = [...PRIMARY_NAV, ...FUTURE_NAV];
 
 export function isNavActive(pathname: string, item: NavItem): boolean {
   if (item.match === 'exact' || item.href === APP_HOME) {

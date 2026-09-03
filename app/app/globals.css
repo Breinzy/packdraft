@@ -1,64 +1,124 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-background: oklch(0.145 0.006 258);
-  --color-foreground: oklch(0.975 0.004 258);
-  --color-muted: oklch(0.7 0.014 258);
-  --color-faint: oklch(0.58 0.012 258);
-  --color-surface: oklch(0.184 0.007 258);
-  --color-surface-2: oklch(0.219 0.008 258);
-  --color-surface-3: oklch(0.252 0.009 258);
-  --color-border: oklch(1 0 0 / 8%);
-  --color-border-strong: oklch(1 0 0 / 15%);
-  --color-accent: oklch(0.62 0.198 258);
-  --color-accent-light: oklch(0.74 0.14 258);
-  --color-accent-dim: oklch(0.62 0.198 258 / 0.15);
-  --color-gold: oklch(0.84 0.13 84);
-  --color-green: oklch(0.78 0.15 164);
-  --color-red: oklch(0.665 0.2 20);
-  --color-primary: oklch(0.62 0.198 258);
-  --color-primary-foreground: oklch(0.99 0.005 258);
-  --color-card: oklch(0.184 0.007 258);
-  --color-card-elevated: oklch(0.219 0.008 258);
-  --color-muted-foreground: oklch(0.7 0.014 258);
-  --color-positive: oklch(0.78 0.15 164);
-  --color-negative: oklch(0.665 0.2 20);
-  --color-sidebar: oklch(0.162 0.007 258);
-  --color-sidebar-border: oklch(1 0 0 / 7%);
-  --font-sans: var(--font-manrope), "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --font-mono: var(--font-jetbrains), ui-monospace, "SF Mono", Menlo, monospace;
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-card-elevated: var(--card-elevated);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-muted: var(--primary-muted);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--primary);
+  --color-accent-foreground: var(--primary-foreground);
+  --color-accent-light: var(--primary);
+  --color-accent-dim: var(--primary-muted);
+  --color-destructive: var(--destructive);
+  --color-positive: var(--positive);
+  --color-positive-foreground: var(--positive-foreground);
+  --color-positive-muted: var(--positive-muted);
+  --color-negative: var(--negative);
+  --color-negative-foreground: var(--negative-foreground);
+  --color-negative-muted: var(--negative-muted);
+  --color-warning: var(--warning);
+  --color-warning-muted: var(--warning-muted);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-surface: var(--card);
+  --color-surface-2: var(--card-elevated);
+  --color-surface-3: var(--secondary);
+  --color-faint: var(--muted-foreground);
+  --color-green: var(--positive);
+  --color-red: var(--negative);
+  --color-gold: var(--warning);
 }
 
 :root {
+  color-scheme: dark;
+  --radius: 0.875rem;
   --page-pad: 1.25rem;
   --page-max: 86rem;
-  --radius-sm: 8px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
   --sidebar-w: 16rem;
-  --radius: 0.875rem;
   --shadow-panel: 0 0 0 1px rgba(255, 255, 255, 0.03), 0 12px 40px rgba(0, 0, 0, 0.28);
   --shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.45);
   --duration-fast: 150ms;
   --duration: 200ms;
-  --bg: var(--color-background);
-  --bg-elevated: var(--color-surface);
-  --text: var(--color-foreground);
-  --muted: var(--color-muted);
-  --border: var(--color-border);
-  --accent: var(--color-accent);
-  --accent-dim: var(--color-accent-dim);
-  --surface-2: var(--color-surface-2);
-  --ring: var(--color-accent-dim);
-  --neg: var(--color-red);
-  --pos: var(--color-green);
+
+  --background: oklch(0.145 0.006 258);
+  --foreground: oklch(0.975 0.004 258);
+  --card: oklch(0.184 0.007 258);
+  --card-foreground: oklch(0.975 0.004 258);
+  --card-elevated: oklch(0.219 0.008 258);
+  --popover: oklch(0.2 0.008 258);
+  --popover-foreground: oklch(0.975 0.004 258);
+  --primary: oklch(0.62 0.198 258);
+  --primary-foreground: oklch(0.99 0.005 258);
+  --primary-muted: oklch(0.62 0.198 258 / 0.15);
+  --secondary: oklch(0.252 0.009 258);
+  --secondary-foreground: oklch(0.965 0.004 258);
+  --muted: oklch(0.232 0.008 258);
+  --muted-foreground: oklch(0.7 0.014 258);
+  --accent: oklch(0.275 0.011 258);
+  --accent-foreground: oklch(0.975 0.004 258);
+  --destructive: oklch(0.63 0.21 22);
+  --positive: oklch(0.78 0.15 164);
+  --positive-foreground: oklch(0.145 0.006 258);
+  --positive-muted: oklch(0.78 0.15 164 / 0.15);
+  --negative: oklch(0.665 0.2 20);
+  --negative-foreground: oklch(0.99 0.005 258);
+  --negative-muted: oklch(0.665 0.2 20 / 0.15);
+  --warning: oklch(0.84 0.13 84);
+  --warning-muted: oklch(0.84 0.13 84 / 0.15);
+  --border: oklch(1 0 0 / 8%);
+  --border-strong: oklch(1 0 0 / 15%);
+  --input: oklch(1 0 0 / 10%);
+  --ring: oklch(0.62 0.198 258);
+  --sidebar: oklch(0.162 0.007 258);
+  --sidebar-foreground: oklch(0.975 0.004 258);
+  --sidebar-border: oklch(1 0 0 / 7%);
+
+  --bg: var(--background);
+  --bg-elevated: var(--card);
+  --text: var(--foreground);
+  --accent-dim: var(--primary-muted);
+  --surface-2: var(--card-elevated);
+  --neg: var(--negative);
+  --pos: var(--positive);
 }
 
-@media (min-width: 768px) {
-  :root {
-    --page-pad: 1.75rem;
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
   }
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* Legacy `text-muted` meant muted copy, not the mockup muted surface. */
+@utility text-muted {
+  color: var(--muted-foreground);
 }
 
 @view-transition {
@@ -131,6 +191,13 @@ button:active:not(:disabled) {
   padding-inline: var(--page-pad);
 }
 
+/* AppShell already provides the mockup content gutter. */
+main .page {
+  max-width: none;
+  margin-inline: 0;
+  padding-inline: 0;
+}
+
 .page-title {
   font-weight: 650;
   letter-spacing: -0.035em;
@@ -174,11 +241,9 @@ button:active:not(:disabled) {
 }
 
 .panel {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-panel);
-  transition: border-color 150ms ease, background-color 150ms ease;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
 }
 
 .panel-hover:hover {
@@ -248,8 +313,9 @@ textarea.field {
 }
 
 .btn-primary {
-  background: var(--color-accent);
-  color: #fff;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border-radius: 0.75rem;
 }
 
 .btn-primary:hover:not(:disabled) {

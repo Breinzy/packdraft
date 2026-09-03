@@ -1,13 +1,16 @@
-import Link from 'next/link';
-import { notFound } from 'next/navigation';
-import AppShell from '@/components/layout/AppShell';
-import AssetCard from '@/components/market/AssetCard';
-import { getSet, searchCatalog } from '@/lib/market/catalog';
-import { tryCreateServerClient } from '@/lib/supabase/server';
-import NeedsDatabase, { QueryFailed } from '@/components/ui/NeedsDatabase';
-import { MARKET_PATH, SETS_PATH } from '@/lib/product/paths';
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
+import AppShell from "@/components/layout/AppShell";
+import { getSet, searchCatalog } from "@/lib/market/catalog";
+import { tryCreateServerClient } from "@/lib/supabase/server";
+import NeedsDatabase, { QueryFailed } from "@/components/ui/NeedsDatabase";
+import { AssetCard } from "@/components/ui/asset-views";
+import { EmptyHint, Panel } from "@/components/ui/primitives";
+import { formatDate, setAccent, setCode } from "@/lib/format";
+import { SETS_PATH } from "@/lib/product/paths";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export default async function SetDetailPage({
   params,
@@ -18,15 +21,13 @@ export default async function SetDetailPage({
 }) {
   const { id } = await params;
   const sp = await searchParams;
-  const page = Number(sp.page ?? '1') || 1;
+  const page = Number(sp.page ?? "1") || 1;
   const supabase = await tryCreateServerClient();
 
   if (!supabase) {
     return (
       <AppShell>
-        <main className="page py-6 md:py-8 space-y-6">
-          <NeedsDatabase feature="Pokémon sets" />
-        </main>
+        <NeedsDatabase feature="Pokémon sets" />
       </AppShell>
     );
   }
@@ -41,35 +42,65 @@ export default async function SetDetailPage({
   } catch {
     return (
       <AppShell>
-        <main className="page py-6 md:py-8 space-y-6">
-          <QueryFailed feature="this set" />
-        </main>
+        <QueryFailed feature="this set" />
       </AppShell>
     );
   }
 
   if (!set) notFound();
 
+  const color = setAccent(set.name);
+  const cards = catalog.assets.filter((asset) => asset.asset_type !== "sealed").length;
+  const sealed = catalog.assets.filter((asset) => asset.asset_type === "sealed").length;
+
   return (
     <AppShell>
-      <main className="page py-6 md:py-8 space-y-6">
-        <Link href={SETS_PATH} className="text-sm text-muted min-h-11 inline-flex items-center">
-          ← Sets
+      <div className="space-y-5">
+        <Link
+          href={SETS_PATH}
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <ArrowLeft className="size-4" /> Sets
         </Link>
-        <div>
-          <h1 className="page-title text-2xl">{set.name}</h1>
-          <p className="mt-2 text-sm text-muted">
-            {set.asset_count ? `${set.asset_count} products in the catalog.` : 'Products in this expansion.'}{' '}
-            <Link href={`${MARKET_PATH}?set=${set.id}`} className="text-accent-light">
-              Open in market
-            </Link>
-          </p>
+
+        <Panel padded={false} className="overflow-hidden">
+          <div
+            className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center"
+            style={{
+              background: `radial-gradient(90% 140% at 0% 0%, color-mix(in oklch, ${color} 22%, transparent), transparent 60%)`,
+            }}
+          >
+            <span
+              className="flex size-16 shrink-0 items-center justify-center rounded-2xl text-xl font-black text-background shadow-lg"
+              style={{ background: color }}
+            >
+              {setCode(set.name)}
+            </span>
+            <div className="min-w-0 flex-1">
+              <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                Expansion
+              </span>
+              <h1 className="text-balance text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+                {set.name}
+              </h1>
+              <p className="mt-0.5 text-sm text-muted-foreground">
+                {set.release_date ? `${formatDate(set.release_date)} · ` : ""}
+                {set.asset_count ? `${set.asset_count} products in the catalog` : "Products in this expansion"}
+              </p>
+            </div>
+          </div>
+        </Panel>
+
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
+          <StatTile label="In catalog" value={String(set.asset_count)} />
+          <StatTile label="Cards on this page" value={String(cards)} />
+          <StatTile label="Sealed on this page" value={String(sealed)} />
         </div>
 
         {catalog.assets.length === 0 ? (
-          <div className="panel p-6 text-sm text-muted">No active products in this set yet.</div>
+          <EmptyHint>No active products in this set yet.</EmptyHint>
         ) : (
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
             {catalog.assets.map((asset) => (
               <AssetCard key={asset.id} asset={asset} />
             ))}
@@ -77,9 +108,9 @@ export default async function SetDetailPage({
         )}
 
         {catalog.total > catalog.pageSize ? (
-          <div className="flex items-center justify-between text-sm text-muted">
+          <div className="flex items-center justify-between text-sm text-muted-foreground">
             {page > 1 ? (
-              <Link href={`${SETS_PATH}/${set.id}?page=${page - 1}`} className="min-h-11 inline-flex items-center">
+              <Link href={`${SETS_PATH}/${set.id}?page=${page - 1}`} className="inline-flex min-h-11 items-center">
                 ← Prev
               </Link>
             ) : (
@@ -89,7 +120,7 @@ export default async function SetDetailPage({
               Page {page} · {catalog.total} assets
             </span>
             {page * catalog.pageSize < catalog.total ? (
-              <Link href={`${SETS_PATH}/${set.id}?page=${page + 1}`} className="min-h-11 inline-flex items-center">
+              <Link href={`${SETS_PATH}/${set.id}?page=${page + 1}`} className="inline-flex min-h-11 items-center">
                 Next →
               </Link>
             ) : (
@@ -97,7 +128,16 @@ export default async function SetDetailPage({
             )}
           </div>
         ) : null}
-      </main>
+      </div>
     </AppShell>
+  );
+}
+
+function StatTile({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl border border-border bg-card p-4">
+      <p className="text-xs font-medium text-muted-foreground">{label}</p>
+      <p className="tabular mt-1 text-xl font-semibold text-foreground">{value}</p>
+    </div>
   );
 }

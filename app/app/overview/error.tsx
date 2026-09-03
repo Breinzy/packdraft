@@ -11,17 +11,15 @@ export default function OverviewError({
 }) {
   return (
     <AppShell>
-      <main className="page py-10">
-        <div className="panel max-w-md p-6">
-          <h2 className="page-title mb-3 text-2xl">Something went wrong</h2>
-          <p className="mb-8 text-sm text-muted">
-            {error.message || 'Failed to load overview. Please try again.'}
-          </p>
-          <button onClick={reset} className="btn btn-primary">
-            Try again
-          </button>
-        </div>
-      </main>
+      <div className="panel max-w-md p-6">
+        <h2 className="page-title mb-3 text-2xl">Something went wrong</h2>
+        <p className="mb-8 text-sm text-muted">
+          {error.message || "Failed to load overview. Please try again."}
+        </p>
+        <button onClick={reset} className="btn btn-primary">
+          Try again
+        </button>
+      </div>
     </AppShell>
   );
 }

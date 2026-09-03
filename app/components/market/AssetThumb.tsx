@@ -1,26 +1,33 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { useState } from "react";
+import { cn } from "@/lib/utils";
 
 interface AssetThumbProps {
   src: string | null;
   alt: string;
-  size?: 'sm' | 'lg';
+  size?: "sm" | "md" | "lg" | "list";
+  className?: string;
 }
 
-export default function AssetThumb({ src, alt, size = 'sm' }: AssetThumbProps) {
+const SIZE = {
+  sm: "size-10 rounded-lg",
+  md: "size-14 rounded-xl",
+  lg: "w-40 h-40 md:w-56 md:h-56 rounded-2xl",
+  list: "h-[4.5rem] w-[4.5rem] rounded-[var(--radius-md)] md:h-20 md:w-20",
+};
+
+export default function AssetThumb({ src, alt, size = "list", className }: AssetThumbProps) {
   const [failed, setFailed] = useState(false);
-  const box =
-    size === 'lg'
-      ? 'w-40 h-40 md:w-56 md:h-56 rounded-[var(--radius-lg)]'
-      : 'w-[4.5rem] h-[4.5rem] md:w-20 md:h-20 rounded-[var(--radius-md)]';
+  const box = cn(
+    "relative flex shrink-0 items-center justify-center overflow-hidden border border-border-strong bg-card-elevated font-bold tracking-tight text-primary",
+    SIZE[size],
+    className,
+  );
 
   if (!src || failed) {
     return (
-      <div
-        className={`${box} shrink-0 bg-surface-2 flex items-center justify-center text-faint font-semibold text-lg`}
-        aria-hidden
-      >
+      <div className={box} aria-hidden>
         P
       </div>
     );
@@ -33,7 +40,7 @@ export default function AssetThumb({ src, alt, size = 'sm' }: AssetThumbProps) {
       src={src}
       alt={alt}
       onError={() => setFailed(true)}
-      className={`${box} shrink-0 object-cover bg-surface-2`}
+      className={cn(box, "object-cover")}
     />
   );
 }

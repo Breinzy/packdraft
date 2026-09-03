@@ -1,32 +1,44 @@
-import Link from 'next/link';
-import { Icon } from '@/components/icons';
-import { PRIMARY_NAV, isNavActive, type BottomNavKey } from '@/components/layout/nav-config';
+import Link from "next/link";
+import {
+  Layers,
+  LayoutDashboard,
+  Star,
+  TrendingUp,
+  Wallet,
+  type LucideIcon,
+} from "lucide-react";
+import { PRIMARY_NAV, isNavActive, type BottomNavKey } from "@/components/layout/nav-config";
 
 export type { BottomNavKey };
+
+const ICONS: Record<string, LucideIcon> = {
+  home: LayoutDashboard,
+  portfolio: Wallet,
+  market: TrendingUp,
+  star: Star,
+  layers: Layers,
+};
 
 export default function BottomNav({ pathname }: { pathname: string; active?: BottomNavKey }) {
   return (
     <nav
-      className="lg:hidden fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background/95 backdrop-blur-md"
-      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden"
       aria-label="Primary mobile"
     >
       <ul className="flex items-stretch justify-around">
         {PRIMARY_NAV.map((item) => {
           const active = isNavActive(pathname, item);
+          const Icon = ICONS[item.icon] ?? LayoutDashboard;
           return (
             <li key={item.href} className="flex-1">
               <Link
                 href={item.href}
-                aria-current={active ? 'page' : undefined}
-                className={`flex min-h-[3.75rem] flex-col items-center justify-center gap-1 px-1 pt-2 pb-1.5 text-[10px] font-semibold ${
-                  active ? 'text-accent-light' : 'text-faint'
+                aria-current={active ? "page" : undefined}
+                className={`flex min-h-[3.75rem] flex-col items-center justify-center gap-1 px-1 pt-2 pb-1.5 text-[10px] font-semibold transition-colors ${
+                  active ? "text-primary" : "text-muted-foreground"
                 }`}
               >
-                <Icon
-                  name={item.icon}
-                  className={`h-[22px] w-[22px] ${active ? 'text-accent' : 'text-faint'}`}
-                />
+                <Icon className="size-[22px]" strokeWidth={active ? 2.4 : 2} />
                 {item.label}
               </Link>
             </li>

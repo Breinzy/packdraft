@@ -2,135 +2,118 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {
+  FlaskConical,
+  Layers,
+  LayoutDashboard,
+  Settings,
+  Sparkles,
+  Star,
+  Target,
+  TrendingUp,
+  Trophy,
+  Wallet,
+  type LucideIcon,
+} from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
 import {
-  COMPETE_NAV,
-  GENERAL_NAV,
-  PRACTICE_NAV,
+  FUTURE_NAV,
   PRIMARY_NAV,
   isNavActive,
   type NavItem,
 } from "@/components/layout/nav-config";
-import { Icon } from "@/components/icons";
 import type { SessionUser } from "@/lib/auth/use-session";
-import type { RankSummary } from "@/lib/auth/use-account-chrome";
 import { APP_HOME } from "@/lib/product/paths";
+import { cn } from "@/lib/utils";
+
+const NAV_ICONS: Record<string, LucideIcon> = {
+  home: LayoutDashboard,
+  portfolio: Wallet,
+  market: TrendingUp,
+  star: Star,
+  layers: Layers,
+  trophy: Trophy,
+  events: Target,
+  flask: FlaskConical,
+  sparkles: Sparkles,
+  settings: Settings,
+};
 
 export function SidebarNav({
   user,
-  rank,
   onNavigate,
 }: {
   user: SessionUser | null;
-  rank: RankSummary;
+  rank?: unknown;
   onNavigate?: () => void;
 }) {
   const pathname = usePathname();
-  const primary = PRIMARY_NAV.filter((item) => !item.auth || user);
-  const compete = COMPETE_NAV.filter((item) => !item.auth || user);
-  const practice = PRACTICE_NAV.filter((item) => !item.auth || user);
-  const general = GENERAL_NAV.filter((item) => !item.auth || user);
 
   return (
     <div className="flex h-full flex-col bg-sidebar">
       <div className="flex h-16 items-center px-5">
-        <Logo href={user ? APP_HOME : "/"} compact />
+        <Logo href={user ? APP_HOME : "/"} />
       </div>
 
       <nav className="flex-1 overflow-y-auto px-3 py-2" aria-label="Primary">
-        <NavGroup items={primary} pathname={pathname} onNavigate={onNavigate} />
+        <ul className="flex flex-col gap-0.5">
+          {PRIMARY_NAV.map((item) => (
+            <li key={item.href}>
+              <PrimaryLink item={item} pathname={pathname} onNavigate={onNavigate} />
+            </li>
+          ))}
+        </ul>
 
-        <p className="mt-6 px-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-faint">
-          Compete
-        </p>
-        <NavGroup items={compete} pathname={pathname} onNavigate={onNavigate} />
-
-        <p className="mt-6 px-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-faint">
-          Practice
-        </p>
-        <NavGroup items={practice} pathname={pathname} onNavigate={onNavigate} />
-
-        {general.length > 0 ? (
-          <>
-            <p className="mt-6 px-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-faint">
-              Account
-            </p>
-            <NavGroup items={general} pathname={pathname} onNavigate={onNavigate} />
-          </>
-        ) : null}
+        <div className="mt-6 px-3">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">
+            Coming soon
+          </span>
+        </div>
+        <ul className="mt-2 flex flex-col gap-0.5">
+          {FUTURE_NAV.map((item) => (
+            <li key={item.href}>
+              <SoonLink item={item} onNavigate={onNavigate} />
+            </li>
+          ))}
+        </ul>
       </nav>
 
-      {user ? (
-        <div className="mx-3 mb-3 rounded-[var(--radius-lg)] border border-sidebar-border bg-surface-2 p-3">
-          <Link
-            href="/settings"
-            onClick={onNavigate}
-            className="flex items-center gap-3 rounded-[var(--radius-md)] outline-none"
-          >
-            <span className="avatar h-10 w-10 text-sm">{user.initials}</span>
-            <span className="min-w-0 flex-1">
-              <span className="block truncate text-sm font-semibold text-foreground">{user.displayName}</span>
-              <span className="mt-0.5 block truncate text-xs text-muted">
-                {rank.rank != null ? (
-                  <>
-                    Sandbox #{rank.rank}
-                    {rank.percentileLabel ? ` · ${rank.percentileLabel}` : ""}
-                  </>
-                ) : (
-                  "Collector account"
-                )}
-              </span>
-            </span>
-          </Link>
-        </div>
-      ) : (
-        <div className="mx-3 mb-3 space-y-2">
-          <Link href="/auth/login" onClick={onNavigate} className="btn btn-ghost w-full">
-            Log in
-          </Link>
-          <Link href="/auth/signup" onClick={onNavigate} className="btn btn-primary w-full">
-            Sign up
-          </Link>
-        </div>
-      )}
-
-      <div className="border-t border-sidebar-border px-4 py-3">
+      <div className="border-t border-sidebar-border p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="relative flex size-2">
-              <span className="absolute inline-flex size-full animate-ping rounded-full bg-green opacity-60" />
-              <span className="relative inline-flex size-2 rounded-full bg-green" />
+              <span className="absolute inline-flex size-full animate-ping rounded-full bg-positive opacity-60" />
+              <span className="relative inline-flex size-2 rounded-full bg-positive" />
             </span>
-            <span className="text-xs font-medium text-muted">Market data live</span>
+            <span className="text-xs font-medium text-muted-foreground">Market data live</span>
           </div>
-          <span className="num text-[11px] font-medium text-faint">TCG · USD</span>
+          <span className="tabular text-[11px] font-medium text-muted-foreground/70">TCG · USD</span>
         </div>
+        {user ? (
+          <Link
+            href="/settings"
+            onClick={onNavigate}
+            className="mt-3 flex items-center gap-2 rounded-lg px-1 py-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <Settings className="size-3.5" />
+            Settings
+          </Link>
+        ) : (
+          <div className="mt-3 flex items-center gap-3 px-1 text-xs font-semibold">
+            <Link href="/auth/login" onClick={onNavigate} className="text-muted-foreground hover:text-foreground">
+              Log in
+            </Link>
+            <Link href="/auth/signup" onClick={onNavigate} className="text-primary hover:text-foreground">
+              Sign up
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
-function NavGroup({
-  items,
-  pathname,
-  onNavigate,
-}: {
-  items: NavItem[];
-  pathname: string;
-  onNavigate?: () => void;
-}) {
-  return (
-    <ul className="flex flex-col gap-0.5">
-      {items.map((item) => (
-        <li key={item.href}>
-          <NavLink item={item} pathname={pathname} onNavigate={onNavigate} />
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-function NavLink({
+function PrimaryLink({
   item,
   pathname,
   onNavigate,
@@ -140,30 +123,38 @@ function NavLink({
   onNavigate?: () => void;
 }) {
   const active = isNavActive(pathname, item);
-  if (item.soon) {
-    return (
-      <div className="flex cursor-not-allowed items-center gap-3 rounded-[var(--radius-md)] px-3 py-2.5 text-sm font-medium text-faint">
-        <Icon name={item.icon} className="h-[18px] w-[18px] text-faint" />
-        <span className="flex-1">{item.label}</span>
-        <span className="rounded bg-surface-3 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-faint">
-          Soon
-        </span>
-      </div>
-    );
-  }
+  const Icon = NAV_ICONS[item.icon] ?? LayoutDashboard;
   return (
     <Link
       href={item.href}
       onClick={onNavigate}
       aria-current={active ? "page" : undefined}
-      className={`flex items-center gap-3 rounded-[var(--radius-md)] px-3 py-2.5 text-sm font-medium transition-colors duration-[var(--duration-fast)] ${
+      className={cn(
+        "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
         active
-          ? "bg-accent-dim text-accent-light"
-          : "text-muted hover:bg-surface-2 hover:text-foreground"
-      }`}
+          ? "bg-primary-muted text-primary"
+          : "text-muted-foreground hover:bg-secondary hover:text-foreground",
+      )}
     >
-      <Icon name={item.icon} className={active ? "h-[18px] w-[18px] text-accent" : "h-[18px] w-[18px] text-muted"} />
-      <span className="flex-1">{item.label}</span>
+      <Icon className="size-[18px]" strokeWidth={active ? 2.4 : 2} />
+      {item.label}
+    </Link>
+  );
+}
+
+function SoonLink({ item, onNavigate }: { item: NavItem; onNavigate?: () => void }) {
+  const Icon = NAV_ICONS[item.icon] ?? Sparkles;
+  return (
+    <Link
+      href={item.href}
+      onClick={onNavigate}
+      className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground/45 transition-colors hover:text-muted-foreground"
+    >
+      <Icon className="size-[18px]" strokeWidth={2} />
+      {item.label}
+      <span className="ml-auto rounded bg-secondary px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-muted-foreground/70">
+        Soon
+      </span>
     </Link>
   );
 }

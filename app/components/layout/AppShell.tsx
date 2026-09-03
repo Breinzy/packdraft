@@ -1,16 +1,14 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { usePathname } from 'next/navigation';
-import BottomNav from '@/components/layout/BottomNav';
-import { MobileDrawer } from '@/components/layout/mobile-drawer';
-import { SidebarNav } from '@/components/layout/sidebar';
-import { TopBar } from '@/components/layout/top-bar';
-import { titleForPath } from '@/components/layout/page-titles';
-import { SearchPalette } from '@/components/layout/search-palette';
-import { AddCollectionModal } from '@/components/layout/add-collection-modal';
-import { UIProvider } from '@/lib/ui';
-import { useAccountChrome } from '@/lib/auth/use-account-chrome';
+import { usePathname } from "next/navigation";
+import BottomNav from "@/components/layout/BottomNav";
+import { SidebarNav } from "@/components/layout/sidebar";
+import { TopBar } from "@/components/layout/top-bar";
+import { SearchPalette } from "@/components/layout/search-palette";
+import { AddCollectionModal } from "@/components/layout/add-collection-modal";
+import { UIProvider } from "@/lib/ui";
+import { useAccountChrome } from "@/lib/auth/use-account-chrome";
+import { APP_HOME } from "@/lib/product/paths";
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -19,35 +17,25 @@ interface AppShellProps {
   subtitle?: string;
 }
 
-export default function AppShell({ children, title, subtitle }: AppShellProps) {
+export default function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
   const chrome = useAccountChrome();
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const copy = titleForPath(pathname);
 
   return (
     <UIProvider>
       <div className="min-h-dvh bg-background">
-        <aside className="hidden lg:fixed lg:inset-y-0 lg:z-40 lg:flex lg:w-[var(--sidebar-w)] lg:flex-col border-r border-sidebar-border bg-sidebar">
-          <SidebarNav user={chrome.user} rank={chrome.rank} />
+        <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-sidebar-border bg-sidebar lg:flex">
+          <SidebarNav user={chrome.user} />
         </aside>
 
-        <div className="lg:pl-[var(--sidebar-w)]">
-          <TopBar
-            title={title ?? copy.title}
-            subtitle={subtitle ?? copy.subtitle}
-            onMenu={() => setDrawerOpen(true)}
-          />
-          <div className="pb-24 lg:pb-0">{children}</div>
+        <div className="lg:pl-64">
+          <TopBar homeHref={chrome.user ? APP_HOME : "/"} />
+          <main className="mx-auto w-full max-w-[1400px] px-4 pb-28 pt-5 lg:px-8 lg:pb-12">
+            {children}
+          </main>
           <BottomNav pathname={pathname} />
         </div>
 
-        <MobileDrawer
-          open={drawerOpen}
-          onClose={() => setDrawerOpen(false)}
-          user={chrome.user}
-          rank={chrome.rank}
-        />
         <SearchPalette />
         <AddCollectionModal />
       </div>
