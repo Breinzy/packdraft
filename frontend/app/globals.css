@@ -1,0 +1,143 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: var(--font-sans-family), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-mono-family), ui-monospace, monospace;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-card-elevated: var(--card-elevated);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-muted: var(--primary-muted);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-positive: var(--positive);
+  --color-positive-foreground: var(--positive-foreground);
+  --color-positive-muted: var(--positive-muted);
+  --color-negative: var(--negative);
+  --color-negative-foreground: var(--negative-foreground);
+  --color-negative-muted: var(--negative-muted);
+  --color-warning: var(--warning);
+  --color-warning-muted: var(--warning-muted);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+}
+
+:root {
+  color-scheme: dark;
+  --radius: 0.875rem;
+
+  /* Deep graphite base — low neutral chroma for a refined, non-"blue-gray SaaS" feel */
+  --background: oklch(0.145 0.006 258);
+  --foreground: oklch(0.975 0.004 258);
+
+  --card: oklch(0.184 0.007 258);
+  --card-foreground: oklch(0.975 0.004 258);
+  --card-elevated: oklch(0.219 0.008 258);
+
+  --popover: oklch(0.2 0.008 258);
+  --popover-foreground: oklch(0.975 0.004 258);
+
+  /* Cleaner cobalt-azure primary (less violet than before) */
+  --primary: oklch(0.62 0.198 258);
+  --primary-foreground: oklch(0.99 0.005 258);
+  --primary-muted: oklch(0.62 0.198 258 / 0.15);
+
+  --secondary: oklch(0.252 0.009 258);
+  --secondary-foreground: oklch(0.965 0.004 258);
+
+  --muted: oklch(0.232 0.008 258);
+  --muted-foreground: oklch(0.7 0.014 258);
+
+  --accent: oklch(0.275 0.011 258);
+  --accent-foreground: oklch(0.975 0.004 258);
+
+  --destructive: oklch(0.63 0.21 22);
+
+  /* Refined jewel tones for gains / losses */
+  --positive: oklch(0.78 0.15 164);
+  --positive-foreground: oklch(0.145 0.006 258);
+  --positive-muted: oklch(0.78 0.15 164 / 0.15);
+
+  --negative: oklch(0.665 0.2 20);
+  --negative-foreground: oklch(0.99 0.005 258);
+  --negative-muted: oklch(0.665 0.2 20 / 0.15);
+
+  --warning: oklch(0.84 0.13 84);
+  --warning-muted: oklch(0.84 0.13 84 / 0.15);
+
+  --border: oklch(1 0 0 / 8%);
+  --border-strong: oklch(1 0 0 / 15%);
+  --input: oklch(1 0 0 / 10%);
+  --ring: oklch(0.62 0.198 258);
+
+  --chart-1: oklch(0.62 0.198 258);
+  --chart-2: oklch(0.78 0.15 164);
+  --chart-3: oklch(0.84 0.13 84);
+  --chart-4: oklch(0.72 0.15 300);
+  --chart-5: oklch(0.665 0.2 20);
+
+  --sidebar: oklch(0.162 0.007 258);
+  --sidebar-foreground: oklch(0.975 0.004 258);
+  --sidebar-border: oklch(1 0 0 / 7%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  /* Financial figures should always be tabular */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+  }
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@layer components {
+  .add-input {
+    @apply h-11 w-full rounded-xl border border-border bg-card px-3.5 text-base text-foreground outline-none transition-colors;
+    @apply placeholder:text-muted-foreground focus:border-primary/70 focus:ring-2 focus:ring-primary/20;
+  }
+}
