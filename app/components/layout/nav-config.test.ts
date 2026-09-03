@@ -21,7 +21,7 @@ describe('collector navigation', () => {
   it('highlights overview only on the home route', () => {
     const overview = PRIMARY_NAV.find((item) => item.label === 'Overview');
     expect(overview).toBeTruthy();
-    expect(isNavActive('/overview', overview!)).toBe(true);
+    expect(isNavActive('/', overview!)).toBe(true);
     expect(isNavActive('/dashboard', overview!)).toBe(true);
     expect(isNavActive('/portfolio', overview!)).toBe(false);
   });

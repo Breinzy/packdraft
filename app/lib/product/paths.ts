@@ -1,4 +1,4 @@
-export const APP_HOME = '/overview';
+export const APP_HOME = '/';
 export const COLLECTION_PATH = '/portfolio';
 export const MARKET_PATH = '/market';
 export const WATCHLIST_PATH = '/watchlist';

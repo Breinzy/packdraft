@@ -3,10 +3,6 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { getOptionalPublicEnv } from '@/lib/env';
 
 const PROTECTED_PREFIXES = [
-  '/overview',
-  '/dashboard',
-  '/portfolio',
-  '/watchlist',
   '/sandbox',
   '/career',
   '/settings',
@@ -63,7 +59,7 @@ export async function updateSession(request: NextRequest) {
     if (user && isPath(pathname, AUTH_ONLY_PREFIXES)) {
       return copyCookies(
         supabaseResponse,
-        NextResponse.redirect(new URL('/overview', request.url))
+        NextResponse.redirect(new URL('/', request.url))
       );
     }
   } catch {

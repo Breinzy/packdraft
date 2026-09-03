@@ -39,7 +39,7 @@ function LoginForm() {
     const next =
       nextParam && nextParam.startsWith('/') && !nextParam.startsWith('//')
         ? nextParam
-        : '/overview';
+        : '/';
     router.push(next);
   }
 

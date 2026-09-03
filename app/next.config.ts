@@ -12,13 +12,14 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
-      { source: '/dashboard', destination: '/overview', permanent: false },
+      { source: '/dashboard', destination: '/', permanent: false },
+      { source: '/overview', destination: '/', permanent: false },
       { source: '/career', destination: '/sandbox', permanent: false },
       { source: '/career/leaderboard', destination: '/sandbox/leaderboard', permanent: false },
       { source: '/assets', destination: '/market', permanent: false },
       { source: '/predictions', destination: '/events', permanent: false },
       { source: '/predictions/:path*', destination: '/events/:path*', permanent: false },
-      { source: '/asset/:id', destination: '/assets/:id', permanent: false },
+      { source: '/assets/:id', destination: '/asset/:id', permanent: false },
     ];
   },
 };

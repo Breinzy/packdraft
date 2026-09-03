@@ -1,15 +1,11 @@
-import AppShell from "@/components/layout/AppShell";
-import { PageHeader } from "@/components/ui/page-header";
-import { PortfolioView } from "@/components/collector/portfolio-view";
+import { PageHeader } from '@/components/page-header'
+import { PortfolioView } from '@/components/portfolio-view'
 
 export default function PortfolioPage() {
   return (
-    <AppShell>
-      <PageHeader
-        title="Portfolio"
-        subtitle="Every card and sealed product you own, with live valuation."
-      />
+    <>
+      <PageHeader title="Portfolio" subtitle="Every card and sealed product you own, with live valuation." />
       <PortfolioView />
-    </AppShell>
-  );
+    </>
+  )
 }

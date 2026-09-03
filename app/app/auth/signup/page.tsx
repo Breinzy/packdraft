@@ -36,7 +36,7 @@ export default function SignupPage() {
     }
 
     if (data.session) {
-      router.push('/overview');
+      router.push('/');
     } else {
       setConfirmEmail(true);
       setLoading(false);

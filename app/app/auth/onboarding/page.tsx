@@ -33,7 +33,7 @@ export default function OnboardingPage() {
         .single();
 
       if (profile?.display_name_set) {
-        router.push('/overview');
+        router.push('/');
         return;
       }
 
@@ -85,7 +85,7 @@ export default function OnboardingPage() {
       return;
     }
 
-    router.push('/overview');
+    router.push('/');
   }
 
   async function handleSkip() {
@@ -102,7 +102,7 @@ export default function OnboardingPage() {
       .update({ display_name_set: true })
       .eq('id', user.id);
 
-    router.push('/overview');
+    router.push('/');
   }
 
   if (checking) {

@@ -1,8 +1,7 @@
-import Link from "next/link";
-import { cn } from "@/lib/utils";
+import Link from 'next/link';
 
 export function Logo({
-  href = "/",
+  href = '/',
   compact = false,
 }: {
   href?: string | null;
@@ -21,7 +20,7 @@ export function Logo({
 
   if (!href) return mark;
   return (
-    <Link href={href} className={cn("inline-flex items-center text-foreground")}>
+    <Link href={href} className="inline-flex items-center text-foreground">
       {mark}
     </Link>
   );
