@@ -26,6 +26,24 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: true, ...result });
     }
 
+    if (action === 'history-backfill') {
+      const { backfillPriceHistory } = await import('@/lib/market/history-backfill');
+      const result = await backfillPriceHistory(supabase);
+      return NextResponse.json({ ok: true, ...result });
+    }
+
+    if (action === 'pause-history') {
+      const { pauseJob } = await import('@/lib/market/job-state');
+      const state = await pauseJob(supabase, 'history_backfill');
+      return NextResponse.json({ ok: true, state });
+    }
+
+    if (action === 'resume-history') {
+      const { resumeJob } = await import('@/lib/market/job-state');
+      const state = await resumeJob(supabase, 'history_backfill');
+      return NextResponse.json({ ok: true, state });
+    }
+
     if (action === 'import-assets') {
       const secret = getCronSecret();
       if (!secret) {

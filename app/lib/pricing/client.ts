@@ -44,6 +44,20 @@ export interface CardResponse {
   metadata?: ApiPagination;
 }
 
+export interface PriceHistoryEntry {
+  date: string;
+  price: number;
+  volume?: number;
+  market?: number;
+}
+
+export type PriceHistoryPayload =
+  | PriceHistoryEntry[]
+  | {
+      variants?: Record<string, Record<string, { history?: PriceHistoryEntry[] }>>;
+      history?: PriceHistoryEntry[];
+    };
+
 export interface SealedProduct {
   tcgPlayerId: number;
   name: string;
@@ -59,7 +73,7 @@ export interface SealedProduct {
     mid?: number;
     high?: number;
   };
-  priceHistory?: PriceHistoryEntry[];
+  priceHistory?: PriceHistoryPayload;
 }
 
 export interface Card {
@@ -78,7 +92,7 @@ export interface Card {
     high?: number;
   };
   ebay?: EbayGradedData;
-  priceHistory?: PriceHistoryEntry[];
+  priceHistory?: PriceHistoryPayload;
 }
 
 export interface GradedPriceData {
@@ -99,11 +113,6 @@ export interface EbayGradedData {
   };
   psa10?: GradedPriceData;
   psa9?: GradedPriceData;
-}
-
-export interface PriceHistoryEntry {
-  date: string;
-  price: number;
 }
 
 function getTotal(res: { pagination?: ApiPagination; metadata?: ApiPagination }): number {

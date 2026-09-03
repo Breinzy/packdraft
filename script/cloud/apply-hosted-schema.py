@@ -36,6 +36,7 @@ FILES = [
     REPO / "supabase/migrations/20260902180000_phase18_monetization.sql",
     REPO / "supabase/migrations/20260902190000_phase19_freetoplay.sql",
     REPO / "supabase/migrations/20260902200000_phase20_release_events.sql",
+    REPO / "supabase/migrations/20260902210000_price_history_volume.sql",
 ]
 
 

@@ -1,3 +1,4 @@
+import { extractHistoryPoints } from './history';
 import { computeChangePct } from './stale';
 import type {
   MarketProviderId,
@@ -251,12 +252,8 @@ export function classifySealedSubtype(
   return 'booster_box';
 }
 
-function changeFromHistory(
-  history: { date: string; price: number }[] | undefined
-): number {
-  if (!history || history.length < 2) return 0;
-  const sorted = [...history].sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-  );
-  return computeChangePct(sorted[0].price, sorted[sorted.length - 1].price);
+function changeFromHistory(history: unknown): number {
+  const points = extractHistoryPoints({ priceHistory: history });
+  if (points.length < 2) return 0;
+  return computeChangePct(points[points.length - 1].price, points[0].price);
 }

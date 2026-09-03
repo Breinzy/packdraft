@@ -76,6 +76,17 @@ export default async function AssetDetailPage({
   }
 
   const history = await getPriceHistory(supabase, id, { limit: priceHistoryLimit(pro) }).catch(() => []);
+  let volume30d = 0;
+  try {
+    const { data: volumeRow } = await supabase
+      .from('asset_market_stats')
+      .select('volume_30d')
+      .eq('asset_id', id)
+      .maybeSingle();
+    volume30d = Number(volumeRow?.volume_30d ?? 0);
+  } catch {
+    volume30d = 0;
+  }
 
   const books = user ? await getUserActiveBooks(supabase, user.id).catch(() => []) : [];
   const tradeable = books.filter((b) => canTradeStatus(b.tournament.status));
@@ -153,6 +164,9 @@ export default async function AssetDetailPage({
               </span>
               {asset.change_7d != null ? (
                 <span className={`text-sm ${changeColor}`}>{formatPct(asset.change_7d)} 7D</span>
+              ) : null}
+              {volume30d > 0 ? (
+                <span className="kicker">{volume30d.toLocaleString()} sold / 30d</span>
               ) : null}
               {asset.price == null ? (
                 <span className="kicker">No price</span>

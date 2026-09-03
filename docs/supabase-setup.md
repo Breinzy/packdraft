@@ -95,6 +95,7 @@ Fallback if MCP is not connected: CLI `db push` has previously failed on this pr
    - `supabase/migrations/20260902180000_phase18_monetization.sql`
    - `supabase/migrations/20260902190000_phase19_freetoplay.sql`
    - `supabase/migrations/20260902200000_phase20_release_events.sql`
+   - `supabase/migrations/20260902210000_price_history_volume.sql`
 3. In Table Editor, confirm `assets`, `tcgs`, `tournaments`, `market_job_state`, `career_portfolios`, `friendships`, and `release_campaigns` exist.
 
 To apply from this repo instead of the SQL editor, set one of:
