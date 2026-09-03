@@ -2,13 +2,15 @@
 
 ## Mission
 
-You are working on Packdraft, a competitive trading-card-market game.
+You are working on Packdraft, a Pokémon TCG portfolio and investing platform with competitive game mechanics.
 
 Read `docs/roadmap.md` before making architectural or product decisions.
 
 The roadmap is the source of truth for **what should be built**.
 
 This file is the source of truth for **how the coding agent should work**.
+
+The previous competitive-game roadmap is obsolete as product direction. Do not continue it. Start from **Phase 21** unless the user names a later phase.
 
 ---
 
@@ -22,11 +24,11 @@ Only work on the phase explicitly requested by the user.
 
 If the user says:
 
-> Implement Phase 5
+> Implement Phase 24
 
-implement Phase 5 only.
+implement Phase 24 only.
 
-Do not silently implement Phase 6 because it appears useful.
+Do not silently implement Phase 25 because it appears useful.
 
 ---
 
@@ -51,31 +53,34 @@ If existing code is correct and relevant, reuse it.
 
 Do not rewrite working systems simply to match your preferred style.
 
-If a reset is requested, first complete the repository audit described in Phase 0.
+Do not rewrite working backend functionality simply because the roadmap changed.
+
+Do not delete useful functionality without justification.
+
+If a product reset is requested, first complete the repository audit described in Phase 21 (`docs/MVP_AUDIT.md`).
 
 ---
 
 # 2. PRODUCT UNDERSTANDING
 
-Packdraft is NOT primarily a portfolio tracker.
+Packdraft is **not** primarily a fantasy-trading game.
 
-The core product is competitive gameplay.
+The core utility is tracking and understanding Pokémon TCG investments.
 
-The core tournament loop is:
+The product combines four pillars:
 
-Fixed virtual budget
-→ temporary portfolio
-→ virtual trading using real TCG market prices
-→ tournament closes
-→ portfolio settlement
-→ leaderboard
-→ historical result
+1. **Utility** — a genuinely useful free collection/portfolio tracker.
+2. **Competition** — tournaments using real Pokémon market prices.
+3. **Experimentation** — sandbox strategy testing with virtual capital.
+4. **Intelligence** — Pro-tier analysis and decision support.
 
-Tournament portfolios are temporary.
+Game mechanics are an engagement layer on top of the tracker.
 
-They do not carry over between tournaments.
+The free product must be good enough to use without paying. Pro sells advanced intelligence, not basic tracking.
 
-A player's tournament history persists, but the tournament bankroll and positions do not.
+Focus exclusively on Pokémon TCG through the entire MVP.
+
+Do not add other TCGs, sports cards, or multi-game catalogs until the Pokémon MVP is complete and the user asks for that work.
 
 ---
 
@@ -83,51 +88,75 @@ A player's tournament history persists, but the tournament bankroll and position
 
 Never conflate these systems.
 
-### Tournament Portfolio
+### Collection / portfolio (free utility)
+
+Persistent tracking of a user’s real Pokémon holdings.
+
+Users record quantity, purchase price, and purchase date.
+
+Values follow Packdraft market data.
+
+This is **not** a Packdraft marketplace and **not** a tournament book.
+
+### Tournament portfolio
 
 Temporary.
 
 Created for one tournament.
 
-Starts with the tournament's preset virtual budget.
+Starts with the tournament’s preset virtual budget.
 
 Ends when the tournament ends.
 
-### Career Portfolio
+### Sandbox portfolio
 
-Persistent.
+Persistent or session-based virtual strategy-testing book.
 
-Starts at $1,000.
+Uses virtual capital.
 
-Continues indefinitely.
+Isolated from collection holdings and from every tournament.
 
-### Market Event
+### Predictions
 
-Temporary prediction competition.
+Skill track record around Pokémon market behavior.
 
-Does not depend on a user's portfolio.
+Does not require transferring collection or tournament assets.
 
-These must remain architecturally separate even when they reuse the same underlying portfolio, asset, or market-data logic.
+Resolution uses Packdraft market data.
+
+### Pro intelligence
+
+Analysis layered on Packdraft data.
+
+Does not change cash, prices, ranks, or tournament outcomes.
+
+Existing Career Mode, Market Events, and similar systems from the old roadmap may map onto Collection, Sandbox, or Predictions. Do not merge or rename them until Phase 21’s audit says how.
+
+These systems may reuse the same underlying asset, price, or portfolio-engine code. They must remain architecturally separate.
 
 ---
 
-# 4. VIRTUAL MONEY RULES
+# 4. MONEY RULES
 
-Packdraft tournament and Career money is simulated.
+Distinguish **recorded cost basis** from **virtual money**.
 
-It is not real money.
+Collection tracking stores the user’s stated purchase prices. That is bookkeeping against market data. It is not Packdraft buying or selling cards in the real world.
 
-A user's virtual purchases and sales do not affect real-world TCG prices.
+Tournament and Sandbox money is simulated. It is not real money.
+
+A user’s Packdraft purchases and sales do not affect real-world TCG prices.
 
 Never describe internal Packdraft trades as real marketplace transactions.
 
-The Packdraft portfolio is a simulation layer over real market data.
+Never build real-money trading, bank connections, or a physical-card marketplace during the MVP.
+
+The Packdraft portfolio layer is a simulation and tracking layer over real market data.
 
 ---
 
 # 5. MARKET DATA ARCHITECTURE
 
-External APIs are providers, not Packdraft's domain model.
+External APIs are providers, not Packdraft’s domain model.
 
 Use:
 
@@ -135,14 +164,20 @@ External provider
 → ingestion
 → normalization
 → Packdraft database
-→ game engine
+→ application / game engine
 → UI
+
+Keep **product data**, **market data**, **user portfolio data**, and **analytics** separate.
 
 Do not scatter external API calls throughout React components.
 
-Do not make the entire application dependent on one provider's exact response format.
+Do not make the entire application dependent on one provider’s exact response format.
 
 Create an internal normalized representation.
+
+Design interfaces so another TCG could be added later, but do not implement other TCGs.
+
+Never expose fabricated market data.
 
 ---
 
@@ -155,6 +190,7 @@ Do not duplicate calculations across pages.
 Examples:
 
 * portfolio value
+* cost basis
 * return %
 * position value
 * realized P&L
@@ -162,8 +198,11 @@ Examples:
 * available cash
 * trade totals
 * tournament rankings
+* prediction accuracy
 
 Business logic belongs in reusable server/domain functions, not directly inside presentation components.
+
+Do not create fake precision where the underlying data does not support it.
 
 ---
 
@@ -185,22 +224,26 @@ At minimum, track concepts such as:
 * total value
 * timestamp
 
+Collection add/edit/remove events that change cost basis or quantity also need durable records.
+
 Use appropriate database constraints to prevent impossible states.
 
 ---
 
-# 8. TOURNAMENT ISOLATION
+# 8. PORTFOLIO ISOLATION
 
 A user must never be able to transfer:
 
 * cash between tournaments
 * positions between tournaments
-* Career assets into a tournament
+* collection holdings into a tournament
+* collection holdings into Sandbox
+* Sandbox assets into a tournament
 * assets from one tournament into another
 
 Every tournament participant receives an independent starting portfolio.
 
-Tournament portfolios are isolated from Career Mode.
+Tournament portfolios are isolated from Collection and Sandbox.
 
 ---
 
@@ -216,7 +259,9 @@ Once a tournament is completed:
 * results are stored
 * historical results do not silently change
 
-Do not rely on a mutable live price to retroactively change a completed tournament.
+The same rule applies to resolved predictions: outcomes lock and do not silently change with a later live price.
+
+Do not rely on a mutable live price to retroactively change a completed tournament or resolved prediction.
 
 ---
 
@@ -233,39 +278,47 @@ Test important UI work at approximately:
 
 Core mobile flows must work:
 
-* joining a tournament
+* adding a holding
 * viewing a portfolio
 * searching for an asset
 * viewing an asset
-* buying
-* selling
+* joining a tournament
+* buying / selling in tournament or sandbox
 * checking rank
 * viewing the leaderboard
 
-Avoid horizontal scrolling for core mobile gameplay.
+Avoid horizontal scrolling for core mobile flows.
 
-Do not create a separate native mobile app during the MVP.
+Do not create a native mobile app during the MVP. Native apps are deferred.
 
-The future native app is Phase 25.
+Never regress existing mobile functionality.
 
 ---
 
 # 11. UI PRINCIPLES
+
+The UI should feel like a premium dark investment platform with light gamification.
+
+It should **not** feel like a generic SaaS dashboard, a children’s Pokémon site, a stock-trading clone, or a gambling product.
 
 Prefer:
 
 * clear hierarchy
 * fast interactions
 * readable numbers
-* obvious buy/sell actions
-* strong tournament status
+* obvious add / buy / sell actions
 * visible portfolio value
+* visible cost basis and return
+* strong tournament status
 * visible rank
 * responsive components
+* the shared Packdraft design system
 
 Do not sacrifice usability for visual complexity.
 
-Do not build excessive dashboards before the underlying gameplay works.
+Do not invent one-off styling when a design-system component exists.
+
+After Phase 22, all new UI must use that system.
 
 ---
 
@@ -364,11 +417,13 @@ Protect:
 * authentication
 * authorization
 * database writes
+* collection / portfolio writes
 * tournament participation
 * trading operations
 * virtual balances
 * rankings
 * settlement
+* Pro entitlements
 * administrative actions
 
 Never trust client-provided:
@@ -379,8 +434,11 @@ Never trust client-provided:
 * ranking
 * trade totals
 * tournament status
+* Pro status
 
 The server/database must be authoritative.
+
+Do not expose sensitive data to clients unnecessarily.
 
 ---
 
@@ -403,8 +461,9 @@ The server should validate:
 * valid price
 * valid timestamp
 * transaction constraints
+* Pro entitlement when a Pro-only action is requested
 
-Do not allow the browser to directly set portfolio balances or final rankings.
+Do not allow the browser to directly set portfolio balances, final rankings, or subscription state.
 
 ---
 
@@ -414,6 +473,8 @@ For important domain logic, write tests.
 
 Prioritize:
 
+* add / edit / remove holdings
+* cost basis
 * buy
 * sell
 * insufficient cash
@@ -424,8 +485,10 @@ Prioritize:
 * tournament lifecycle
 * settlement
 * ranking
+* prediction resolution
+* portfolio isolation between collection, sandbox, and tournaments
 
-UI tests are useful, but correct financial/game logic is the higher priority.
+UI tests are useful, but correct financial and data logic is the higher priority.
 
 ---
 
@@ -445,6 +508,8 @@ If something cannot be run, say so explicitly.
 
 Do not claim tests passed if they were not run.
 
+Never claim a phase is complete without verifying the actual implementation.
+
 ---
 
 # 21. DOCUMENTATION
@@ -458,6 +523,8 @@ Examples:
 * database design
 * external provider assumptions
 * tournament rules
+* collection vs sandbox vs tournament isolation
+* Pro entitlement rules
 
 Avoid creating documentation for trivial implementation details.
 
@@ -486,22 +553,24 @@ Commit messages should describe the actual change.
 
 Do NOT prematurely implement:
 
-* Career Mode
-* Career progression
-* Market Events
+* other TCGs
 * native mobile apps
-* creator tournaments
-* social features
-* monetization
-* multi-TCG
-* complex rankings
-* real-money competitions
+* social network / messaging
+* real-money trading or marketplace
+* bank connections
+* gambling or prediction-market mechanics
+* pay-to-win tournament mechanics
+* Stripe / Pro AI features before their phase
+* advanced achievements or complex career progression
+* enterprise/API products
 
 unless the user explicitly asks for that phase.
 
-The tournament loop (Phases 0–10) is the MVP. Phase 11 is polish of that loop. Career Mode is post-MVP even though it is numbered Phase 12.
+Build foundations that support later phases, but do not build the features themselves.
 
-Build foundations that support later modes, but do not build the features themselves.
+Do not paywall basic collection tracking.
+
+Do not implement AI that fabricates prices or guarantees profitable trades.
 
 ---
 
@@ -515,6 +584,7 @@ Read:
 
 * `docs/roadmap.md`
 * `AGENTS.md`
+* `docs/MVP_AUDIT.md` if it exists
 * relevant existing documentation
 
 ### Step 2 — Inspect
@@ -525,9 +595,15 @@ Inspect relevant repository files.
 
 Give a short implementation plan.
 
+For major architectural changes, explain the reasoning before implementing.
+
 ### Step 4 — Implement
 
 Implement only the requested phase.
+
+Use reusable components and existing architecture where possible.
+
+Do not create duplicate systems for functionality that already exists.
 
 ### Step 5 — Validate
 
@@ -543,15 +619,18 @@ Look for:
 * mobile issues
 * duplicated business logic
 * roadmap violations
+* fabricated or provider-coupled market data
 
 ### Step 7 — Report
 
 Summarize:
 
-* what changed
-* files changed
-* tests/checks run
-* known limitations
+* what was completed
+* files / components changed
+* database changes
+* tests / checks run
+* remaining issues
+* recommended follow-up work
 * anything requiring user review
 
 ### Step 8 — Stop
@@ -573,6 +652,7 @@ If ambiguity affects:
 * user permissions
 * security
 * external data
+* Free vs Pro boundary
 
 ask for clarification or present the decision before implementing it.
 
@@ -582,19 +662,15 @@ For minor implementation details, use the simplest reasonable approach consisten
 
 # 26. PRODUCT NORTH STAR
 
-The question every feature should ultimately help answer is:
+The Pokémon MVP should make a user think:
 
-> **Why would a player open Packdraft today?**
+1. Packdraft is the place I track my Pokémon investments.
+2. I can compete with other investors here.
+3. I can test strategies without risking money.
+4. I want Packdraft Pro because it actually helps me understand my portfolio.
 
-Possible answers:
+Every feature should strengthen **utility**, **competition**, **experimentation**, or **intelligence**.
 
-* There is a tournament I can win.
-* There is a prediction event.
-* My Career portfolio is growing.
-* My ranking is at stake.
-* A new TCG set just released.
-* My friends are competing.
+Do not build features merely because they sound impressive.
 
-Do not turn Packdraft into a generic TCG portfolio tracker.
-
-The product is a competitive game built around real TCG market data.
+Build the best free Pokémon TCG investment tracker possible, then layer competitive gameplay and premium investment intelligence on top.
