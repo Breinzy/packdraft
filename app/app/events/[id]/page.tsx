@@ -30,7 +30,7 @@ export default async function EventDetailPage({
   if (!supabase) {
     return (
       <AppShell nav="play">
-        <main className="page py-6 md:py-8 space-y-6">
+        <main className="page page-main stack">
           <h1 className="page-title text-2xl">Event</h1>
           <NeedsDatabase feature="This event" />
         </main>
@@ -53,7 +53,7 @@ export default async function EventDetailPage({
   } catch {
     return (
       <AppShell nav="play">
-        <main className="page py-6 md:py-8 space-y-6">
+        <main className="page page-main stack">
           <h1 className="page-title text-2xl">Event</h1>
           <QueryFailed feature="this event" />
         </main>
@@ -82,7 +82,7 @@ export default async function EventDetailPage({
 
   return (
     <AppShell nav="play">
-      <main className="page py-6 md:py-8 space-y-6">
+      <main className="page page-main stack">
         <Link href="/events" className="text-sm text-accent-light min-h-11 inline-flex items-center">
           ← Events
         </Link>
@@ -109,7 +109,7 @@ export default async function EventDetailPage({
         </div>
 
         {myResult ? (
-          <div className="panel px-4 py-3">
+          <div className="panel panel-row">
             <div className="kicker mb-1">Your finish</div>
             <div className="num text-lg font-medium">
               #{myResult.rank} · {myResult.score.toFixed(2)} pts
@@ -117,13 +117,13 @@ export default async function EventDetailPage({
           </div>
         ) : null}
 
-        <section className="space-y-3">
+        <section className="stack">
           <h2 className="section-title">Assets</h2>
-          <ul className="space-y-2">
+          <ul className="stack">
             {assets.map((row) => {
               const change = pctChange(row.start_price, row.end_price);
               return (
-                <li key={row.asset_id} className="panel px-4 py-3">
+                <li key={row.asset_id} className="panel panel-row">
                   <Link href={`/assets/${row.asset_id}`} className="text-sm font-medium text-foreground">
                     {row.asset?.name ?? row.asset_id}
                   </Link>
@@ -149,14 +149,14 @@ export default async function EventDetailPage({
         ) : null}
 
         {event.status === 'completed' ? (
-          <section className="space-y-3">
+          <section className="stack">
             <h2 className="section-title">Results</h2>
             {results.length === 0 ? (
               <p className="text-sm text-muted">No entries.</p>
             ) : (
-              <ol className="space-y-2">
+              <ol className="stack">
                 {results.map((row) => (
-                  <li key={row.user_id} className="panel px-4 py-3.5 flex items-baseline justify-between gap-3">
+                  <li key={row.user_id} className="panel panel-row flex items-baseline justify-between gap-3">
                     <div className="min-w-0 flex items-baseline gap-3">
                       <span className="num text-sm text-gold font-medium w-8 shrink-0">#{row.rank}</span>
                       <Link href={`/players/${row.user_id}`} className="text-sm font-medium truncate">

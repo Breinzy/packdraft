@@ -41,7 +41,7 @@ export default async function TournamentDetailPage({
   if (!supabase) {
     return (
       <AppShell nav="play">
-        <main className="page py-6 md:py-8 space-y-6">
+        <main className="page page-main stack">
           <h1 className="page-title text-2xl">Tournament</h1>
           <NeedsDatabase feature="This tournament" />
         </main>
@@ -63,7 +63,7 @@ export default async function TournamentDetailPage({
   } catch {
     return (
       <AppShell nav="play">
-        <main className="page py-6 md:py-8 space-y-6">
+        <main className="page page-main stack">
           <h1 className="page-title text-2xl">Tournament</h1>
           <QueryFailed feature="this tournament" />
         </main>
@@ -131,7 +131,7 @@ export default async function TournamentDetailPage({
 
   return (
     <AppShell nav="play">
-      <main className="page py-6 md:py-8 space-y-6">
+      <main className="page page-main stack">
         <Link href="/tournaments" className="text-sm text-muted min-h-11 inline-flex items-center">
           ← Play
         </Link>
@@ -164,7 +164,7 @@ export default async function TournamentDetailPage({
         </div>
 
         {portfolio ? (
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          <div className="card-grid grid-cols-2 md:grid-cols-5">
             {[
               { label: 'Value', value: formatCurrency(portfolioValue) },
               { label: 'Cash', value: formatCurrency(portfolio.cash) },
@@ -172,8 +172,8 @@ export default async function TournamentDetailPage({
               { label: 'Return', value: formatReturn(ret), tone: ret >= 0 ? 'text-green' : 'text-red' },
               { label: 'Rank', value: myStanding ? `#${myStanding.rank}` : '—' },
             ].map((stat) => (
-              <div key={stat.label} className="panel px-4 py-3">
-                <div className="label-caps mb-1">{stat.label}</div>
+              <div key={stat.label} className="panel stat-tile">
+                <div className="label-caps">{stat.label}</div>
                 <div className={`num text-base md:text-lg font-semibold ${stat.tone ?? 'text-foreground'}`}>
                   {stat.value}
                 </div>
@@ -209,7 +209,7 @@ export default async function TournamentDetailPage({
           ) : null}
         </div>
 
-        <section className="space-y-3">
+        <section className="stack">
           <h2 className="section-title">Leaderboard</h2>
           {standings[0]?.frozen ? (
             <p className="text-xs text-gold">Final — will not change</p>
@@ -223,14 +223,14 @@ export default async function TournamentDetailPage({
 
         {portfolio ? (
           <>
-            <section className="space-y-3">
+            <section className="stack">
               <h2 className="section-title">Holdings</h2>
               <HoldingsList
                 holdings={holdings}
                 hrefFor={(assetId) => `/assets/${assetId}?tournament=${tournament.id}`}
               />
             </section>
-            <section className="space-y-3">
+            <section className="stack">
               <h2 className="section-title">Trade history</h2>
               <TradeHistory trades={trades} />
             </section>

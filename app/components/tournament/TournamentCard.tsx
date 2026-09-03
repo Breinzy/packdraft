@@ -12,7 +12,6 @@ export default function TournamentCard({
   cash,
   rank,
   portfolioValue,
-  compact,
 }: {
   tournament: Tournament;
   href?: string;
@@ -32,9 +31,9 @@ export default function TournamentCard({
           : TOURNAMENT_STATUS_HELP[tournament.status];
 
   const inner = (
-    <div className={compact ? 'p-4 md:p-5' : 'p-4 md:p-5'}>
-      <div className="flex items-start gap-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--radius-md)] bg-accent-dim text-accent">
+    <div>
+      <div className="flex items-start gap-4">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[var(--radius-md)] bg-accent-dim text-accent">
           <Icon name="trophy" />
         </span>
         <div className="min-w-0 flex-1">
@@ -54,7 +53,7 @@ export default function TournamentCard({
           </div>
         </div>
       </div>
-      <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs text-muted">
+      <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2.5 text-xs text-muted">
         <span className="inline-flex items-center gap-1.5">
           <Icon name="wallet" className="h-3.5 w-3.5" />
           Budget {formatCurrency(tournament.starting_budget)}

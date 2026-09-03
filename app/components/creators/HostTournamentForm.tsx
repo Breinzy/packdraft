@@ -52,7 +52,7 @@ export default function HostTournamentForm({
   }
 
   return (
-    <form onSubmit={submit} className="panel p-4 md:p-5 space-y-3">
+    <form onSubmit={submit} className="panel stack">
       <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Name" className="field" />
       <textarea
         value={description}
@@ -60,7 +60,7 @@ export default function HostTournamentForm({
         placeholder="Description"
         className="field"
       />
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-4">
         <label className="kicker">
           Budget
           <input value={budget} onChange={(e) => setBudget(e.target.value)} className="field mt-1" />

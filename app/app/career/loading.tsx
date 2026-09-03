@@ -4,7 +4,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 export default function Loading() {
   return (
     <AppShell>
-      <main className="page space-y-4 py-6">
+      <main className="page page-main stack">
         <Skeleton className="h-8 w-40" />
         <Skeleton className="h-24 w-full rounded-[var(--radius-lg)]" />
         <Skeleton className="h-40 w-full rounded-[var(--radius-lg)]" />

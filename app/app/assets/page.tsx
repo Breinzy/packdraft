@@ -37,7 +37,7 @@ export default async function AssetsPage({
   if (!supabase) {
     return (
       <AppShell nav="market">
-        <main className="page py-6 md:py-8 space-y-6">
+        <main className="page page-main stack">
           <h1 className="page-title text-2xl">Market</h1>
           <NeedsDatabase feature="The asset catalog" />
         </main>
@@ -55,7 +55,7 @@ export default async function AssetsPage({
   } catch {
     return (
       <AppShell nav="market">
-        <main className="page py-6 md:py-8 space-y-6">
+        <main className="page page-main stack">
           <h1 className="page-title text-2xl">Market</h1>
           <QueryFailed feature="the asset catalog" />
         </main>
@@ -76,7 +76,7 @@ export default async function AssetsPage({
 
   return (
     <AppShell nav="market">
-      <main className="page py-6 md:py-8 space-y-6">
+      <main className="page page-main stack">
         <div>
           <p className="text-sm text-muted">
             Pokémon prices stored by Packdraft. Virtual trades do not move the real market.
@@ -90,13 +90,13 @@ export default async function AssetsPage({
             name="q"
             defaultValue={q}
             placeholder="Search assets"
-            className="field min-h-12"
+            className="field min-h-12 px-4"
           />
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2.5">
             {TYPES.map((t) => (
               <label key={t.id} className="cursor-pointer">
                 <input type="radio" name="type" value={t.id} defaultChecked={assetType === t.id} className="sr-only peer" />
-                <span className="inline-flex min-h-11 items-center px-3.5 rounded-md border border-border text-sm text-muted peer-checked:text-foreground peer-checked:border-accent/50 peer-checked:bg-accent-dim">
+                <span className="inline-flex min-h-12 items-center px-4 rounded-md border border-border text-sm text-muted peer-checked:text-foreground peer-checked:border-accent/50 peer-checked:bg-accent-dim">
                   {t.label}
                 </span>
               </label>
@@ -125,13 +125,13 @@ export default async function AssetsPage({
         </form>
 
         {catalog.assets.length === 0 ? (
-          <div className="panel p-6 text-sm text-muted">
+          <div className="panel text-sm text-muted">
             {q || assetType !== 'all' || setId
               ? 'No assets match these filters.'
               : 'No assets in the catalog yet. An admin can import them from /admin.'}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+          <div className="card-grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
             {catalog.assets.map((asset) => (
               <AssetCard
                 key={asset.id}

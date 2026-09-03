@@ -162,15 +162,13 @@ export default async function DashboardPage() {
 
   return (
     <AppShell nav="dashboard">
-      <main className="page py-6 lg:py-8">
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_20rem]">
-          <div className="space-y-6">
-            <section className="panel-elevated p-5 md:p-6">
+      <main className="page page-main">
+        <div className="grid gap-[var(--grid-gap)] xl:grid-cols-[minmax(0,1fr)_22.5rem]">
+          <div className="stack">
+            <section className="panel-elevated">
               <p className="label-caps">Total portfolio value</p>
-              <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
-                <p className="metric">{formatCurrency(portfolioValue)}</p>
-              </div>
-              <div className="mt-3 flex flex-wrap items-center gap-2">
+              <p className="metric mt-5">{formatCurrency(portfolioValue)}</p>
+              <div className="mt-5 flex flex-wrap items-center gap-2.5">
                 <Delta pct={totalReturnPct} />
                 <span className="text-sm text-muted">
                   {totalReturnAmt >= 0 ? '+' : ''}
@@ -178,12 +176,12 @@ export default async function DashboardPage() {
                   {myCareerRank != null ? ` · Rank #${myCareerRank}` : ''}
                 </span>
               </div>
-              <div className="mt-6">
+              <div className="mt-10">
                 <PortfolioChart series={history} currentValue={portfolioValue} />
               </div>
             </section>
 
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div className="card-grid sm:grid-cols-3">
               <MetricCard
                 label="Today's change"
                 value={day ? formatCurrency(day.amount) : '—'}
@@ -205,7 +203,7 @@ export default async function DashboardPage() {
               />
             </div>
 
-            <section className="space-y-3">
+            <section className="stack">
               <SectionHeader title="Current tournament" href="/tournaments" actionLabel="All" />
               {featuredBook ? (
                 <TournamentCard
@@ -227,18 +225,14 @@ export default async function DashboardPage() {
             </section>
           </div>
 
-          <aside className="space-y-6">
-            <section className="panel p-4 md:p-5">
+          <aside className="stack">
+            <section className="panel stack">
               <SectionHeader title="Leaderboard" href={leaderHref} />
-              <div className="mt-4">
-                <LeaderboardPreview rows={leaderRows} userId={user.id} />
-              </div>
+              <LeaderboardPreview rows={leaderRows} userId={user.id} />
             </section>
-            <section className="panel p-4 md:p-5">
+            <section className="panel stack">
               <SectionHeader title="Recent activity" href={career ? '/career' : '/tournaments'} />
-              <div className="mt-2">
-                <ActivityList items={activity} />
-              </div>
+              <ActivityList items={activity} />
             </section>
             <AdSlot hidden={pro} />
           </aside>

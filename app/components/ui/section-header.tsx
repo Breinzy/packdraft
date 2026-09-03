@@ -10,10 +10,10 @@ export function SectionHeader({
   actionLabel?: string;
 }) {
   return (
-    <div className="flex items-center justify-between gap-3">
+    <div className="flex items-center justify-between gap-4">
       <h2 className="section-title">{title}</h2>
       {href ? (
-        <Link href={href} className="link-quiet inline-flex min-h-11 items-center">
+        <Link href={href} className="link-quiet shrink-0 py-1">
           {actionLabel}
         </Link>
       ) : null}

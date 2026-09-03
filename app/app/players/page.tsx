@@ -12,7 +12,7 @@ export default async function PlayersPage() {
   if (!supabase) {
     return (
       <AppShell nav="dashboard">
-        <main className="page py-6 md:py-8 space-y-6">
+        <main className="page page-main stack">
           <h1 className="page-title text-2xl">Players</h1>
           <NeedsDatabase feature="Player rankings" />
         </main>
@@ -26,7 +26,7 @@ export default async function PlayersPage() {
   } catch {
     return (
       <AppShell nav="dashboard">
-        <main className="page py-6 md:py-8 space-y-6">
+        <main className="page page-main stack">
           <h1 className="page-title text-2xl">Players</h1>
           <QueryFailed feature="Player rankings" />
         </main>
@@ -36,7 +36,7 @@ export default async function PlayersPage() {
 
   return (
     <AppShell nav="dashboard">
-      <main className="page py-6 md:py-8 space-y-6">
+      <main className="page page-main stack">
         <div>
           <p className="text-sm text-muted">
             Tournament record only. Career value is a separate book.
@@ -45,9 +45,9 @@ export default async function PlayersPage() {
         {rankings.length === 0 ? (
           <p className="text-sm text-muted">No settled tournament results yet.</p>
         ) : (
-          <ol className="space-y-2">
+          <ol className="stack">
             {rankings.map((row) => (
-              <li key={row.user_id} className="panel px-4 py-3.5 flex items-center justify-between gap-3">
+              <li key={row.user_id} className="panel panel-row flex items-center justify-between gap-3">
                 <div className="min-w-0 flex items-center gap-3">
                   <span className="num text-sm font-semibold text-muted w-8 shrink-0">#{row.rank}</span>
                   <Link href={`/players/${row.user_id}`} className="text-sm font-semibold truncate">

@@ -38,7 +38,7 @@ export default function AppShell({ children, nav, title, subtitle }: AppShellPro
           onMenu={() => setDrawerOpen(true)}
           heading={isSectionRoot}
         />
-        <div className={activeNav === 'none' ? '' : 'pb-20 lg:pb-0'}>{children}</div>
+        <div className={activeNav === 'none' ? '' : 'pb-28 lg:pb-0'}>{children}</div>
         {activeNav !== 'none' ? <BottomNav active={activeNav} /> : null}
       </div>
 

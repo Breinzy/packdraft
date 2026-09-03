@@ -17,7 +17,7 @@ export default async function ReleaseDetailPage({
   if (!supabase) {
     return (
       <AppShell nav="play">
-        <main className="page py-6 md:py-8 space-y-6">
+        <main className="page page-main stack">
           <h1 className="page-title text-2xl">Release</h1>
           <NeedsDatabase feature="This release" />
         </main>
@@ -31,7 +31,7 @@ export default async function ReleaseDetailPage({
   } catch {
     return (
       <AppShell nav="play">
-        <main className="page py-6 md:py-8 space-y-6">
+        <main className="page page-main stack">
           <h1 className="page-title text-2xl">Release</h1>
           <QueryFailed feature="this release" />
         </main>
@@ -42,7 +42,7 @@ export default async function ReleaseDetailPage({
 
   return (
     <AppShell nav="play">
-      <main className="page py-6 md:py-8 space-y-6">
+      <main className="page page-main stack">
         <Link href="/releases" className="text-sm text-accent-light min-h-11 inline-flex items-center">
           ← Releases
         </Link>
@@ -50,12 +50,12 @@ export default async function ReleaseDetailPage({
           <h1 className="page-title text-2xl">{campaign.name}</h1>
           <p className="text-sm text-muted mt-1.5">{campaign.description}</p>
         </div>
-        <ul className="space-y-2">
+        <ul className="stack">
           {campaign.items.map((item) => (
             <li key={`${item.kind}-${item.target_id}`}>
               <Link
                 href={item.kind === 'tournament' ? `/tournaments/${item.target_id}` : `/events/${item.target_id}`}
-                className="block panel px-4 py-3 panel-hover text-sm"
+                className="block panel panel-row panel-hover text-sm"
               >
                 {item.kind === 'tournament' ? 'Portfolio tournament' : 'Prediction event'}
               </Link>

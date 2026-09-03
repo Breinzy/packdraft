@@ -96,7 +96,7 @@ export default function AdminPanel({
   return (
     <div className="min-h-dvh">
       <header className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur-md">
-        <div className="page flex min-h-14 items-center justify-between gap-4">
+        <div className="page flex min-h-[4.25rem] items-center justify-between gap-4 py-4">
           <div className="flex items-center gap-3">
             <Logo href="/dashboard" compact />
             <span className="pill bg-[rgba(201,178,122,0.12)] text-gold">Admin</span>
@@ -107,8 +107,8 @@ export default function AdminPanel({
         </div>
       </header>
 
-      <main className="page py-6 md:py-8 space-y-8">
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+      <main className="page page-main stack">
+        <div className="card-grid grid-cols-2 md:grid-cols-3">
           {[
             { label: 'Active assets', value: stats.totalAssets },
             { label: 'Sealed', value: stats.sealedCount },
@@ -122,15 +122,15 @@ export default function AdminPanel({
             { label: 'Tournaments', value: tournaments.length },
             { label: 'Events', value: events.length },
           ].map((stat) => (
-            <div key={stat.label} className="panel px-4 py-3">
-              <div className="kicker mb-1">{stat.label}</div>
+            <div key={stat.label} className="panel stat-tile">
+              <div className="kicker">{stat.label}</div>
               <div className="text-base font-bold text-foreground">{stat.value}</div>
             </div>
           ))}
         </div>
 
         {importJob ? (
-          <div className="panel p-4 space-y-2">
+          <div className="panel stack">
             <div className="section-title">Catalog import</div>
             <div className="text-sm text-foreground">
               {importJob.status.toUpperCase()} · stage {importJob.stage}
@@ -173,12 +173,12 @@ export default function AdminPanel({
           </p>
         )}
 
-        <div className="space-y-3">
-          <div className="section-title mb-2">Market data</div>
+        <div className="stack">
+          <div className="section-title">Market data</div>
           {actions.map((action) => (
             <div
               key={action.id}
-              className="panel p-4 flex flex-col md:flex-row md:items-center gap-3"
+              className="panel flex flex-col md:flex-row md:items-center gap-3"
             >
               <div className="flex-1">
                 <div className="text-sm font-bold text-foreground">{action.label}</div>
@@ -208,9 +208,9 @@ export default function AdminPanel({
           ))}
         </div>
 
-        <div className="space-y-3">
+        <div className="stack">
           <div className="section-title">Create tournament</div>
-          <div className="panel p-4 space-y-3">
+          <div className="panel stack">
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -223,7 +223,7 @@ export default function AdminPanel({
               placeholder="Description"
               className="field"
             />
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-4">
               <label className="kicker">
                 Budget
                 <input
@@ -294,7 +294,7 @@ export default function AdminPanel({
           </div>
         </div>
 
-        <div className="space-y-3">
+        <div className="stack">
           <div className="section-title">Settle one</div>
           <div className="flex flex-col md:flex-row gap-2">
             <select
@@ -325,9 +325,9 @@ export default function AdminPanel({
           ) : null}
         </div>
 
-        <div className="space-y-3">
+        <div className="stack">
           <div className="section-title">Create market event</div>
-          <div className="panel p-4 space-y-3">
+          <div className="panel stack">
             <input
               value={eventName}
               onChange={(e) => setEventName(e.target.value)}
@@ -349,7 +349,7 @@ export default function AdminPanel({
                 <option value="release_price">Release price</option>
               </select>
             </label>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-4">
               <label className="kicker">
                 Lock hours
                 <input
@@ -410,7 +410,7 @@ export default function AdminPanel({
           </div>
         </div>
 
-        <div className="space-y-3">
+        <div className="stack">
           <div className="section-title">Settle one event</div>
           <div className="flex flex-col md:flex-row gap-2">
             <select
@@ -441,12 +441,12 @@ export default function AdminPanel({
           ) : null}
         </div>
 
-        <div className="space-y-3">
+        <div className="stack">
           <div className="section-title">Grant Pro</div>
           <p className="text-xs text-muted">
             Flag only. No Stripe. Pro must not change tournament cash, prices, or ranks.
           </p>
-          <div className="panel p-4 space-y-3">
+          <div className="panel stack">
             <input
               value={grantUserId}
               onChange={(e) => setGrantUserId(e.target.value)}
@@ -471,9 +471,9 @@ export default function AdminPanel({
           </div>
         </div>
 
-        <div className="space-y-3">
+        <div className="stack">
           <div className="section-title">Create release weekend</div>
-          <div className="panel p-4 space-y-3">
+          <div className="panel stack">
             <input
               value={releaseName}
               onChange={(e) => setReleaseName(e.target.value)}
@@ -512,7 +512,7 @@ export default function AdminPanel({
           </div>
         </div>
 
-        <div className="space-y-2">
+        <div className="stack">
           <div className="section-title">Tournaments</div>
           {tournaments.length === 0 ? (
             <p className="text-sm text-muted">None yet. Apply the Phase 5–10 migration, then create one.</p>
@@ -521,7 +521,7 @@ export default function AdminPanel({
               <Link
                 key={t.id}
                 href={`/tournaments/${t.id}`}
-                className="flex items-center justify-between gap-3 panel px-4 py-3"
+                className="flex items-center justify-between gap-3 panel panel-row"
               >
                 <span className="text-sm text-foreground truncate">{t.name}</span>
                 <StatusBadge status={t.status} />
@@ -530,7 +530,7 @@ export default function AdminPanel({
           )}
         </div>
 
-        <div className="space-y-2">
+        <div className="stack">
           <div className="section-title">Events</div>
           {events.length === 0 ? (
             <p className="text-sm text-muted">None yet. Apply the Phase 14–15 migrations, then create one.</p>
@@ -539,7 +539,7 @@ export default function AdminPanel({
               <Link
                 key={event.id}
                 href={`/events/${event.id}`}
-                className="flex items-center justify-between gap-3 panel px-4 py-3"
+                className="flex items-center justify-between gap-3 panel panel-row"
               >
                 <span className="text-sm text-foreground truncate">{event.name}</span>
                 <EventStatusBadge status={event.status} />

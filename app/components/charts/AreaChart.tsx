@@ -37,21 +37,23 @@ export default function PortfolioChart({
 
   return (
     <div>
-      <div className="seg" role="tablist" aria-label="Chart range">
-        {RANGES.map((r) => (
-          <button
-            key={r.key}
-            type="button"
-            role="tab"
-            data-active={range === r.key}
-            aria-selected={range === r.key}
-            onClick={() => setRange(r.key)}
-          >
-            {r.key}
-          </button>
-        ))}
+      <div className="flex justify-end">
+        <div className="seg" role="tablist" aria-label="Chart range">
+          {RANGES.map((r) => (
+            <button
+              key={r.key}
+              type="button"
+              role="tab"
+              data-active={range === r.key}
+              aria-selected={range === r.key}
+              onClick={() => setRange(r.key)}
+            >
+              {r.key}
+            </button>
+          ))}
+        </div>
       </div>
-      <div className="mt-5">
+      <div className="mt-6">
         <AreaChart points={points} />
       </div>
     </div>
@@ -71,10 +73,10 @@ export function AreaChart({ points }: { points: number[] }) {
   const span = max - min || 1;
   const w = 640;
   const h = 220;
-  const padL = 52;
-  const padR = 12;
-  const padT = 12;
-  const padB = 28;
+  const padL = 64;
+  const padR = 24;
+  const padT = 20;
+  const padB = 36;
   const coords = points.map((p, i) => {
     const x = padL + (i / (points.length - 1)) * (w - padL - padR);
     const y = padT + (1 - (p - min) / span) * (h - padT - padB);
@@ -93,10 +95,10 @@ export function AreaChart({ points }: { points: number[] }) {
           <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
         </linearGradient>
       </defs>
-      {ticks.map((tick) => {
+      {ticks.map((tick, i) => {
         const y = padT + (1 - (tick - min) / span) * (h - padT - padB);
         return (
-          <g key={tick}>
+          <g key={`${tick}-${i}`}>
             <line
               x1={padL}
               x2={w - padR}
@@ -106,7 +108,7 @@ export function AreaChart({ points }: { points: number[] }) {
               strokeDasharray="3 6"
               strokeWidth="1"
             />
-            <text x={4} y={y + 4} fill="#6e7681" fontSize="11">
+            <text x={10} y={y + 4} fill="#6e7681" fontSize="11">
               {compactUsd(tick)}
             </text>
           </g>
@@ -126,7 +128,7 @@ export function AreaChart({ points }: { points: number[] }) {
           <text
             key={label}
             x={padL + (i / (xLabels.length - 1)) * (w - padL - padR)}
-            y={h - 6}
+            y={h - 8}
             fill="#6e7681"
             fontSize="11"
             textAnchor={i === 0 ? 'start' : i === xLabels.length - 1 ? 'end' : 'middle'}

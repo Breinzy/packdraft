@@ -33,7 +33,7 @@ export function LeaderboardPreview({
   return (
     <div>
       {mine ? (
-        <div className="mb-4 rounded-[var(--radius-lg)] border border-border bg-surface-3 p-3.5">
+        <div className="mb-5 rounded-[var(--radius-lg)] border border-border bg-surface-3 px-4 py-3.5">
           <div className="flex items-baseline justify-between gap-3">
             <p className="text-sm font-semibold text-foreground">Your rank #{mine.rank}</p>
             <span className={`num text-sm ${mine.return_pct >= 0 ? 'text-green' : 'text-red'}`}>
@@ -45,7 +45,7 @@ export function LeaderboardPreview({
           ) : null}
         </div>
       ) : null}
-      <ol className="space-y-1">
+      <ol className="stack">
         {visible.map((row) => {
           const isMine = userId === row.user_id;
           return (
@@ -53,7 +53,7 @@ export function LeaderboardPreview({
               <Link
                 href={`/players/${row.user_id}`}
                 className={cn(
-                  'flex items-center gap-3 rounded-[var(--radius-md)] px-2 py-2 transition-colors',
+                  'flex items-center gap-3.5 rounded-[var(--radius-md)] px-3.5 py-3 transition-colors',
                   isMine ? 'bg-accent-dim' : 'hover:bg-surface-3'
                 )}
               >
@@ -71,7 +71,7 @@ export function LeaderboardPreview({
         })}
       </ol>
       {hrefAll ? (
-        <Link href={hrefAll} className="link-quiet mt-3 inline-flex min-h-11 items-center">
+        <Link href={hrefAll} className="link-quiet mt-2 inline-flex items-center py-1">
           View all
         </Link>
       ) : null}
@@ -98,9 +98,9 @@ export function ActivityList({
     return <p className="text-sm text-muted">No activity yet.</p>;
   }
   return (
-    <ul className="space-y-1">
+    <ul className="stack">
       {items.map((item) => (
-        <li key={item.id} className="flex items-start gap-3 rounded-[var(--radius-md)] px-1 py-2.5">
+        <li key={item.id} className="flex items-start gap-3.5 rounded-[var(--radius-md)] px-3 py-3">
           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--radius-sm)] bg-surface-3 text-muted">
             <Icon name={item.side === 'sell' ? 'tag' : 'cart'} className="h-4 w-4" />
           </span>
@@ -113,7 +113,7 @@ export function ActivityList({
       ))}
       {hrefAll ? (
         <li>
-          <Link href={hrefAll} className="link-quiet inline-flex min-h-11 items-center">
+          <Link href={hrefAll} className="link-quiet inline-flex items-center py-1">
             View all
           </Link>
         </li>

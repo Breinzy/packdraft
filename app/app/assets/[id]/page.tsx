@@ -35,7 +35,7 @@ export default async function AssetDetailPage({
   if (!supabase) {
     return (
       <AppShell nav="market">
-        <main className="page py-6 md:py-8 space-y-6">
+        <main className="page page-main stack">
           <h1 className="page-title text-2xl">Asset</h1>
           <NeedsDatabase feature="Asset detail" />
         </main>
@@ -48,7 +48,7 @@ export default async function AssetDetailPage({
   } catch {
     return (
       <AppShell nav="market">
-        <main className="page py-6 md:py-8 space-y-6">
+        <main className="page page-main stack">
           <h1 className="page-title text-2xl">Asset</h1>
           <QueryFailed feature="this asset" />
         </main>
@@ -134,7 +134,7 @@ export default async function AssetDetailPage({
 
   return (
     <AppShell nav="market">
-      <main className="page py-6 md:py-8 space-y-6">
+      <main className="page page-main stack">
         <Link href="/assets" className="text-sm text-muted min-h-11 inline-flex items-center">
           ← Market
         </Link>
@@ -176,8 +176,8 @@ export default async function AssetDetailPage({
           </div>
         </div>
 
-        <div className="panel p-4 md:p-6">
-          <div className="section-title mb-3">Price history</div>
+        <div className="panel">
+          <div className="section-title mb-5">Price history</div>
           <Sparkline points={history.map((p) => p.price)} className="h-28 w-full md:h-36" variant="brand" />
           <p className="text-[11px] text-faint mt-2">
             {pro ? 'Pro history window.' : 'Free history window. Pro extends this. It does not change prices or ranks.'}
@@ -214,11 +214,11 @@ export default async function AssetDetailPage({
             loginNext={`/assets/${asset.id}?tournament=${selectedTournament.tournament.id}`}
           />
         ) : (usingCareer || selectedTournament) && asset.price == null ? (
-          <div className="panel p-5 text-sm text-muted">
+          <div className="panel text-sm text-muted">
             No Packdraft price for this asset yet. Trading needs a stored snapshot.
           </div>
         ) : user ? (
-          <div className="panel p-5 text-sm text-muted">
+          <div className="panel text-sm text-muted">
             Open Career or join an active tournament to trade this asset.{' '}
             <Link href="/career" className="text-accent-light">
               Career
@@ -238,7 +238,7 @@ export default async function AssetDetailPage({
         )}
 
         {venues.length > 1 ? (
-          <div className="text-xs text-muted space-y-2">
+          <div className="text-xs text-muted stack">
             <div className="section-title">Trade in</div>
             <div className="flex flex-wrap gap-2">
               {venues.map((v) => (

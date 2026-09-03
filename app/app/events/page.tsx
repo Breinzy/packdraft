@@ -17,7 +17,7 @@ export default async function EventsPage() {
   if (!supabase) {
     return (
       <AppShell nav="play">
-        <main className="page py-6 md:py-8 space-y-6">
+        <main className="page page-main stack">
           <h1 className="page-title text-2xl">Events</h1>
           <NeedsDatabase feature="Market Events" />
         </main>
@@ -40,7 +40,7 @@ export default async function EventsPage() {
   } catch {
     return (
       <AppShell nav="play">
-        <main className="page py-6 md:py-8 space-y-6">
+        <main className="page page-main stack">
           <h1 className="page-title text-2xl">Events</h1>
           <QueryFailed feature="Market Events" />
           <p className="text-sm text-muted">
@@ -55,7 +55,7 @@ export default async function EventsPage() {
 
   return (
     <AppShell nav="play">
-      <main className="page py-6 md:py-8 space-y-6">
+      <main className="page page-main stack">
         <div className="flex flex-wrap gap-x-4">
           <Link href="/releases" className="inline-flex min-h-11 items-center text-sm text-accent-light">
             Release weekends
@@ -63,14 +63,14 @@ export default async function EventsPage() {
         </div>
 
         {events.length === 0 ? (
-          <div className="panel p-5 text-sm text-muted">
+          <div className="panel text-sm text-muted">
             No events yet. An admin can create one from /admin.
           </div>
         ) : (
-          <ul className="space-y-2">
+          <ul className="stack">
             {events.map((event) => (
               <li key={event.id}>
-                <Link href={`/events/${event.id}`} className="block panel p-4 md:p-5 panel-hover">
+                <Link href={`/events/${event.id}`} className="block panel panel-hover">
                   <div className="flex items-start justify-between gap-3">
                     <h2 className="text-lg font-medium text-foreground">{event.name}</h2>
                     <EventStatusBadge status={event.status} />

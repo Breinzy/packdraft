@@ -12,7 +12,7 @@ export default async function ReleasesPage() {
   if (!supabase) {
     return (
       <AppShell nav="play">
-        <main className="page py-6 md:py-8 space-y-6">
+        <main className="page page-main stack">
           <h1 className="page-title text-2xl">Releases</h1>
           <NeedsDatabase feature="Release events" />
         </main>
@@ -26,7 +26,7 @@ export default async function ReleasesPage() {
   } catch {
     return (
       <AppShell nav="play">
-        <main className="page py-6 md:py-8 space-y-6">
+        <main className="page page-main stack">
           <h1 className="page-title text-2xl">Releases</h1>
           <QueryFailed feature="Release events" />
         </main>
@@ -36,7 +36,7 @@ export default async function ReleasesPage() {
 
   return (
     <AppShell nav="play">
-      <main className="page py-6 md:py-8 space-y-6">
+      <main className="page page-main stack">
         <div>
           <p className="text-sm text-muted">
             A tournament plus predictions around a set drop. Still virtual. Still free.
@@ -45,10 +45,10 @@ export default async function ReleasesPage() {
         {campaigns.length === 0 ? (
           <p className="text-sm text-muted">No release weekends yet. An admin can create one.</p>
         ) : (
-          <ul className="space-y-2">
+          <ul className="stack">
             {campaigns.map((row) => (
               <li key={row.id}>
-                <Link href={`/releases/${row.id}`} className="block panel p-4 md:p-5 panel-hover">
+                <Link href={`/releases/${row.id}`} className="block panel panel-hover">
                   <div className="font-medium text-foreground">{row.name}</div>
                   <div className="mt-2 text-xs text-muted">Ends {formatCountdown(row.ends_at)}</div>
                 </Link>

@@ -13,7 +13,7 @@ export default function AuthShell({
     <div className="flex min-h-dvh items-center justify-center px-4 py-10">
       <div className="w-full max-w-md flash">
         <Logo />
-        <div className="panel-elevated mt-6 p-6 md:p-8">
+        <div className="panel-elevated panel-spacious mt-8">
           <h1 className="page-title text-2xl">{title}</h1>
           {subtitle ? <p className="mt-2 text-sm leading-6 text-muted">{subtitle}</p> : null}
           <div className="mt-6">{children}</div>

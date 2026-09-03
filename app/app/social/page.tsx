@@ -14,7 +14,7 @@ export default async function SocialPage() {
   if (!supabase) {
     return (
       <AppShell nav="dashboard">
-        <main className="page py-6 md:py-8 space-y-6">
+        <main className="page page-main stack">
           <h1 className="page-title text-2xl">Social</h1>
           <NeedsDatabase feature="Social" />
         </main>
@@ -37,7 +37,7 @@ export default async function SocialPage() {
   } catch {
     return (
       <AppShell nav="dashboard">
-        <main className="page py-6 md:py-8 space-y-6">
+        <main className="page page-main stack">
           <h1 className="page-title text-2xl">Social</h1>
           <QueryFailed feature="Social" />
           <p className="text-sm text-muted">
@@ -50,7 +50,7 @@ export default async function SocialPage() {
 
   return (
     <AppShell nav="dashboard">
-      <main className="page py-6 md:py-8 space-y-6">
+      <main className="page page-main stack">
         <div>
           <p className="text-sm text-muted mt-0">
             Friends, follows, and a feed. Tournament books stay isolated.
@@ -61,10 +61,10 @@ export default async function SocialPage() {
         </Link>
 
         {requests.length > 0 ? (
-          <section className="space-y-2">
+          <section className="stack">
             <h2 className="section-title">Friend requests</h2>
             {requests.map((row) => (
-              <div key={row.id} className="panel px-4 py-3 space-y-2">
+              <div key={row.id} className="panel panel-row stack">
                 <Link href={`/players/${row.requester_id}`} className="text-sm font-medium">
                   {row.requester_name}
                 </Link>
@@ -80,14 +80,14 @@ export default async function SocialPage() {
           </section>
         ) : null}
 
-        <section className="space-y-2">
+        <section className="stack">
           <h2 className="section-title">Feed</h2>
           {feed.length === 0 ? (
             <p className="text-sm text-muted">Follow players or add friends to fill this.</p>
           ) : (
-            <ul className="space-y-2">
+            <ul className="stack">
               {feed.map((row) => (
-                <li key={row.id} className="panel px-4 py-3">
+                <li key={row.id} className="panel panel-row">
                   <Link href={`/players/${row.actor_id}`} className="text-sm font-medium">
                     {row.actor_name}
                   </Link>

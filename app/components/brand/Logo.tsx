@@ -8,7 +8,7 @@ export function Logo({
   compact?: boolean;
 }) {
   const mark = (
-    <span className="inline-flex items-center gap-2.5 min-h-11">
+    <span className="inline-flex items-center gap-3 min-h-12">
       <span className="logo-mark" aria-hidden>
         <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M5 16.5 12 20l7-3.5v-9L12 4 5 7.5z" />

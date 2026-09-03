@@ -13,7 +13,7 @@ export default async function CreatePage() {
   if (!supabase) {
     return (
       <AppShell nav="play">
-        <main className="page py-6 md:py-8 space-y-6">
+        <main className="page page-main stack">
           <h1 className="page-title text-2xl">Host</h1>
           <NeedsDatabase feature="Creator hosting" />
         </main>
@@ -36,7 +36,7 @@ export default async function CreatePage() {
 
   return (
     <AppShell nav="play">
-      <main className="page py-6 md:py-8 space-y-6">
+      <main className="page page-main stack">
         <div>
           <p className="text-sm text-muted">
             Creator tournaments use the same isolated virtual books. No real money. No pay-to-win.

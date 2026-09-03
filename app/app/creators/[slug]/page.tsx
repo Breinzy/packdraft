@@ -15,7 +15,7 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
   if (!supabase) {
     return (
       <AppShell nav="play">
-        <main className="page py-6 md:py-8 space-y-6">
+        <main className="page page-main stack">
           <h1 className="page-title text-2xl">Creator</h1>
           <NeedsDatabase feature="Creator page" />
         </main>
@@ -31,7 +31,7 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
   if (error) {
     return (
       <AppShell nav="play">
-        <main className="page py-6 md:py-8 space-y-6">
+        <main className="page page-main stack">
           <h1 className="page-title text-2xl">Creator</h1>
           <QueryFailed feature="this creator" />
         </main>
@@ -50,7 +50,7 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
 
   return (
     <AppShell nav="play">
-      <main className="page py-6 md:py-8 space-y-6">
+      <main className="page page-main stack">
         <div>
           <h1 className="page-title text-2xl">{profile.display_name || slug}</h1>
           <p className="text-sm text-muted mt-1.5">{profile.creator_bio || 'Creator tournaments.'}</p>
@@ -58,10 +58,10 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
         {tournaments.length === 0 ? (
           <p className="text-sm text-muted">No hosted tournaments yet.</p>
         ) : (
-          <ul className="space-y-2">
+          <ul className="stack">
             {tournaments.map((t) => (
               <li key={t.id}>
-                <Link href={`/tournaments/${t.id}`} className="block panel p-4 panel-hover">
+                <Link href={`/tournaments/${t.id}`} className="block panel panel-hover">
                   <div className="flex items-start justify-between gap-3">
                     <span className="font-medium">{t.name}</span>
                     <StatusBadge status={t.status} />
