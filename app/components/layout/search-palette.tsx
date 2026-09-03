@@ -57,7 +57,7 @@ export function SearchPalette() {
           assets?: { id: string; name: string; asset_type?: AssetType; set_name?: string | null; price?: number | null }[];
           sets?: { id: string; name: string; asset_count?: number }[];
         };
-        const setHits: SearchHit[] = (data.sets ?? []).map((set) => ({
+        const setResults: SearchHit[] = (data.sets ?? []).map((set) => ({
           id: set.id,
           name: set.name,
           href: `/sets/${set.id}`,
@@ -75,7 +75,7 @@ export function SearchPalette() {
             .join(' · '),
           price: asset.price ?? null,
         }));
-        setHits([...setHits, ...assetHits]);
+        setHits([...setResults, ...assetHits]);
         setActive(0);
       } catch (err) {
         if ((err as { name?: string }).name !== 'AbortError') setHits([]);
