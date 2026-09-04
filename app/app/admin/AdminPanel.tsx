@@ -98,10 +98,10 @@ export default function AdminPanel({
       <header className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur-md">
         <div className="page flex min-h-14 items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <Logo href="/dashboard" compact />
+            <Logo href="/" compact />
             <span className="pill bg-[rgba(201,178,122,0.12)] text-gold">Admin</span>
           </div>
-          <Link href="/dashboard" className="text-sm text-muted hover:text-foreground min-h-11 inline-flex items-center">
+          <Link href="/" className="text-sm text-muted hover:text-foreground min-h-11 inline-flex items-center">
             ← Dashboard
           </Link>
         </div>

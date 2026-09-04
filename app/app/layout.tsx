@@ -1,25 +1,39 @@
-import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Analytics } from '@vercel/analytics/next';
+import type { Metadata, Viewport } from 'next';
+import { Manrope, JetBrains_Mono } from 'next/font/google';
+import { Providers } from '@/components/providers';
 import './globals.css';
+import './legacy-game.css';
 
-const geist = Geist({
+const manrope = Manrope({
   subsets: ['latin'],
-  variable: '--font-geist',
-  display: 'swap',
-  fallback: ['Segoe UI', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
+  variable: '--font-sans-family',
+  weight: ['400', '500', '600', '700', '800'],
 });
 
-const geistMono = Geist_Mono({
+const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
-  variable: '--font-geist-mono',
-  display: 'swap',
-  fallback: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+  variable: '--font-mono-family',
+  weight: ['400', '500', '600'],
 });
 
 export const metadata: Metadata = {
-  title: 'Packdraft — Competitive TCG Market Game',
+  title: 'Packdraft — Pokémon TCG Portfolio & Market Intelligence',
   description:
-    'Compete with virtual money using real Pokémon TCG market prices. Tournaments, temporary portfolios, and leaderboards.',
+    'Track your Pokémon card and sealed collection, understand what it is worth, and research the Pokémon TCG market like a serious investor.',
+  manifest: '/manifest.json',
+  icons: {
+    icon: '/icon.svg',
+  },
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: '#0a0b0f',
+  colorScheme: 'dark',
 };
 
 export default function RootLayout({
@@ -28,9 +42,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${geist.variable} ${geistMono.variable}`}>
-      <body className={`${geist.className} min-h-dvh bg-background text-foreground antialiased`}>
-        {children}
+    <html lang="en" className={`dark bg-background ${manrope.variable} ${jetbrainsMono.variable}`}>
+      <body className="min-h-dvh bg-background font-sans text-foreground antialiased">
+        <Providers>{children}</Providers>
+        {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>
   );

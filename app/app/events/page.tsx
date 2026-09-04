@@ -18,8 +18,8 @@ export default async function EventsPage() {
     return (
       <AppShell nav="play">
         <main className="page py-6 md:py-8 space-y-6">
-          <h1 className="page-title text-2xl">Events</h1>
-          <NeedsDatabase feature="Market Events" />
+          <h1 className="page-title text-2xl">Predictions</h1>
+          <NeedsDatabase feature="Predictions" />
         </main>
       </AppShell>
     );
@@ -41,10 +41,10 @@ export default async function EventsPage() {
     return (
       <AppShell nav="play">
         <main className="page py-6 md:py-8 space-y-6">
-          <h1 className="page-title text-2xl">Events</h1>
-          <QueryFailed feature="Market Events" />
+          <h1 className="page-title text-2xl">Predictions</h1>
+          <QueryFailed feature="Predictions" />
           <p className="text-sm text-muted">
-            If Career Mode already works, apply{' '}
+            If Sandbox already works, apply{' '}
             <code className="text-foreground">20260902150000_phase14_market_events.sql</code> (and
             the Phase 15 settlement migration it depends on).
           </p>
@@ -64,7 +64,7 @@ export default async function EventsPage() {
 
         {events.length === 0 ? (
           <div className="panel p-5 text-sm text-muted">
-            No events yet. An admin can create one from /admin.
+            No prediction events yet. An admin can create one from /admin.
           </div>
         ) : (
           <ul className="space-y-2">

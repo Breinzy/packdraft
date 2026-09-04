@@ -1,4 +1,13 @@
-# Packdraft — Career Mode
+# Packdraft — Sandbox (Career Mode)
+
+**Product name:** Sandbox.  
+**Code/schema name:** Career Mode (`career_*` tables, `/api/career/trade`).
+
+Under the collector-first roadmap, this is **not** the user’s real collection. It is a persistent virtual strategy-testing book, isolated from Collection and from every tournament.
+
+Do not merge these tables into a collection ledger. Phase 24 adds collection tracking separately.
+
+---
 
 Career Mode is a persistent simulated book. It is not a tournament.
 

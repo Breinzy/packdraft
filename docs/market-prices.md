@@ -65,7 +65,19 @@ For an asset at time T (default now):
 2. Take the latest `recorded_at`.
 3. That row’s `price` is the Packdraft current price.
 
+Live “now” batch lookups read the `asset_latest_prices` view (`DISTINCT ON (asset_id)` ordered by `recorded_at desc`) so a large catalog does not pull every historical row. Point-in-time reads (`getPriceAt`) still query `price_snapshots` directly.
+
 Do not reconstruct prices from holdings.
+
+## Set index
+
+Packdraft does not receive a set-level price from PokemonPriceTracker.
+
+Each set’s **index** is the sum of current member prices (cards + graded + sealed, `price > 0`). That is the cost of the tracked basket, not an average and not a fabricated walk.
+
+Point-in-time baskets use `latest_prices_at` / `set_indexes_at` (latest snapshot per asset at or before T). 24-hour and 30-day asset/set percent changes are computed from those baskets when a prior snapshot exists. They stay `0` when it does not.
+
+Do not invent index history. Observation days only.
 
 ## Daily price sync
 

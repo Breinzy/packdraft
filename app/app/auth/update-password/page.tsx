@@ -30,7 +30,7 @@ export default function UpdatePasswordPage() {
       return;
     }
 
-    router.push('/dashboard');
+    router.push('/');
   }
 
   return (

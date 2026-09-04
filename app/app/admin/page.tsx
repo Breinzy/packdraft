@@ -14,7 +14,7 @@ export default async function AdminPage() {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect('/auth/login');
-  if (!isAdminEmail(user.email)) redirect('/dashboard');
+  if (!isAdminEmail(user.email)) redirect('/');
 
   const { count: assetCount } = await supabase
     .from('assets')

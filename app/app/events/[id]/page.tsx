@@ -84,7 +84,7 @@ export default async function EventDetailPage({
     <AppShell nav="play">
       <main className="page py-6 md:py-8 space-y-6">
         <Link href="/events" className="text-sm text-accent-light min-h-11 inline-flex items-center">
-          ← Events
+          ← Predictions
         </Link>
 
         <div className="flex items-start justify-between gap-3">
