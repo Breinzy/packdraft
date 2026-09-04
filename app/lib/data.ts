@@ -45,6 +45,8 @@ export interface PokeSet {
   code: string
   releasedAt: string
   cardCount: number
+  trackedCount: number
+  sealedCount: number
   logoColor: string
   price: number
   change30d: number

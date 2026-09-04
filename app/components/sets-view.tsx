@@ -1,17 +1,23 @@
 'use client'
 
 import Link from 'next/link'
-import { sets, assetsInSet } from '@/lib/data'
+import { sets } from '@/lib/data'
 import { Sparkline } from '@/components/charts'
 import { ChangeBadge } from '@/components/primitives'
-import { formatUSD, formatDate, formatCompactNumber } from '@/lib/format'
+import { formatUSD, formatDate } from '@/lib/format'
 
 export function SetsView() {
+  if (sets.length === 0) {
+    return (
+      <p className="py-16 text-center text-sm text-muted-foreground">
+        No Pokémon sets are in the Packdraft catalog yet.
+      </p>
+    )
+  }
+
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
       {sets.map((s) => {
-        const members = assetsInSet(s.id)
-        const sealed = members.filter((m) => m.type === 'sealed').length
         return (
           <Link
             key={s.id}
@@ -51,8 +57,8 @@ export function SetsView() {
                   <p className="tabular text-lg font-bold text-foreground">{formatUSD(s.price)}</p>
                 </div>
                 <div className="text-right text-xs text-muted-foreground">
-                  <p className="tabular">{members.length} tracked</p>
-                  <p className="tabular">{sealed} sealed</p>
+                  <p className="tabular">{s.trackedCount} tracked</p>
+                  <p className="tabular">{s.sealedCount} sealed</p>
                 </div>
               </div>
             </div>

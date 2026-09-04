@@ -69,6 +69,16 @@ Live “now” batch lookups read the `asset_latest_prices` view (`DISTINCT ON (
 
 Do not reconstruct prices from holdings.
 
+## Set index
+
+Packdraft does not receive a set-level price from PokemonPriceTracker.
+
+Each set’s **index** is the sum of current member prices (cards + graded + sealed, `price > 0`). That is the cost of the tracked basket, not an average and not a fabricated walk.
+
+Point-in-time baskets use `latest_prices_at` / `set_indexes_at` (latest snapshot per asset at or before T). 24-hour and 30-day asset/set percent changes are computed from those baskets when a prior snapshot exists. They stay `0` when it does not.
+
+Do not invent index history. Observation days only.
+
 ## Daily price sync
 
 `syncMarketPrices` walks **existing** active assets by `id` cursor (`market_job_state` job `price_sync`). It does not add products.

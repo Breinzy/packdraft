@@ -8,7 +8,7 @@ import { assets } from '@/lib/data'
 import { PriceChart, AllocationDonut } from '@/components/charts'
 import { AssetToken, ChangeBadge, Panel, SectionHead } from '@/components/primitives'
 import { AssetRow } from '@/components/asset-views'
-import { formatUSD, formatSignedUSD, formatPct, formatDateShort, trendClass } from '@/lib/format'
+import { formatUSD, formatSignedUSD, formatPct, formatDateShort, trendClass, displayChange } from '@/lib/format'
 import { cn } from '@/lib/utils'
 
 export function Overview() {
@@ -42,7 +42,7 @@ export function Overview() {
     [positionViews],
   )
   const marketMovers = useMemo(
-    () => [...assets].sort((a, b) => Math.abs(b.change24h) - Math.abs(a.change24h)).slice(0, 5),
+    () => [...assets].sort((a, b) => Math.abs(displayChange(b)) - Math.abs(displayChange(a))).slice(0, 5),
     [],
   )
   const watchActivity = useMemo(
@@ -50,7 +50,7 @@ export function Overview() {
       watch
         .map((w) => assets.find((a) => a.id === w.assetId)!)
         .filter(Boolean)
-        .sort((a, b) => Math.abs(b.change24h) - Math.abs(a.change24h))
+        .sort((a, b) => Math.abs(displayChange(b)) - Math.abs(displayChange(a)))
         .slice(0, 4),
     [watch],
   )

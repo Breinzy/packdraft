@@ -31,6 +31,8 @@ describe('collector catalog cache', () => {
           code: 'BS',
           releasedAt: '2024-01-01',
           cardCount: 1,
+          trackedCount: 1,
+          sealedCount: 0,
           logoColor: 'oklch(0.7 0.14 80)',
           price: 10,
           change30d: 0,

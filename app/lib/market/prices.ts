@@ -116,6 +116,32 @@ export async function getCurrentPrices(
   return prices;
 }
 
+export async function getPricesAt(
+  supabase: SupabaseClient,
+  at: Date,
+  assetIds?: string[]
+): Promise<Map<string, number>> {
+  const prices = new Map<string, number>();
+  if (assetIds && assetIds.length === 0) return prices;
+
+  const chunks = assetIds ? chunkIds(assetIds) : [null];
+  for (const chunk of chunks) {
+    const { data, error } = await supabase.rpc('latest_prices_at', {
+      p_at: at.toISOString(),
+      p_ids: chunk,
+    });
+    if (error) {
+      throw new Error(`Failed to load prices at timestamp: ${error.message}`);
+    }
+    for (const row of data ?? []) {
+      if (!row.asset_id) continue;
+      const price = Number(row.price);
+      if (Number.isFinite(price) && price > 0) prices.set(row.asset_id as string, price);
+    }
+  }
+  return prices;
+}
+
 export interface PriceHistoryPoint {
   price: number;
   recordedAt: string;

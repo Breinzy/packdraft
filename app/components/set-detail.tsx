@@ -7,7 +7,7 @@ import { getSet, assetsInSet } from '@/lib/data'
 import { PriceChart } from '@/components/charts'
 import { AssetCard, AssetRow } from '@/components/asset-views'
 import { Panel, SectionHead, ChangeBadge } from '@/components/primitives'
-import { formatUSD, formatDate, formatPct, trendClass } from '@/lib/format'
+import { formatUSD, formatDate, formatPct, trendClass, displayChange } from '@/lib/format'
 import { cn } from '@/lib/utils'
 
 export function SetDetail({ setId }: { setId: string }) {
@@ -16,7 +16,7 @@ export function SetDetail({ setId }: { setId: string }) {
   const cards = members.filter((m) => m.type === 'card')
   const sealed = members.filter((m) => m.type === 'sealed')
   const movers = useMemo(
-    () => [...members].sort((a, b) => b.change24h - a.change24h),
+    () => [...members].sort((a, b) => displayChange(b) - displayChange(a)),
     [members],
   )
 
@@ -58,7 +58,7 @@ export function SetDetail({ setId }: { setId: string }) {
             <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Expansion</span>
             <h1 className="text-2xl font-bold tracking-tight text-foreground text-balance sm:text-3xl">{set.name}</h1>
             <p className="mt-0.5 text-sm text-muted-foreground">
-              {formatDate(set.releasedAt)} · {set.cardCount} cards · {members.length} tracked assets
+              {formatDate(set.releasedAt)} · {set.cardCount} cards · {set.trackedCount} tracked assets
             </p>
           </div>
           <div className="text-right">

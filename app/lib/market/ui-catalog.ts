@@ -1,6 +1,9 @@
 import type { CatalogAsset } from '@/types';
 import type { Asset, EnergyType, PokeSet } from '@/lib/data';
 import type { CatalogSet } from './catalog';
+import { computeChangePct } from './stale';
+import type { SetIndex } from './set-index';
+import { emptySetIndex } from './set-index';
 
 const ENERGY: ReadonlySet<string> = new Set([
   'lightning',
@@ -109,9 +112,20 @@ export function honestHistory(price: number, recorded?: number[]): number[] {
 export function catalogAssetToUi(
   asset: CatalogAsset,
   set?: CatalogSet | null,
-  recordedHistory?: number[]
+  recordedHistory?: number[],
+  prior?: { price24h?: number; price7d?: number; price30d?: number }
 ): Asset {
   const price = asset.price ?? 0;
+  const change24h = prior?.price24h != null ? Number(computeChangePct(price, prior.price24h).toFixed(2)) : 0;
+  const stored7d = asset.change_7d ?? 0;
+  const change7d =
+    stored7d !== 0 ? stored7d : prior?.price7d != null ? Number(computeChangePct(price, prior.price7d).toFixed(2)) : 0;
+  const change30d = prior?.price30d != null ? Number(computeChangePct(price, prior.price30d).toFixed(2)) : 0;
+  const historyPoints = recordedHistory?.length
+    ? recordedHistory
+    : [prior?.price30d, prior?.price7d, prior?.price24h, price].filter(
+        (value): value is number => typeof value === 'number' && Number.isFinite(value) && value > 0
+      );
   return {
     id: asset.id,
     type: asset.asset_type === 'sealed' ? 'sealed' : 'card',
@@ -122,34 +136,28 @@ export function catalogAssetToUi(
     tag: tagFromCatalog(asset),
     energy: energyFromMetadata(asset.metadata ?? {}),
     price,
-    change24h: 0,
-    change7d: asset.change_7d ?? 0,
-    change30d: 0,
+    change24h,
+    change7d,
+    change30d,
     volume: asset.volume ?? 0,
     watchers: 0,
     releasedAt: asset.set_release_date ?? set?.release_date ?? '',
-    history: honestHistory(price, recordedHistory),
+    history: honestHistory(price, historyPoints),
   };
 }
 
-function averageMemberPrice(members: Asset[]): number {
-  const priced = members.filter((asset) => asset.price > 0);
-  if (priced.length === 0) return 0;
-  const sum = priced.reduce((total, asset) => total + asset.price, 0);
-  return Number((sum / priced.length).toFixed(2));
-}
-
-export function catalogSetToUi(set: CatalogSet, members: Asset[] = []): PokeSet {
-  const price = averageMemberPrice(members);
+export function catalogSetToUi(set: CatalogSet, index: SetIndex = emptySetIndex()): PokeSet {
   return {
     id: set.id,
     name: set.name,
     code: setCode(set),
     releasedAt: set.release_date ?? '',
     cardCount: set.asset_count,
+    trackedCount: index.trackedCount,
+    sealedCount: index.sealedCount,
     logoColor: setLogoColor(set.id),
-    price,
-    change30d: 0,
-    history: honestHistory(price),
+    price: index.price,
+    change30d: index.change30d,
+    history: index.history.length ? index.history : honestHistory(index.price),
   };
 }

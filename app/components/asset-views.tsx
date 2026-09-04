@@ -6,7 +6,7 @@ import type { Asset } from '@/lib/data'
 import { usePortfolio } from '@/lib/store'
 import { AssetToken, ChangeBadge, TypePill } from '@/components/primitives'
 import { Sparkline } from '@/components/charts'
-import { formatUSD, formatCompactNumber } from '@/lib/format'
+import { formatUSD, formatCompactNumber, displayChange } from '@/lib/format'
 import { cn } from '@/lib/utils'
 
 /* Compact watch button reused everywhere */
@@ -72,7 +72,7 @@ export function AssetRow({ asset, rank }: { asset: Asset; rank?: number }) {
       </div>
       <div className="flex shrink-0 flex-col items-end gap-1">
         <span className="tabular text-sm font-semibold text-foreground">{formatUSD(asset.price)}</span>
-        <ChangeBadge value={asset.change24h} size="sm" />
+        <ChangeBadge value={displayChange(asset)} size="sm" />
       </div>
     </Link>
   )
@@ -102,7 +102,7 @@ export function AssetCard({ asset }: { asset: Asset }) {
       </div>
       <div className="mt-2 flex items-end justify-between">
         <span className="tabular text-base font-bold text-foreground">{formatUSD(asset.price)}</span>
-        <ChangeBadge value={asset.change24h} />
+        <ChangeBadge value={displayChange(asset)} />
       </div>
       <div className="mt-2 flex items-center gap-3 border-t border-border pt-2 text-[11px] text-muted-foreground">
         <span className="tabular">{formatCompactNumber(asset.watchers)} watching</span>

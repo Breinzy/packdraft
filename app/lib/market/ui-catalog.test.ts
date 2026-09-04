@@ -35,7 +35,7 @@ const baseAsset: CatalogAsset = {
 };
 
 describe('catalogAssetToUi', () => {
-  it('maps a single onto the mockup Asset contract without inventing 24h or watchers', () => {
+  it('maps a single onto the mockup Asset contract without inventing watchers or grades', () => {
     const ui = catalogAssetToUi(baseAsset);
     expect(ui.type).toBe('card');
     expect(ui.subtitle).toBe('161/131');
@@ -47,6 +47,12 @@ describe('catalogAssetToUi', () => {
     expect(ui.grades).toBeUndefined();
     expect(ui.history).toEqual([1420]);
     expect(ui.releasedAt).toBe('2025-01-17');
+  });
+
+  it('derives 24h and 30d change from earlier snapshots when they exist', () => {
+    const ui = catalogAssetToUi(baseAsset, null, undefined, { price24h: 1400, price30d: 1000 });
+    expect(ui.change24h).toBeCloseTo(1.43, 1);
+    expect(ui.change30d).toBe(42);
   });
 
   it('maps sealed products to sealed and uses subtype tags', () => {
@@ -79,11 +85,7 @@ describe('set helpers', () => {
     expect(setCode({ name: 'Prismatic Evolutions', slug: 'prismatic-evolutions' })).toBe('PE');
   });
 
-  it('averages known member prices into a set index and leaves 30d change at 0', () => {
-    const members = [
-      catalogAssetToUi({ ...baseAsset, id: 'a', price: 10 }),
-      catalogAssetToUi({ ...baseAsset, id: 'b', price: 30 }),
-    ];
+  it('uses a set index basket instead of averaging a partial member list', () => {
     const set = catalogSetToUi(
       {
         id: 'set-1',
@@ -92,10 +94,20 @@ describe('set helpers', () => {
         release_date: '2025-01-17',
         asset_count: 180,
       },
-      members
+      {
+        price: 12840,
+        change30d: 8.5,
+        history: [11800, 12840],
+        trackedCount: 190,
+        sealedCount: 6,
+        cardCount: 184,
+        pricedCount: 188,
+      }
     );
-    expect(set.price).toBe(20);
-    expect(set.change30d).toBe(0);
+    expect(set.price).toBe(12840);
+    expect(set.change30d).toBe(8.5);
+    expect(set.trackedCount).toBe(190);
+    expect(set.sealedCount).toBe(6);
     expect(set.cardCount).toBe(180);
   });
 });

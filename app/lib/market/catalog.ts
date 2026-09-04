@@ -352,6 +352,115 @@ export async function getSet(
   };
 }
 
+export type SetIndexRow = {
+  set_id: string;
+  index_price: number;
+  tracked_count: number;
+  sealed_count: number;
+  card_count: number;
+  priced_count: number;
+};
+
+export async function listSetLatestIndexes(supabase: SupabaseClient): Promise<Map<string, SetIndexRow>> {
+  const byId = new Map<string, SetIndexRow>();
+  const { data, error } = await supabase
+    .from('set_latest_indexes')
+    .select('set_id, index_price, tracked_count, sealed_count, card_count, priced_count');
+  if (error) {
+    throw new Error(`Failed to load set indexes: ${error.message}`);
+  }
+  for (const row of data ?? []) {
+    if (!row.set_id) continue;
+    byId.set(row.set_id, {
+      set_id: row.set_id,
+      index_price: Number(row.index_price ?? 0),
+      tracked_count: Number(row.tracked_count ?? 0),
+      sealed_count: Number(row.sealed_count ?? 0),
+      card_count: Number(row.card_count ?? 0),
+      priced_count: Number(row.priced_count ?? 0),
+    });
+  }
+  return byId;
+}
+
+export async function listSetIndexesAt(
+  supabase: SupabaseClient,
+  at: Date
+): Promise<Map<string, number>> {
+  const byId = new Map<string, number>();
+  const { data, error } = await supabase.rpc('set_indexes_at', { p_at: at.toISOString() });
+  if (error) {
+    throw new Error(`Failed to load historical set indexes: ${error.message}`);
+  }
+  for (const row of data ?? []) {
+    if (!row.set_id) continue;
+    const price = Number(row.index_price ?? 0);
+    if (price > 0) byId.set(row.set_id as string, price);
+  }
+  return byId;
+}
+
+export async function listSetMemberIds(supabase: SupabaseClient, setId: string): Promise<string[]> {
+  const ids: string[] = [];
+  const pageSize = 1000;
+  let from = 0;
+  while (true) {
+    const { data, error } = await supabase
+      .from('assets')
+      .select('id')
+      .eq('set_id', setId)
+      .eq('active', true)
+      .range(from, from + pageSize - 1);
+    if (error) {
+      throw new Error(`Failed to load set members: ${error.message}`);
+    }
+    const rows = data ?? [];
+    for (const row of rows) {
+      if (row.id) ids.push(row.id as string);
+    }
+    if (rows.length < pageSize) break;
+    from += pageSize;
+  }
+  return ids;
+}
+
+export async function listSetPriceObservations(
+  supabase: SupabaseClient,
+  memberIds: string[],
+  since: Date
+): Promise<{ assetId: string; price: number; recordedAt: string }[]> {
+  const observations: { assetId: string; price: number; recordedAt: string }[] = [];
+  const pageSize = 1000;
+  for (const chunk of chunkIds(memberIds)) {
+    let from = 0;
+    while (true) {
+      const { data, error } = await supabase
+        .from('price_snapshots')
+        .select('asset_id, price, recorded_at')
+        .in('asset_id', chunk)
+        .gt('price', 0)
+        .gte('recorded_at', since.toISOString())
+        .order('recorded_at', { ascending: true })
+        .range(from, from + pageSize - 1);
+      if (error) {
+        throw new Error(`Failed to load set price observations: ${error.message}`);
+      }
+      const rows = data ?? [];
+      for (const row of rows) {
+        if (!row.asset_id) continue;
+        observations.push({
+          assetId: row.asset_id as string,
+          price: Number(row.price),
+          recordedAt: row.recorded_at as string,
+        });
+      }
+      if (rows.length < pageSize) break;
+      from += pageSize;
+    }
+  }
+  return observations;
+}
+
 export function asAsset(catalog: CatalogAsset): Pick<Asset, 'image_url' | 'external_id'> {
   return { image_url: catalog.image_url, external_id: catalog.external_id };
 }

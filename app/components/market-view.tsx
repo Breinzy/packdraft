@@ -7,7 +7,7 @@ import { assets, sets } from '@/lib/data'
 import { useUI } from '@/lib/ui'
 import { AssetCard, AssetRow } from '@/components/asset-views'
 import { Panel, SectionHead, ChangeBadge } from '@/components/primitives'
-import { formatUSD, formatDate } from '@/lib/format'
+import { formatUSD, formatDate, displayChange } from '@/lib/format'
 import { cn } from '@/lib/utils'
 
 type Filter = 'all' | 'card' | 'sealed'
@@ -34,9 +34,9 @@ export function MarketView() {
     const arr = [...pool]
     switch (rail) {
       case 'gainers':
-        return arr.sort((a, b) => b.change24h - a.change24h).slice(0, 8)
+        return arr.sort((a, b) => displayChange(b) - displayChange(a)).slice(0, 8)
       case 'losers':
-        return arr.sort((a, b) => a.change24h - b.change24h).slice(0, 8)
+        return arr.sort((a, b) => displayChange(a) - displayChange(b)).slice(0, 8)
       case 'watched':
         return arr.sort((a, b) => b.watchers - a.watchers).slice(0, 8)
       case 'new':
@@ -48,7 +48,7 @@ export function MarketView() {
 
   const popular = useMemo(() => [...pool].sort((a, b) => b.watchers - a.watchers).slice(0, 6), [pool])
   const moving = useMemo(
-    () => [...pool].sort((a, b) => Math.abs(b.change24h) - Math.abs(a.change24h)).slice(0, 8),
+    () => [...pool].sort((a, b) => Math.abs(displayChange(b)) - Math.abs(displayChange(a))).slice(0, 8),
     [pool],
   )
 

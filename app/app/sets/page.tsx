@@ -4,7 +4,10 @@ import { SetsView } from '@/components/sets-view'
 export default function SetsPage() {
   return (
     <>
-      <PageHeader title="Sets" subtitle="Browse Pokemon expansions and their market performance." />
+      <PageHeader
+        title="Sets"
+        subtitle="Each expansion is one Packdraft index: cards and sealed lumped together from stored market prices."
+      />
       <SetsView />
     </>
   )

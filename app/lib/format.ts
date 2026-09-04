@@ -48,6 +48,10 @@ export function formatDateShort(iso: string): string {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
+export function displayChange(asset: { change24h: number; change7d: number }): number {
+  return asset.change24h !== 0 ? asset.change24h : asset.change7d
+}
+
 export function trendClass(n: number): string {
   return n > 0 ? 'text-positive' : n < 0 ? 'text-negative' : 'text-muted-foreground'
 }
