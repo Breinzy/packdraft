@@ -32,7 +32,6 @@ const FUTURE_NAV = [
   { label: 'Tournaments', icon: Trophy },
   { label: 'Predictions', icon: Target },
   { label: 'Sandbox', icon: FlaskConical },
-  { label: 'Pro', icon: Sparkles },
 ]
 
 const MOBILE_NAV = PRIMARY_NAV
@@ -89,6 +88,24 @@ function Sidebar() {
             )
           })}
         </ul>
+
+        <div className="mt-4">
+          <Link
+            href="/pro"
+            className={cn(
+              'group flex items-center gap-3 rounded-lg border px-3 py-2.5 text-sm font-semibold transition-colors',
+              isActive(pathname, '/pro')
+                ? 'border-primary/40 bg-primary-muted text-primary'
+                : 'border-primary/25 bg-primary-muted/40 text-primary hover:bg-primary-muted',
+            )}
+          >
+            <Sparkles className="size-[18px]" strokeWidth={2.2} />
+            Pro
+            <span className="ml-auto rounded bg-primary px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-primary-foreground">
+              Upgrade
+            </span>
+          </Link>
+        </div>
 
         <div className="mt-6 px-3">
           <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">
@@ -150,6 +167,14 @@ function Topbar() {
         </button>
 
         <div className="ml-auto flex items-center gap-2">
+          <Link
+            href="/pro"
+            className="flex h-10 items-center gap-1.5 rounded-xl border border-primary/30 bg-primary-muted/50 px-3 text-sm font-semibold text-primary transition-colors hover:bg-primary-muted"
+          >
+            <Sparkles className="size-4" strokeWidth={2.5} />
+            <span className="hidden sm:inline">Pro</span>
+            <span className="sr-only sm:hidden">Upgrade to Pro</span>
+          </Link>
           <Button onClick={() => openAdd()} size="sm" className="h-10 gap-1.5 rounded-xl font-semibold">
             <Plus className="size-4" strokeWidth={2.5} />
             <span className="hidden sm:inline">Add to collection</span>
