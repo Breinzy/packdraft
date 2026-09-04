@@ -91,6 +91,17 @@ export function emptySetIndex(): SetIndex {
   };
 }
 
+/** Real basket values at sampled as-of times. Duplicate consecutive levels are dropped. */
+export function sampledIndexHistory(values: Array<number | null | undefined>): number[] {
+  const history: number[] = [];
+  for (const value of values) {
+    if (value == null || !Number.isFinite(value) || value <= 0) continue;
+    const rounded = Number(value.toFixed(2));
+    if (history.length === 0 || history[history.length - 1] !== rounded) history.push(rounded);
+  }
+  return history;
+}
+
 export function buildSetIndex(input: {
   currentPrice: number;
   price30d?: number | null;

@@ -11,6 +11,10 @@
     {
       "path": "/api/cron/sync-prices",
       "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/admin/history-backfill",
+      "schedule": "0 10 * * *"
     }
   ]
 }
