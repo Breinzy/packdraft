@@ -1,8 +1,9 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { getCurrentPrices } from './prices';
+import { chunkIds, getCurrentPrices } from './prices';
 import type { Asset, AssetType, CatalogAsset } from '@/types';
 
 export const PAGE_SIZE = 24;
+export const MAX_PAGE_SIZE = 200;
 
 export interface CatalogQuery {
   q?: string;
@@ -10,6 +11,7 @@ export interface CatalogQuery {
   setId?: string;
   tcgSlug?: string;
   page?: number;
+  pageSize?: number;
 }
 
 interface AssetRow {
@@ -22,7 +24,10 @@ interface AssetRow {
   tcg_id: string;
   set_id: string | null;
   tcgs: { name: string; slug: string } | { name: string; slug: string }[] | null;
-  sets: { name: string } | { name: string }[] | null;
+  sets:
+    | { name: string; slug?: string | null; release_date?: string | null }
+    | { name: string; slug?: string | null; release_date?: string | null }[]
+    | null;
 }
 
 function one<T>(value: T | T[] | null | undefined): T | null {
@@ -49,6 +54,8 @@ function toCatalogAsset(
     tcg_slug: tcg?.slug ?? null,
     set_id: row.set_id,
     set_name: set?.name ?? null,
+    set_slug: set?.slug ?? null,
+    set_release_date: set?.release_date ?? null,
     price: quote?.price ?? null,
     recorded_at: quote?.recordedAt ?? null,
     change_7d: quote?.change7d ?? null,
@@ -60,25 +67,30 @@ function toCatalogAsset(
   };
 }
 
+const ASSET_SELECT = `
+  id, name, asset_type, image_url, external_id, metadata, tcg_id, set_id,
+  tcgs ( name, slug ),
+  sets ( name, slug, release_date )
+`;
+
+function resolvePageSize(query: CatalogQuery): number {
+  const requested = query.pageSize ?? PAGE_SIZE;
+  return Math.min(MAX_PAGE_SIZE, Math.max(1, Math.floor(requested)));
+}
+
 export async function searchCatalog(
   supabase: SupabaseClient,
   query: CatalogQuery = {},
   now: Date = new Date()
 ): Promise<{ assets: CatalogAsset[]; total: number; page: number; pageSize: number }> {
   const page = Math.max(1, query.page ?? 1);
-  const from = (page - 1) * PAGE_SIZE;
-  const to = from + PAGE_SIZE - 1;
+  const pageSize = resolvePageSize(query);
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
 
   let q = supabase
     .from('assets')
-    .select(
-      `
-      id, name, asset_type, image_url, external_id, metadata, tcg_id, set_id,
-      tcgs ( name, slug ),
-      sets ( name )
-    `,
-      { count: 'exact' }
-    )
+    .select(ASSET_SELECT, { count: 'exact' })
     .eq('active', true)
     .order('name', { ascending: true })
     .range(from, to);
@@ -117,7 +129,7 @@ export async function searchCatalog(
     assets: rows.map((row) => toCatalogAsset(row, prices)),
     total: count ?? 0,
     page,
-    pageSize: PAGE_SIZE,
+    pageSize,
   };
 }
 
@@ -128,13 +140,7 @@ export async function getCatalogAsset(
 ): Promise<CatalogAsset | null> {
   const { data, error } = await supabase
     .from('assets')
-    .select(
-      `
-      id, name, asset_type, image_url, external_id, metadata, tcg_id, set_id,
-      tcgs ( name, slug ),
-      sets ( name )
-    `
-    )
+    .select(ASSET_SELECT)
     .eq('id', assetId)
     .maybeSingle();
 
@@ -144,6 +150,103 @@ export async function getCatalogAsset(
   if (!data) return null;
   const prices = await getCurrentPrices(supabase, [assetId], now);
   return toCatalogAsset(data as AssetRow, prices);
+}
+
+export async function getCatalogAssetsByIds(
+  supabase: SupabaseClient,
+  assetIds: string[],
+  now: Date = new Date()
+): Promise<CatalogAsset[]> {
+  const chunks = chunkIds(assetIds);
+  if (chunks.length === 0) return [];
+
+  const rows: AssetRow[] = [];
+  for (const chunk of chunks) {
+    const { data, error } = await supabase.from('assets').select(ASSET_SELECT).in('id', chunk).eq('active', true);
+    if (error) {
+      throw new Error(`Failed to load assets: ${error.message}`);
+    }
+    rows.push(...((data ?? []) as AssetRow[]));
+  }
+
+  const prices = await getCurrentPrices(
+    supabase,
+    rows.map((row) => row.id),
+    now
+  );
+  const byId = new Map(rows.map((row) => [row.id, toCatalogAsset(row, prices)]));
+  return assetIds.map((id) => byId.get(id)).filter((asset): asset is CatalogAsset => Boolean(asset));
+}
+
+export async function listLatestQuoteAssetIds(
+  supabase: SupabaseClient,
+  options: {
+    order: 'change_7d' | 'volume' | 'recorded_at';
+    ascending?: boolean;
+    limit: number;
+  }
+): Promise<string[]> {
+  const { data, error } = await supabase
+    .from('asset_latest_prices')
+    .select('asset_id')
+    .order(options.order, { ascending: options.ascending ?? false })
+    .limit(Math.max(1, options.limit));
+
+  if (error) {
+    throw new Error(`Failed to load latest prices: ${error.message}`);
+  }
+  return (data ?? []).map((row) => row.asset_id).filter((id): id is string => Boolean(id));
+}
+
+export async function listRecentAssets(
+  supabase: SupabaseClient,
+  limit = 80,
+  now: Date = new Date()
+): Promise<CatalogAsset[]> {
+  const { data, error } = await supabase
+    .from('assets')
+    .select(ASSET_SELECT)
+    .eq('active', true)
+    .order('created_at', { ascending: false })
+    .limit(Math.max(1, limit));
+
+  if (error) {
+    throw new Error(`Failed to load recent assets: ${error.message}`);
+  }
+  const rows = (data ?? []) as AssetRow[];
+  const prices = await getCurrentPrices(
+    supabase,
+    rows.map((row) => row.id),
+    now
+  );
+  return rows.map((row) => toCatalogAsset(row, prices));
+}
+
+export async function listSetAssets(
+  supabase: SupabaseClient,
+  setId: string,
+  options: { cap?: number; now?: Date } = {}
+): Promise<CatalogAsset[]> {
+  const cap = options.cap ?? 400;
+  const now = options.now ?? new Date();
+  const pageSize = MAX_PAGE_SIZE;
+  const assets: CatalogAsset[] = [];
+  let page = 1;
+
+  while (assets.length < cap) {
+    const result = await searchCatalog(
+      supabase,
+      { setId, page, pageSize: Math.min(pageSize, cap - assets.length) },
+      now
+    );
+    assets.push(...result.assets);
+    if (result.assets.length === 0 || assets.length >= result.total || result.assets.length < result.pageSize) {
+      break;
+    }
+    page += 1;
+  }
+
+  return assets.slice(0, cap);
 }
 
 export type CatalogSet = {

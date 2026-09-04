@@ -1,12 +1,14 @@
 'use client'
 
-import { createContext, useCallback, useContext, useMemo, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import {
   assets,
   getAsset,
+  getCatalogEpoch,
   positions as seedPositions,
   watchlist as seedWatch,
   positionUnitPrice,
+  subscribeCatalog,
   type Asset,
   type GradeQuote,
   type Position,
@@ -48,8 +50,50 @@ interface StoreValue {
 
 const StoreContext = createContext<StoreValue | null>(null)
 
-export function buildView(p: Position): PositionView {
-  const asset = getAsset(p.assetId)!
+const POSITIONS_KEY = 'packdraft.collection.positions'
+const WATCH_KEY = 'packdraft.watchlist'
+
+function isPosition(value: unknown): value is Position {
+  if (!value || typeof value !== 'object') return false
+  const row = value as Position
+  return (
+    typeof row.assetId === 'string' &&
+    typeof row.quantity === 'number' &&
+    typeof row.costBasisPerUnit === 'number' &&
+    typeof row.purchaseDate === 'string'
+  )
+}
+
+function isWatchItem(value: unknown): value is WatchItem {
+  if (!value || typeof value !== 'object') return false
+  const row = value as WatchItem
+  return typeof row.assetId === 'string' && typeof row.addedAt === 'string'
+}
+
+function readLocal<T>(key: string, fallback: T, guard: (value: unknown) => value is T): T {
+  if (typeof window === 'undefined') return fallback
+  try {
+    const raw = window.localStorage.getItem(key)
+    if (!raw) return fallback
+    const parsed = JSON.parse(raw) as unknown
+    if (!guard(parsed)) return fallback
+    return parsed
+  } catch {
+    return fallback
+  }
+}
+
+function isPositionList(value: unknown): value is Position[] {
+  return Array.isArray(value) && value.every(isPosition)
+}
+
+function isWatchList(value: unknown): value is WatchItem[] {
+  return Array.isArray(value) && value.every(isWatchItem)
+}
+
+export function buildView(p: Position): PositionView | null {
+  const asset = getAsset(p.assetId)
+  if (!asset) return null
   const unitPrice = positionUnitPrice(p)
   const marketValue = unitPrice * p.quantity
   const costBasis = p.costBasisPerUnit * p.quantity
@@ -59,13 +103,37 @@ export function buildView(p: Position): PositionView {
 }
 
 export function PortfolioProvider({ children }: { children: React.ReactNode }) {
-  const [positions, setPositions] = useState<Position[]>(seedPositions)
-  const [watch, setWatch] = useState<WatchItem[]>(seedWatch)
-
-  const positionViews = useMemo(
-    () => positions.map(buildView).sort((a, b) => b.marketValue - a.marketValue),
-    [positions],
+  const [positions, setPositions] = useState<Position[]>(() =>
+    readLocal(POSITIONS_KEY, seedPositions, isPositionList),
   )
+  const [watch, setWatch] = useState<WatchItem[]>(() => readLocal(WATCH_KEY, seedWatch, isWatchList))
+  const [catalogEpoch, setCatalogEpoch] = useState(getCatalogEpoch)
+
+  useEffect(() => subscribeCatalog(() => setCatalogEpoch(getCatalogEpoch())), [])
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(POSITIONS_KEY, JSON.stringify(positions))
+    } catch {
+      // Ignore quota / private-mode failures.
+    }
+  }, [positions])
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(WATCH_KEY, JSON.stringify(watch))
+    } catch {
+      // Ignore quota / private-mode failures.
+    }
+  }, [watch])
+
+  const positionViews = useMemo(() => {
+    const views = positions
+      .map(buildView)
+      .filter((view): view is PositionView => view !== null)
+      .sort((a, b) => b.marketValue - a.marketValue)
+    return catalogEpoch >= 0 ? views : views
+  }, [positions, catalogEpoch])
 
   const totals = useMemo<PortfolioTotals>(() => {
     let value = 0
@@ -159,9 +227,12 @@ export function portfolioValueSeries(positions: Position[], points = 180): numbe
   for (const p of positions) {
     const a = getAsset(p.assetId)
     if (!a) continue
-    const gradeMult = positionUnitPrice(p) / a.price
+    const gradeMult = a.price > 0 ? positionUnitPrice(p) / a.price : 1
+    const series = a.history.length > 0 ? a.history : [a.price]
     for (let i = 0; i < points; i++) {
-      out[i] += (a.history[i] ?? a.price) * gradeMult * p.quantity
+      const histIndex = i - (points - series.length)
+      const px = histIndex >= 0 ? series[histIndex] : series[0]
+      out[i] += (px ?? a.price) * gradeMult * p.quantity
     }
   }
   return out.map((n) => Number(n.toFixed(2)))

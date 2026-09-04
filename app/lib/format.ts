@@ -30,12 +30,22 @@ export function formatCompactNumber(n: number): string {
   return new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(n)
 }
 
+function validDate(iso: string): Date | null {
+  if (!iso) return null
+  const date = new Date(iso)
+  return Number.isNaN(date.getTime()) ? null : date
+}
+
 export function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  const date = validDate(iso)
+  if (!date) return '—'
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
 export function formatDateShort(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  const date = validDate(iso)
+  if (!date) return '—'
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
 export function trendClass(n: number): string {

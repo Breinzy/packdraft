@@ -65,6 +65,8 @@ For an asset at time T (default now):
 2. Take the latest `recorded_at`.
 3. That row’s `price` is the Packdraft current price.
 
+Live “now” batch lookups read the `asset_latest_prices` view (`DISTINCT ON (asset_id)` ordered by `recorded_at desc`) so a large catalog does not pull every historical row. Point-in-time reads (`getPriceAt`) still query `price_snapshots` directly.
+
 Do not reconstruct prices from holdings.
 
 ## Daily price sync

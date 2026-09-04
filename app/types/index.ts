@@ -174,6 +174,8 @@ export interface CatalogAsset {
   tcg_slug: string | null;
   set_id: string | null;
   set_name: string | null;
+  set_slug: string | null;
+  set_release_date: string | null;
   price: number | null;
   recorded_at: string | null;
   change_7d: number | null;
