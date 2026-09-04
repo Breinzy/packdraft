@@ -31,6 +31,8 @@ export function SetDetail({ setId }: { setId: string }) {
     )
   }
 
+  const cardsTracked = Math.max(0, set.trackedCount - set.sealedCount)
+
   return (
     <div className="space-y-5">
       <Link
@@ -76,8 +78,8 @@ export function SetDetail({ setId }: { setId: string }) {
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatTile label="Cards tracked" value={String(cards.length)} />
-        <StatTile label="Sealed tracked" value={String(sealed.length)} />
+        <StatTile label="Cards tracked" value={String(cardsTracked)} />
+        <StatTile label="Sealed tracked" value={String(set.sealedCount)} />
         <StatTile label="30d performance" value={formatPct(set.change30d)} valueClass={trendClass(set.change30d)} />
         <StatTile label="Released" value={formatDate(set.releasedAt)} />
       </div>
