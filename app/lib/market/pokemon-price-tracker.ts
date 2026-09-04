@@ -14,6 +14,7 @@ import {
   normalizeSet,
   normalizeSingleCard,
 } from './normalize';
+import { extractHistoryPoints, HISTORY_DAYS } from './history';
 import type {
   AssetPriceRef,
   MarketDataProvider,
@@ -25,6 +26,21 @@ import type {
 } from './types';
 
 const SOURCE: MarketProviderId = 'pokemonpricetracker';
+
+function withHistory(
+  price: NormalizedPrice,
+  payload: unknown,
+  includeHistory: boolean
+): NormalizedPrice {
+  if (!includeHistory) return price;
+  const history = extractHistoryPoints(payload);
+  const latest = history[history.length - 1];
+  return {
+    ...price,
+    history,
+    volume: latest?.volume ?? price.volume ?? 0,
+  };
+}
 
 function pageFrom(
   assets: NormalizedAsset[],
@@ -150,8 +166,13 @@ export class PokemonPriceTrackerProvider implements MarketDataProvider {
     return pageFrom(assets, prices, total, meta);
   }
 
-  async fetchPrices(refs: AssetPriceRef[]): Promise<NormalizedPrice[]> {
+  async fetchPrices(
+    refs: AssetPriceRef[],
+    options: { includeHistory?: boolean; days?: number } = {}
+  ): Promise<NormalizedPrice[]> {
     const recordedAt = new Date().toISOString();
+    const includeHistory = options.includeHistory === true;
+    const days = options.days ?? HISTORY_DAYS;
     const sealedIds = [
       ...new Set(
         refs
@@ -173,22 +194,29 @@ export class PokemonPriceTrackerProvider implements MarketDataProvider {
     const prices: NormalizedPrice[] = [];
 
     if (sealedIds.length > 0) {
-      const sealed = await getSealedProductPrices(sealedIds);
+      const sealed = await getSealedProductPrices(sealedIds, {
+        includeHistory,
+        days: includeHistory ? days : undefined,
+      });
       for (const product of sealed) {
         const normalized = normalizeSealedProduct(product, SOURCE, recordedAt);
-        if (normalized?.price) prices.push(normalized.price);
+        if (normalized?.price) prices.push(withHistory(normalized.price, product, includeHistory));
       }
     }
 
     if (cardIds.length > 0) {
-      const cards = await getGradedCardPrices(cardIds, { includeEbay: needsEbay });
+      const cards = await getGradedCardPrices(cardIds, {
+        includeEbay: needsEbay,
+        includeHistory,
+        days: includeHistory ? days : undefined,
+      });
       for (const card of cards) {
         const wantsSingle = refs.some(
           (ref) => ref.assetType === 'single' && ref.externalId === String(card.tcgPlayerId)
         );
         if (wantsSingle) {
           const single = normalizeSingleCard(card, SOURCE, recordedAt);
-          if (single?.price) prices.push(single.price);
+          if (single?.price) prices.push(withHistory(single.price, card, includeHistory));
         }
         if (needsEbay) {
           for (const grade of [10, 9] as const) {
@@ -198,7 +226,7 @@ export class PokemonPriceTrackerProvider implements MarketDataProvider {
             );
             if (!requested) continue;
             const normalized = normalizeGradedCard(card, grade, SOURCE, recordedAt);
-            if (normalized?.price) prices.push(normalized.price);
+            if (normalized?.price) prices.push(withHistory(normalized.price, card, includeHistory));
           }
         }
       }

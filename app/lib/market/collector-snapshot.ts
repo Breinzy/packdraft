@@ -14,9 +14,10 @@ import {
   listSetPriceObservations,
   listSets,
   searchCatalog,
+  listAssetVolumeStats,
 } from './catalog';
 import { catalogAssetToUi, catalogSetToUi } from './ui-catalog';
-import { buildSetIndex, emptySetIndex, observationDayBaskets } from './set-index';
+import { buildSetIndex, emptySetIndex, observationDayBaskets, sampledIndexHistory } from './set-index';
 import type { CatalogAsset } from '@/types';
 
 const GAINERS = 180;
@@ -83,7 +84,8 @@ export async function buildCollectorSnapshot(
   const sets = await listSets(supabase);
   const setById = new Map(sets.map((set) => [set.id, set]));
 
-  const [gainerIds, loserIds, sealed, recent, queryHits, latestIndexes, indexes30d] = await Promise.all([
+  const [gainerIds, loserIds, sealed, recent, queryHits, latestIndexes, indexes7d, indexes30d, indexes180d] =
+    await Promise.all([
     safe(listLatestQuoteAssetIds(supabase, { order: 'change_7d', ascending: false, limit: GAINERS }), []),
     safe(listLatestQuoteAssetIds(supabase, { order: 'change_7d', ascending: true, limit: LOSERS }), []),
     safe(searchCatalog(supabase, { assetType: 'sealed', page: 1, pageSize: SEALED }, now).then((r) => r.assets), []),
@@ -94,31 +96,46 @@ export async function buildCollectorSnapshot(
       )
     ),
     safe(listSetLatestIndexes(supabase), new Map()),
+    safe(listSetIndexesAt(supabase, daysAgo(now, 7)), new Map()),
     safe(listSetIndexesAt(supabase, at30d), new Map()),
+    safe(listSetIndexesAt(supabase, daysAgo(now, INDEX_LOOKBACK_DAYS)), new Map()),
   ]);
 
   const quoted = await safe(getCatalogAssetsByIds(supabase, [...gainerIds, ...loserIds], now), []);
   const catalogAssets = uniqueCatalog([...quoted, ...sealed, ...recent, ...queryHits.flat()]);
   const assetIds = catalogAssets.map((asset) => asset.id);
-  const [prices24h, prices7d, prices30d] = await Promise.all([
+  const [prices24h, prices7d, prices30d, volumes] = await Promise.all([
     safe(getPricesAt(supabase, at24h, assetIds), new Map()),
     safe(getPricesAt(supabase, at7d, assetIds), new Map()),
     safe(getPricesAt(supabase, at30d, assetIds), new Map()),
+    safe(listAssetVolumeStats(supabase, assetIds), new Map()),
   ]);
 
   const assets = catalogAssets.map((asset) =>
-    catalogAssetToUi(asset, asset.set_id ? setById.get(asset.set_id) : undefined, undefined, {
-      price24h: prices24h.get(asset.id),
-      price7d: prices7d.get(asset.id),
-      price30d: prices30d.get(asset.id),
-    })
+    catalogAssetToUi(
+      { ...asset, volume: volumes.get(asset.id) ?? asset.volume },
+      asset.set_id ? setById.get(asset.set_id) : undefined,
+      undefined,
+      {
+        price24h: prices24h.get(asset.id),
+        price7d: prices7d.get(asset.id),
+        price30d: prices30d.get(asset.id),
+      }
+    )
   );
 
   const uiSets = sets.map((set) => {
     const row = latestIndexes.get(set.id);
+    const current = row?.index_price ?? 0;
     const index = buildSetIndex({
-      currentPrice: row?.index_price ?? 0,
+      currentPrice: current,
       price30d: indexes30d.get(set.id) ?? null,
+      history: sampledIndexHistory([
+        indexes180d.get(set.id),
+        indexes30d.get(set.id),
+        indexes7d.get(set.id),
+        current,
+      ]),
       trackedCount: row?.tracked_count ?? 0,
       sealedCount: row?.sealed_count ?? 0,
       cardCount: row?.card_count ?? 0,
@@ -151,19 +168,25 @@ export async function buildSetDetail(
   ]);
 
   const memberAssetIds = members.map((asset) => asset.id);
-  const [prices24h, prices7d, prices30d, observations] = await Promise.all([
+  const [prices24h, prices7d, prices30d, observations, volumes] = await Promise.all([
     safe(getPricesAt(supabase, at24h, memberAssetIds), new Map()),
     safe(getPricesAt(supabase, at7d, memberAssetIds), new Map()),
     safe(getPricesAt(supabase, at30d, memberAssetIds), new Map()),
     safe(listSetPriceObservations(supabase, memberIds, since), []),
+    safe(listAssetVolumeStats(supabase, memberAssetIds), new Map()),
   ]);
 
   const assets = members.map((asset) =>
-    catalogAssetToUi(asset, set, undefined, {
-      price24h: prices24h.get(asset.id),
-      price7d: prices7d.get(asset.id),
-      price30d: prices30d.get(asset.id),
-    })
+    catalogAssetToUi(
+      { ...asset, volume: volumes.get(asset.id) ?? asset.volume },
+      set,
+      undefined,
+      {
+        price24h: prices24h.get(asset.id),
+        price7d: prices7d.get(asset.id),
+        price30d: prices30d.get(asset.id),
+      }
+    )
   );
 
   const row = latestIndexes.get(set.id);
@@ -203,19 +226,25 @@ export async function buildAssetDetail(
   const catalog = await getCatalogAsset(supabase, assetId, now);
   if (!catalog) return { asset: null, set: null, related: [] };
 
-  const [set, history, latestIndexes, indexes30d] = await Promise.all([
+  const [set, history, latestIndexes, indexes30d, volumes] = await Promise.all([
     catalog.set_id ? getSet(supabase, catalog.set_id) : Promise.resolve(null),
     getPriceHistory(supabase, assetId, { limit: HISTORY_LIMIT, before: now }),
     safe(listSetLatestIndexes(supabase), new Map()),
     safe(listSetIndexesAt(supabase, daysAgo(now, 30)), new Map()),
+    safe(listAssetVolumeStats(supabase, [assetId]), new Map()),
   ]);
 
   const recorded = history.map((point) => point.price);
-  const asset = catalogAssetToUi(catalog, set, recorded, {
-    price24h: priceAtOrBefore(history, new Date(now.getTime() - 24 * MS_HOUR)),
-    price7d: priceAtOrBefore(history, daysAgo(now, 7)),
-    price30d: priceAtOrBefore(history, daysAgo(now, 30)),
-  });
+  const asset = catalogAssetToUi(
+    { ...catalog, volume: volumes.get(catalog.id) ?? catalog.volume },
+    set,
+    recorded,
+    {
+      price24h: priceAtOrBefore(history, new Date(now.getTime() - 24 * MS_HOUR)),
+      price7d: priceAtOrBefore(history, daysAgo(now, 7)),
+      price30d: priceAtOrBefore(history, daysAgo(now, 30)),
+    }
+  );
 
   let related: Asset[] = [];
   if (catalog.set_id) {

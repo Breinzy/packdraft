@@ -1,7 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { STALE_RUNNING_MS } from './chunk-limits';
 
-export type MarketJob = 'catalog_import' | 'price_sync';
+export type MarketJob = 'catalog_import' | 'price_sync' | 'history_backfill';
 export type MarketJobStatus = 'pending' | 'running' | 'paused' | 'completed' | 'failed';
 
 export interface MarketJobState {
@@ -68,7 +68,7 @@ export async function claimJob(
   if (state.status === 'paused') {
     return { claimed: false, state, reason: 'paused' };
   }
-  if (state.status === 'completed' && job === 'catalog_import') {
+  if (state.status === 'completed' && (job === 'catalog_import' || job === 'history_backfill')) {
     return { claimed: false, state, reason: 'completed' };
   }
   if (state.status === 'running') {

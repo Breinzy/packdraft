@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { basketValue, buildSetIndex, indexChangePct, observationDayBaskets } from './set-index';
+import { basketValue, buildSetIndex, indexChangePct, observationDayBaskets, sampledIndexHistory } from './set-index';
 
 describe('basketValue', () => {
   it('sums only positive member prices so cards and sealed share one index', () => {
@@ -62,5 +62,12 @@ describe('buildSetIndex', () => {
     expect(index.change30d).toBe(25);
     expect(index.history).toEqual([160, 200]);
     expect(index.sealedCount).toBe(3);
+  });
+});
+
+describe('sampledIndexHistory', () => {
+  it('keeps real as-of baskets and drops duplicate consecutive levels', () => {
+    expect(sampledIndexHistory([100, 100, 110, null, 120])).toEqual([100, 110, 120]);
+    expect(sampledIndexHistory([0, undefined, -1])).toEqual([]);
   });
 });

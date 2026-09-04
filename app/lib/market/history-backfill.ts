@@ -1,82 +1,33 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { PokemonPriceTrackerRateLimitError } from '@/lib/pricing/client';
-import { getMarketProvider } from './provider';
-import { insertMissingHistorySnapshots, upsertAssetMarketStats } from './persist';
-import type { AssetPriceRef, NormalizedPrice } from './types';
 import {
   DEFAULT_MIN_DAILY_REMAINING,
   DEFAULT_REQUEST_GAP_MS,
-  DEFAULT_SYNC_CREDIT_BUDGET,
-  DEFAULT_SYNC_TIME_BUDGET_MS,
   capTimeBudgetMs,
   shouldStopChunk,
   type ChunkBudget,
 } from './chunk-limits';
-import { HISTORY_DAYS, isAlwaysDailySealed, sealedSubtypeFromAsset } from './history';
+import { HISTORY_DAYS } from './history';
 import { claimJob, saveJobState } from './job-state';
+import { insertMissingHistorySnapshots, upsertAssetMarketStats } from './persist';
+import { getMarketProvider } from './provider';
+import type { AssetPriceRef, NormalizedPrice } from './types';
 
-export interface SyncResult {
-  synced: number;
-  skipped: number;
-  errors: string[];
+export interface HistoryBackfillResult {
   visited: number;
+  snapshotsWritten: number;
+  statsUpdated: number;
+  skipped: number;
   wrapped: boolean;
   stopReason: string | null;
   skippedJob?: boolean;
   skipReason?: string;
+  errors: string[];
 }
 
-const BATCH_SIZE = 8;
-
-function estimatedCredits(refs: AssetPriceRef[]): number {
-  const sealed = new Set(refs.filter((r) => r.assetType === 'sealed').map((r) => r.externalId)).size;
-  const singles = new Set(refs.filter((r) => r.assetType === 'single').map((r) => r.externalId)).size;
-  const graded = new Set(refs.filter((r) => r.assetType === 'graded').map((r) => r.externalId)).size;
-  return sealed * 2 + singles * 2 + graded * 3;
-}
-
-async function heldAssetIds(supabase: SupabaseClient): Promise<string[]> {
-  const [{ data: tournament }, { data: career }] = await Promise.all([
-    supabase.from('tournament_positions').select('asset_id').gt('quantity', 0),
-    supabase.from('career_positions').select('asset_id').gt('quantity', 0),
-  ]);
-  return [
-    ...(tournament ?? []).map((row) => row.asset_id as string),
-    ...(career ?? []).map((row) => row.asset_id as string),
-  ];
-}
-
-/**
- * Daily refresh universe: ETBs + booster boxes, high-volume cards, and anything
- * currently held in a Packdraft book. Dead zero-volume catalog is skipped.
- */
-export async function loadDailySyncTargetIds(supabase: SupabaseClient): Promise<string[]> {
-  const ids = new Set<string>();
-
-  const { data: sealedRows } = await supabase
-    .from('assets')
-    .select('id, name, metadata')
-    .eq('active', true)
-    .eq('asset_type', 'sealed');
-  for (const row of sealedRows ?? []) {
-    const subtype = sealedSubtypeFromAsset(
-      'sealed',
-      String(row.name),
-      (row.metadata as Record<string, unknown> | null) ?? {}
-    );
-    if (isAlwaysDailySealed(subtype)) ids.add(row.id as string);
-  }
-
-  const { data: ranked } = await supabase
-    .from('asset_market_stats')
-    .select('asset_id')
-    .in('daily_tier', ['always', 'high']);
-  for (const row of ranked ?? []) ids.add(row.asset_id as string);
-
-  for (const id of await heldAssetIds(supabase)) ids.add(id);
-
-  return [...ids].sort();
-}
+const BATCH_SIZE = 6;
+const DEFAULT_HISTORY_TIME_BUDGET_MS = 240_000;
+const DEFAULT_HISTORY_CREDIT_BUDGET = 2_000;
 
 function gradeKey(metadata: Record<string, unknown> | null): string {
   if (!metadata) return '';
@@ -91,9 +42,7 @@ function matchingPrice(
   grade: string
 ): NormalizedPrice | undefined {
   return prices.find((price) => {
-    if (price.externalId !== externalId || price.assetType !== assetType) {
-      return false;
-    }
+    if (price.externalId !== externalId || price.assetType !== assetType) return false;
     const priceGrade =
       price.metadata?.grade === null || price.metadata?.grade === undefined
         ? ''
@@ -102,106 +51,100 @@ function matchingPrice(
   });
 }
 
+function estimatedCredits(refs: AssetPriceRef[]): number {
+  const sealed = new Set(refs.filter((r) => r.assetType === 'sealed').map((r) => r.externalId)).size;
+  const singles = new Set(refs.filter((r) => r.assetType === 'single').map((r) => r.externalId)).size;
+  const graded = new Set(refs.filter((r) => r.assetType === 'graded').map((r) => r.externalId)).size;
+  return sealed * 2 + singles * 2 + graded * 3;
+}
+
 /**
- * Pull provider prices for the daily priority set and insert Packdraft snapshots.
- * ETBs/booster boxes and high-volume cards first. Time-boxed for Vercel Hobby.
+ * One-pass 6-month PPT history + volume for every active card and sealed product.
+ * Starts paused. Admin must resume it. Chunked for Vercel / PPT credit windows.
  */
-export async function syncMarketPrices(
+export async function backfillPriceHistory(
   supabase: SupabaseClient,
   options: { delayMs?: number; timeBudgetMs?: number; creditBudget?: number } = {}
-): Promise<SyncResult> {
+): Promise<HistoryBackfillResult> {
   const delayMs = options.delayMs ?? DEFAULT_REQUEST_GAP_MS;
   const errors: string[] = [];
-  let synced = 0;
-  let skipped = 0;
   let visited = 0;
+  let snapshotsWritten = 0;
+  let statsUpdated = 0;
+  let skipped = 0;
   let wrapped = false;
 
   let claim: Awaited<ReturnType<typeof claimJob>>;
   try {
-    claim = await claimJob(supabase, 'price_sync');
+    claim = await claimJob(supabase, 'history_backfill');
   } catch (err) {
     return {
-      synced: 0,
-      skipped: 0,
-      errors: [err instanceof Error ? err.message : String(err)],
       visited: 0,
+      snapshotsWritten: 0,
+      statsUpdated: 0,
+      skipped: 0,
       wrapped: false,
       stopReason: 'error',
+      errors: [err instanceof Error ? err.message : String(err)],
     };
   }
 
   if (!claim.claimed) {
     return {
-      synced: 0,
-      skipped: 0,
-      errors: [],
       visited: 0,
+      snapshotsWritten: 0,
+      statsUpdated: 0,
+      skipped: 0,
       wrapped: false,
       stopReason: claim.reason ?? 'skipped',
       skippedJob: true,
       skipReason: claim.reason,
+      errors: [],
     };
   }
 
   const budget: ChunkBudget = {
     startedAtMs: Date.now(),
-    timeBudgetMs: capTimeBudgetMs(options.timeBudgetMs, DEFAULT_SYNC_TIME_BUDGET_MS),
+    timeBudgetMs: capTimeBudgetMs(options.timeBudgetMs, DEFAULT_HISTORY_TIME_BUDGET_MS),
     creditsUsed: 0,
-    creditBudget: options.creditBudget ?? DEFAULT_SYNC_CREDIT_BUDGET,
+    creditBudget: options.creditBudget ?? DEFAULT_HISTORY_CREDIT_BUDGET,
     dailyRemaining: claim.state.daily_remaining,
     minDailyRemaining: DEFAULT_MIN_DAILY_REMAINING,
   };
 
   let lastAssetId = claim.state.last_asset_id;
   const provider = getMarketProvider();
-  let targets: string[] = [];
-  try {
-    targets = await loadDailySyncTargetIds(supabase);
-  } catch (err) {
-    errors.push(err instanceof Error ? err.message : String(err));
-    await saveJobState(supabase, 'price_sync', {
-      status: 'pending',
-      last_error: errors[0] ?? null,
-      stop_reason: 'error',
-      last_run_at: new Date().toISOString(),
-    });
-    return result('error');
-  }
 
   try {
     while (!shouldStopChunk(budget)) {
-      const remaining = lastAssetId
-        ? targets.filter((id) => id > lastAssetId!)
-        : targets;
-      const batchIds = remaining.slice(0, BATCH_SIZE);
-      if (batchIds.length === 0) {
-        if (!lastAssetId || wrapped) break;
-        lastAssetId = null;
-        wrapped = true;
-        continue;
-      }
-
-      const { data: assets, error: fetchError } = await supabase
+      let query = supabase
         .from('assets')
         .select('id, name, asset_type, external_id, metadata')
         .eq('active', true)
-        .in('id', batchIds)
-        .order('id', { ascending: true });
+        .in('asset_type', ['sealed', 'single', 'graded'])
+        .order('id', { ascending: true })
+        .limit(BATCH_SIZE);
+      if (lastAssetId) query = query.gt('id', lastAssetId);
+
+      const { data: assets, error: fetchError } = await query;
       if (fetchError) {
         errors.push(`Failed to fetch assets: ${fetchError.message}`);
         break;
       }
       if (!assets || assets.length === 0) {
-        lastAssetId = batchIds[batchIds.length - 1];
-        skipped += batchIds.length;
+        if (!lastAssetId || wrapped) {
+          await finish('complete');
+          return result('complete');
+        }
+        lastAssetId = null;
+        wrapped = true;
         continue;
       }
 
       const withIds = assets.filter((asset) => asset.external_id);
       skipped += assets.length - withIds.length;
       visited += assets.length;
-      lastAssetId = batchIds[batchIds.length - 1];
+      lastAssetId = assets[assets.length - 1].id;
 
       const refs: AssetPriceRef[] = withIds.map((asset) => ({
         externalId: String(asset.external_id),
@@ -229,25 +172,16 @@ export async function syncMarketPrices(
       for (const asset of withIds) {
         const grade = gradeKey(asset.metadata as Record<string, unknown> | null);
         const quote = matchingPrice(prices, String(asset.external_id), asset.asset_type, grade);
-
         if (!quote) {
           errors.push(`No price returned for ${asset.name}`);
           continue;
         }
-
         const points =
           quote.history && quote.history.length > 0
             ? quote.history
-            : [
-                {
-                  date: quote.recordedAt.slice(0, 10),
-                  price: quote.price,
-                  volume: quote.volume ?? 0,
-                },
-              ];
-
+            : [{ date: quote.recordedAt.slice(0, 10), price: quote.price, volume: quote.volume ?? 0 }];
         try {
-          const written = await insertMissingHistorySnapshots(supabase, asset.id, quote, points);
+          snapshotsWritten += await insertMissingHistorySnapshots(supabase, asset.id, quote, points);
           await upsertAssetMarketStats(
             supabase,
             {
@@ -258,18 +192,16 @@ export async function syncMarketPrices(
             },
             points
           );
-          synced += written > 0 ? written : 1;
+          statsUpdated += 1;
         } catch (err) {
-          errors.push(
-            err instanceof Error ? err.message : `Persist failed for ${asset.name}: ${String(err)}`
-          );
+          errors.push(err instanceof Error ? err.message : String(err));
         }
       }
 
-      await saveJobState(supabase, 'price_sync', {
+      await saveJobState(supabase, 'history_backfill', {
         status: 'running',
         last_asset_id: lastAssetId,
-        snapshots_written: claim.state.snapshots_written + synced,
+        snapshots_written: claim.state.snapshots_written + snapshotsWritten,
         assets_visited: claim.state.assets_visited + visited,
         credits_used: claim.state.credits_used + budget.creditsUsed,
         last_run_at: new Date().toISOString(),
@@ -287,26 +219,28 @@ export async function syncMarketPrices(
   }
 
   async function finish(stopReason: string) {
-    await saveJobState(supabase, 'price_sync', {
-      status: 'pending',
-      last_asset_id: lastAssetId,
-      snapshots_written: claim.state.snapshots_written + synced,
+    await saveJobState(supabase, 'history_backfill', {
+      status: stopReason === 'complete' ? 'completed' : 'pending',
+      last_asset_id: stopReason === 'complete' ? null : lastAssetId,
+      snapshots_written: claim.state.snapshots_written + snapshotsWritten,
       assets_visited: claim.state.assets_visited + visited,
       credits_used: claim.state.credits_used + budget.creditsUsed,
       last_error: errors[0] ?? null,
       stop_reason: stopReason,
+      completed_at: stopReason === 'complete' ? new Date().toISOString() : claim.state.completed_at,
       last_run_at: new Date().toISOString(),
     });
   }
 
-  function result(stopReason: string): SyncResult {
+  function result(stopReason: string): HistoryBackfillResult {
     return {
-      synced,
-      skipped,
-      errors: errors.slice(0, 25),
       visited,
+      snapshotsWritten,
+      statsUpdated,
+      skipped,
       wrapped,
       stopReason,
+      errors: errors.slice(0, 25),
     };
   }
 }

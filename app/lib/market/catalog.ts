@@ -249,6 +249,27 @@ export async function listSetAssets(
   return assets.slice(0, cap);
 }
 
+export async function listAssetVolumeStats(
+  supabase: SupabaseClient,
+  assetIds: string[]
+): Promise<Map<string, number>> {
+  const byId = new Map<string, number>();
+  for (const chunk of chunkIds(assetIds)) {
+    const { data, error } = await supabase
+      .from('asset_market_stats')
+      .select('asset_id, volume_30d')
+      .in('asset_id', chunk);
+    if (error) {
+      throw new Error(`Failed to load asset volume stats: ${error.message}`);
+    }
+    for (const row of data ?? []) {
+      const volume = Number(row.volume_30d ?? 0);
+      if (row.asset_id && volume > 0) byId.set(row.asset_id as string, volume);
+    }
+  }
+  return byId;
+}
+
 export type CatalogSet = {
   id: string;
   name: string;

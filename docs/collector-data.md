@@ -16,7 +16,8 @@ PokemonPriceTracker
 ## What is real
 
 * Asset identity, names, set membership, rarity / card number / sealed subtype from `assets.metadata`
-* Current price, 7-day change, and volume from `asset_latest_prices` (latest `price_snapshots` row)
+* Current price, 7-day change, and latest snapshot volume from `asset_latest_prices`
+* Trailing 30-day PPT sales volume from `asset_market_stats.volume_30d` when the history backfill has written a row
 * 24-hour and 30-day percent changes when an earlier snapshot exists
 * Price history on the asset page: stored snapshots only, oldest → newest, not padded to 180 points
 * Set index: sum of priced members (cards + sealed + graded) from `set_latest_indexes`
@@ -50,6 +51,6 @@ A Packdraft set index is a **derived basket**, not a provider quote.
 * **30-day change** — same basket as-of now vs as-of 30 days ago (`set_indexes_at`). `0` when there is no prior basket.
 * **History** — one point per UTC day that has at least one member snapshot, last observation carried forward across cards and sealed. Calendar days with no observation are not filled in.
 
-The sets list reads `set_latest_indexes` so every expansion has an index without loading every card into the browser. Set detail still loads members for the grid (capped) while the index stays the full basket.
+The sets list reads `set_latest_indexes` so every expansion has an index without loading every card into the browser. The list sparkline uses real basket values sampled at 180d / 30d / 7d / now (`set_indexes_at`). Set detail still loads members for the grid (capped) while the index and observation-day history stay the full basket.
 
 See `docs/market-prices.md`.

@@ -69,7 +69,17 @@ Writes use the service role. Clients may `SELECT`.
 
 ### `market_job_state`
 
-Singleton rows `catalog_import` and `price_sync`. Each cron/admin chunk claims a row, writes a cursor (`sealed_offset`, `set_index`, `graded_offset`, or `last_asset_id`), and releases it. Clients may `SELECT`. Writes are service-role only.
+Singleton rows `catalog_import`, `price_sync`, and `history_backfill`. Each cron/admin chunk claims a row, writes a cursor (`sealed_offset`, `set_index`, `graded_offset`, or `last_asset_id`), and releases it. Clients may `SELECT`. Writes are service-role only.
+
+`history_backfill` starts **paused**. Resume it from `/admin` before it spends PPT credits.
+
+### `asset_market_stats`
+
+Per-asset trailing PPT sales volume (`volume_7d` / `volume_30d` / `volume_180d`) and `daily_tier` (`always` | `high` | `normal` | `skip`). Written by the 6-month history backfill and daily priority sync. Public `SELECT`. Service-role writes.
+
+### `set_latest_indexes`
+
+Derived basket per set: sum of latest member prices (cards + graded + sealed, `price > 0`). Not a provider field. Point-in-time baskets use RPCs `latest_prices_at` / `set_indexes_at`.
 
 ## Tournament data (Phases 5–10)
 
